@@ -1,0 +1,68 @@
+name: Fix README hero rendering
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/hero-render-trigger
+
+permissions:
+  contents: write
+
+jobs:
+  convert-and-replace:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install WebP decoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends webp
+
+      - name: Convert WebP hero to GitHub-safe PNG and update README
+        shell: bash
+        run: |
+          set -euo pipefail
+          old='open-deep-mind/assets/diagrams/homepage-bilingual-final.webp'
+          new='open-deep-mind/assets/diagrams/homepage-bilingual-final.png'
+
+          test -f "$old"
+          rm -f "$new"
+          dwebp "$old" -o "$new"
+
+          python - <<'PY'
+          from pathlib import Path
+
+          png = Path('open-deep-mind/assets/diagrams/homepage-bilingual-final.png')
+          data = png.read_bytes()
+          if len(data) < 100_000 or data[:8] != b'\x89PNG\r\n\x1a\n':
+              raise SystemExit('PNG conversion failed or produced an invalid image')
+
+          readme = Path('README.md')
+          text = readme.read_text(encoding='utf-8')
+          old_ref = 'open-deep-mind/assets/diagrams/homepage-bilingual-final.webp?v=20260808-final-r1'
+          new_ref = 'open-deep-mind/assets/diagrams/homepage-bilingual-final.png'
+          if old_ref not in text:
+              raise SystemExit('Expected README hero reference was not found')
+          readme.write_text(text.replace(old_ref, new_ref, 1), encoding='utf-8')
+          PY
+
+          rm -f "$old"
+          rm -f .github/hero-render-trigger
+          rm -f .github/workflows/fix-readme-hero-rendering.yml
+
+      - name: Commit verified PNG replacement
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'fix: replace non-rendering README WebP hero with PNG'
+          git push origin HEAD:main
