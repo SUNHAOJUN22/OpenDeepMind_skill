@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/hero.svg" alt="OpenDeepMind 双引擎思维系统" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/hero.svg" alt="OpenDeepMind 双引擎思维系统" width="100%">
 </p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
@@ -23,6 +23,8 @@
 </p>
 
 > **独立项目声明：**OpenDeepMind_skill 与 Google DeepMind 无隶属、合作或背书关系。仓库名称表达的是一种开放、深度、可审计的思维方法。
+
+> **视觉语言约定：**本中文 README 使用八张纯中文 AI 设计 SVG，数理公式采用确定性排版；英文 README 使用另一套纯英文图，单张图内不混用中英文标签。
 
 ---
 
@@ -62,17 +64,17 @@ OpenDeepMind 在第一性原理之前增加一道基础资格审查：
 - 可执行、可监测、可复审的决策。
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/ai-concept-map.svg" alt="OpenDeepMind AI 概念示意图" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/concept-map.svg" alt="OpenDeepMind AI 概念示意图" width="100%">
 </p>
 
-<p align="center"><sub>AI 生成的可编辑概念总图，用于表达工作流，而不是正式文件树。</sub></p>
+<p align="center"><sub>中文本地化 AI 设计图。图中的中文标签与数理公式采用确定性排版，保证可读与准确；构图表达方法体系，而不是正式文件树。</sub></p>
 
 ---
 
 ## 双引擎架构
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/dual-engine.svg" alt="OpenDeepMind 双引擎架构" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/dual-engine.svg" alt="OpenDeepMind 双引擎架构" width="100%">
 </p>
 
 ### Φ 引擎：第一哲学
@@ -101,7 +103,7 @@ OpenDeepMind 在第一性原理之前增加一道基础资格审查：
 - 仍然成立的竞争框架与阻断项。
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/philosophy-lenses.svg" alt="第一哲学八重透镜" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/philosophy-lenses.svg" alt="第一哲学八重透镜" width="100%">
 </p>
 
 独立文件：
@@ -129,7 +131,7 @@ P9 流程包括：
 9. 决策、监测、触发复审与更新。
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/principles-loop.svg" alt="第一性原理拆解与重构" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/principles-loop.svg" alt="第一性原理拆解与重构" width="100%">
 </p>
 
 独立文件：
@@ -148,7 +150,7 @@ P9 流程包括：
 OpenDeepMind 不允许不同类型的命题互相借用权威。
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/proposition-ledger.svg" alt="OpenDeepMind 命题账本" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/proposition-ledger.svg" alt="OpenDeepMind 命题账本" width="100%">
 </p>
 
 | 编码 | 类型 | 含义 |
@@ -181,7 +183,7 @@ OpenDeepMind 不允许不同类型的命题互相借用权威。
 某个原理可以是一个模型的基础，同时又是另一套更低层理论的推导结果。
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/scale-ladder.svg" alt="从基础到行动的尺度阶梯" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/scale-ladder.svg" alt="从基础到行动的尺度阶梯" width="100%">
 </p>
 
 跨尺度箭头必须付出方法学成本：
@@ -209,10 +211,6 @@ OpenDeepMind 不允许不同类型的命题互相借用权威。
 ---
 
 ## 领域路由
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/domain-map.svg" alt="OpenDeepMind 领域路由" width="100%">
-</p>
 
 | 领域 | 默认重点 |
 |---|---|
@@ -265,7 +263,7 @@ OpenDeepMind 不允许不同类型的命题互相借用权威。
 ## 质量门
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/quality-gates.svg" alt="OpenDeepMind 质量门" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/quality-gates.svg" alt="OpenDeepMind 质量门" width="100%">
 </p>
 
 ### 第一层：红色阻断项
@@ -316,10 +314,6 @@ OpenDeepMind 不允许不同类型的命题互相借用权威。
 
 ## 错误雷达
 
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/failure-modes.svg" alt="OpenDeepMind 错误雷达" width="100%">
-</p>
-
 系统主动检测：
 
 - 范畴错误与实体化；
@@ -342,10 +336,6 @@ OpenDeepMind 不允许不同类型的命题互相借用权威。
 ---
 
 ## 输出体系
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/output-architecture.svg" alt="OpenDeepMind 输出体系" width="100%">
-</p>
 
 内置输出模板包括：
 
@@ -407,8 +397,8 @@ OpenDeepMind_skill/
     │   ├── claim-ledger.schema.json
     │   ├── example-ledger.json
     │   └── diagrams/
-    │       ├── ai-concept-map.svg
-    │       └── 11 张可编辑的 AI 生成 SVG 示意图
+    │       ├── zh/                 # 8 张中文 AI 设计、公式化 SVG 示意图
+    │       └── en/                 # 8 张英文 AI 设计、公式化 SVG 示意图
     └── scripts/
         ├── validate_repository.py
         └── validate_ledger.py
