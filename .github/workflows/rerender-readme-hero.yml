@@ -1,0 +1,66 @@
+name: Re-upload README homepage hero
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - bootstrap/homepage-bilingual-rerender-v2.webp.b64
+
+permissions:
+  contents: write
+
+jobs:
+  replace-hero:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete old hero and decode freshly uploaded image
+        shell: bash
+        run: |
+          set -euo pipefail
+          old='open-deep-mind/assets/diagrams/homepage-bilingual-final.webp'
+          new='open-deep-mind/assets/diagrams/homepage-bilingual-rerender-v2.webp'
+          payload='bootstrap/homepage-bilingual-rerender-v2.webp.b64'
+
+          test -f "$payload"
+          rm -f "$old" "$new"
+          base64 --decode "$payload" > "$new"
+
+          python - <<'PY'
+          from pathlib import Path
+
+          image = Path('open-deep-mind/assets/diagrams/homepage-bilingual-rerender-v2.webp')
+          data = image.read_bytes()
+          if len(data) < 100_000 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
+              raise SystemExit('decoded homepage image is not a valid WebP payload')
+
+          readme = Path('README.md')
+          text = readme.read_text(encoding='utf-8')
+          old_name = 'homepage-bilingual-final.webp'
+          new_name = 'homepage-bilingual-rerender-v2.webp'
+          if old_name not in text:
+              raise SystemExit('README does not contain the expected previous hero path')
+          text = text.replace(old_name, new_name)
+          text = text.replace('?v=20260808-final-r1', '?v=20260808-rerender-v2')
+          readme.write_text(text, encoding='utf-8')
+          PY
+
+          rm -f "$payload"
+          rm -f .github/workflows/rerender-readme-hero.yml
+          rmdir bootstrap 2>/dev/null || true
+
+      - name: Commit the clean replacement
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'assets: delete and freshly re-upload README homepage hero'
+          git push origin HEAD:main
