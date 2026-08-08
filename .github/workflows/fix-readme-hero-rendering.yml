@@ -1,22 +1,21 @@
 name: Fix README hero rendering
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/hero-render-trigger
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   convert-and-replace:
-    if: github.actor != 'github-actions[bot]'
+    if: github.event.issue.title == 'RUN: fix README hero rendering'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Install WebP decoder
@@ -24,7 +23,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends webp
 
-      - name: Convert WebP hero to GitHub-safe PNG and update README
+      - name: Replace the non-rendering WebP with a standard PNG
         shell: bash
         run: |
           set -euo pipefail
@@ -56,7 +55,7 @@ jobs:
           rm -f .github/hero-render-trigger
           rm -f .github/workflows/fix-readme-hero-rendering.yml
 
-      - name: Commit verified PNG replacement
+      - name: Commit the verified replacement
         shell: bash
         run: |
           set -euo pipefail
@@ -66,3 +65,9 @@ jobs:
           git diff --cached --check
           git commit -m 'fix: replace non-rendering README WebP hero with PNG'
           git push origin HEAD:main
+
+      - name: Close the one-time trigger issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: gh issue close "$ISSUE_NUMBER" --repo "${{ github.repository }}" --reason completed
