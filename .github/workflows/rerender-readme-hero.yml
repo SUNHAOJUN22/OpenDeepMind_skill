@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - bootstrap/homepage-bilingual-rerender-v2.webp.b64
+      - bootstrap/READY
 
 permissions:
   contents: write
@@ -25,9 +25,10 @@ jobs:
           set -euo pipefail
           old='open-deep-mind/assets/diagrams/homepage-bilingual-final.webp'
           new='open-deep-mind/assets/diagrams/homepage-bilingual-rerender-v2.webp'
-          payload='bootstrap/homepage-bilingual-rerender-v2.webp.b64'
+          payload='/tmp/homepage-bilingual-rerender-v2.webp.b64'
 
-          test -f "$payload"
+          test -f bootstrap/READY
+          cat bootstrap/homepage-bilingual-rerender-v2.part-* > "$payload"
           rm -f "$old" "$new"
           base64 --decode "$payload" > "$new"
 
@@ -50,9 +51,8 @@ jobs:
           readme.write_text(text, encoding='utf-8')
           PY
 
-          rm -f "$payload"
+          rm -rf bootstrap
           rm -f .github/workflows/rerender-readme-hero.yml
-          rmdir bootstrap 2>/dev/null || true
 
       - name: Commit the clean replacement
         shell: bash
