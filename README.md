@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/main/open-deep-mind/assets/diagrams/homepage-bilingual-final.webp" alt="OpenDeepMind_skill 中英双语首页总览 / Bilingual homepage overview" width="100%">
+  <img src="https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/main/open-deep-mind/assets/diagrams/homepage-bilingual-20260808.webp" alt="OpenDeepMind_skill 中英双语首页总览 / Bilingual homepage overview" width="100%">
 </p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
@@ -397,7 +397,7 @@ OpenDeepMind_skill/
     │   ├── claim-ledger.schema.json
     │   ├── example-ledger.json
     │   └── diagrams/
-    │       ├── homepage-bilingual-final.webp  # bilingual repository hero
+    │       ├── homepage-bilingual-20260808.webp  # bilingual repository hero
     │       ├── en/                     # English AI-designed, formula-rich SVG diagrams
     │       └── zh/                     # Chinese AI-designed, formula-rich SVG diagrams
     └── scripts/
