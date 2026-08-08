@@ -1,6 +1,7 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/en/hero.svg" alt="OpenDeepMind — dual-engine reasoning system" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/hero.svg?v=20260808-overview2" alt="OpenDeepMind English AI-designed system overview" width="100%">
 </p>
+<p align="center"><sub>English AI-designed overview: First Philosophy × First Principles × competing models × cross-scale modeling × quality gates × iterative action.</sub></p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
 
