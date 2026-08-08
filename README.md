@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/homepage-bilingual-final.webp?v=20260808-final-r1" alt="OpenDeepMind_skill 中英双语首页总览 / Bilingual homepage overview" width="100%">
+  <img src="https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/main/open-deep-mind/assets/diagrams/homepage-bilingual-final.webp" alt="OpenDeepMind_skill 中英双语首页总览 / Bilingual homepage overview" width="100%">
 </p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
