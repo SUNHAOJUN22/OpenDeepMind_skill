@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/hero.svg" alt="OpenDeepMind — dual-engine reasoning system" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/hero.svg" alt="OpenDeepMind — dual-engine reasoning system" width="100%">
 </p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
@@ -23,6 +23,8 @@
 </p>
 
 > **Independent project.** OpenDeepMind_skill is not affiliated with or endorsed by Google DeepMind. The repository name refers to an open methodology for deep, auditable reasoning.
+
+> **Visual-language contract.** This README uses eight English-only AI-designed SVG systems with deterministic mathematical typesetting. The Chinese README uses a separate set of Chinese-only visuals; no bilingual labels are mixed inside the same diagram.
 
 ---
 
@@ -56,17 +58,17 @@ OpenDeepMind introduces a prior gate:
 It is not a philosophy encyclopedia and not a brainstorming toy. It is a portable procedure for turning ambiguous, consequential questions into **typed claims, explicit foundations, competing models, falsifiable reasoning, and actionable decisions**.
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/ai-concept-map.svg" alt="AI-generated concept map for OpenDeepMind" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/concept-map.svg" alt="AI-generated concept map for OpenDeepMind" width="100%">
 </p>
 
-<p align="center"><sub>AI-generated editable concept map. It communicates the workflow rather than a literal file tree.</sub></p>
+<p align="center"><sub>English-localized AI-designed visual. Mathematical notation and labels are rendered deterministically for accuracy; the composition is conceptual rather than a literal file tree.</sub></p>
 
 ---
 
 ## The dual engine
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/dual-engine.svg" alt="Dual-engine architecture" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/dual-engine.svg" alt="Dual-engine architecture" width="100%">
 </p>
 
 ### Engine Φ — First Philosophy / 第一哲学
@@ -87,7 +89,7 @@ It audits eight dimensions:
 Its deliverable is a **Foundation Charter**: definitions, ontology, evidence status, logic, explanatory commitments, scale, values, stakeholders, and unresolved blockers.
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/philosophy-lenses.svg" alt="First Philosophy eight lenses" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/philosophy-lenses.svg" alt="First Philosophy eight lenses" width="100%">
 </p>
 
 The file is deliberately separate:
@@ -115,7 +117,7 @@ Its P9 process is:
 9. decide, monitor, and update.
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/principles-loop.svg" alt="First principles decomposition and reconstruction" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/principles-loop.svg" alt="First principles decomposition and reconstruction" width="100%">
 </p>
 
 The file is deliberately separate:
@@ -134,7 +136,7 @@ This separation prevents two common errors:
 OpenDeepMind refuses to let unlike claims borrow one another’s authority.
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/proposition-ledger.svg" alt="OpenDeepMind proposition ledger" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/proposition-ledger.svg" alt="OpenDeepMind proposition ledger" width="100%">
 </p>
 
 | Code | Type | Typical evidence or justification |
@@ -167,7 +169,7 @@ Templates:
 A principle can be foundational for one model and derived in another.
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/scale-ladder.svg" alt="Scale ladder from foundation to action" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/scale-ladder.svg" alt="Scale ladder from foundation to action" width="100%">
 </p>
 
 A cross-scale arrow is never free:
@@ -195,10 +197,6 @@ This makes the skill usable for conceptual work, formal proof, causal inference,
 ---
 
 ## Domain routing
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/domain-map.svg" alt="Domain routing map" width="100%">
-</p>
 
 The same core grammar is routed differently:
 
@@ -251,7 +249,7 @@ Methods rotate only when a specific weak link is identified. Repeating the same 
 ## Quality gate
 
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/quality-gates.svg" alt="OpenDeepMind quality gates" width="100%">
+  <img src="open-deep-mind/assets/diagrams/en/quality-gates.svg" alt="OpenDeepMind quality gates" width="100%">
 </p>
 
 The evaluation system has two layers.
@@ -304,10 +302,6 @@ Full rubric: [`quality-gates.md`](open-deep-mind/references/quality-gates.md)
 
 ## Failure-mode radar
 
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/failure-modes.svg" alt="Failure mode radar" width="100%">
-</p>
-
 OpenDeepMind actively tests for:
 
 - category mistakes and reification;
@@ -329,10 +323,6 @@ Diagnostic catalog: [`failure-modes.md`](open-deep-mind/references/failure-modes
 ---
 
 ## Output architecture
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/output-architecture.svg" alt="OpenDeepMind output architecture" width="100%">
-</p>
 
 Available formats include:
 
@@ -394,8 +384,8 @@ OpenDeepMind_skill/
     │   ├── claim-ledger.schema.json
     │   ├── example-ledger.json
     │   └── diagrams/
-    │       ├── ai-concept-map.svg
-    │       └── 11 editable AI-generated SVG diagrams
+    │       ├── en/                 # 8 English AI-designed, formula-rich SVG diagrams
+    │       └── zh/                 # 8 Chinese AI-designed, formula-rich SVG diagrams
     └── scripts/
         ├── validate_repository.py
         └── validate_ledger.py
