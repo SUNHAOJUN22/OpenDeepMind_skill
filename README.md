@@ -1,17 +1,20 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/homepage-bilingual.webp?v=20260808-bilingual-final" alt="OpenDeepMind bilingual Chinese-English system overview" width="100%">
+  <img src="open-deep-mind/assets/diagrams/homepage-bilingual-final.webp?v=20260808-final-r1" alt="OpenDeepMind_skill 中英双语首页总览 / Bilingual homepage overview" width="100%">
 </p>
-<p align="center"><sub><b>中英双语首页总览 / Bilingual homepage overview</b> · 第一哲学 × First Philosophy · 第一性原理 × First Principles · 跨尺度建模 × Quality Gates</sub></p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
 
-<p align="center"><b>Do not optimize the inherited frame.<br>Qualify the foundation, derive upward, test the result, and keep the decision revisable.</b></p>
+<p align="center">
+  <b>用第一哲学审查基础，用第一性原理重构方案。</b><br>
+  <b>Qualify foundations with First Philosophy. Reconstruct solutions with First Principles.</b>
+</p>
 
 <p align="center">
-  <a href="README.zh-CN.md">简体中文</a> ·
+  <a href="README.zh-CN.md">中文完整版</a> ·
+  <a href="#why-this-exists">English</a> ·
   <a href="open-deep-mind/SKILL.md">Skill</a> ·
-  <a href="open-deep-mind/FIRST_PHILOSOPHY.md">First Philosophy</a> ·
-  <a href="open-deep-mind/FIRST_PRINCIPLES.md">First Principles</a>
+  <a href="open-deep-mind/FIRST_PHILOSOPHY.md">第一哲学 / First Philosophy</a> ·
+  <a href="open-deep-mind/FIRST_PRINCIPLES.md">第一性原理 / First Principles</a>
 </p>
 
 <p align="center">
@@ -23,9 +26,18 @@
   <img alt="Dependencies" src="https://img.shields.io/badge/runtime_dependencies-0-91a7bd?style=flat-square">
 </p>
 
-> **Independent project.** OpenDeepMind_skill is not affiliated with or endorsed by Google DeepMind. The repository name refers to an open methodology for deep, auditable reasoning.
+<p align="center">
+  <sub>
+    基础资格审查 → 基底命题 → 竞争模型 → 证伪与质量门 → 行动与迭代<br>
+    Foundation Qualification → Primitive Claims → Competing Models → Falsification &amp; Quality Gates → Action &amp; Iteration
+  </sub>
+</p>
 
-> **Bilingual homepage.** The repository homepage uses one integrated Chinese–English system overview. Detailed sections retain language-specific diagrams for readability and deterministic mathematical typesetting.
+> **中文简介：** OpenDeepMind_skill 是一套面向复杂问题、科研论证、工程设计、战略决策与创造实践的双引擎思维系统：先用第一哲学审查定义、本体、证据、因果、边界与价值，再用第一性原理拆解至可辩护的基底命题，构造竞争模型，并通过证伪、质量门和复审触发器形成可执行、可修正的结论。
+>
+> **English overview:** OpenDeepMind_skill is a dual-engine reasoning system for complex inquiry and consequential decisions. It first qualifies definitions, ontology, evidence, causality, boundaries, and values through First Philosophy; it then decomposes and reconstructs through First Principles, maintains competing models, and converts falsifiable reasoning into auditable action.
+>
+> **独立项目声明 / Independent project:** OpenDeepMind_skill 与 Google DeepMind 无隶属、合作或背书关系。 The repository name denotes an open methodology for deep, auditable reasoning and is not affiliated with or endorsed by Google DeepMind.
 
 ---
 
@@ -385,7 +397,7 @@ OpenDeepMind_skill/
     │   ├── claim-ledger.schema.json
     │   ├── example-ledger.json
     │   └── diagrams/
-    │       ├── homepage-bilingual.webp  # bilingual repository hero
+    │       ├── homepage-bilingual-final.webp  # bilingual repository hero
     │       ├── en/                     # English AI-designed, formula-rich SVG diagrams
     │       └── zh/                     # Chinese AI-designed, formula-rich SVG diagrams
     └── scripts/
