@@ -1,7 +1,5 @@
 <p align="center">
-  <a href="open-deep-mind/assets/diagrams/homepage-bilingual-20260808.webp">
-    <img src="https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/main/open-deep-mind/assets/diagrams/homepage-bilingual-20260808.webp" alt="OpenDeepMind_skill 中英双语思维系统总览 / Bilingual reasoning-system overview" width="100%">
-  </a>
+  <img src="open-deep-mind/assets/diagrams/homepage-bilingual.svg" alt="OpenDeepMind_skill 中英双语方法总览 / Bilingual methodology overview" width="100%">
 </p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
@@ -12,129 +10,108 @@
 </p>
 
 <p align="center">
-  <a href="README.zh-CN.md">中文文档</a> ·
   <a href="open-deep-mind/SKILL.md">Agent Skill</a> ·
   <a href="open-deep-mind/FIRST_PHILOSOPHY.md">第一哲学 / First Philosophy</a> ·
   <a href="open-deep-mind/FIRST_PRINCIPLES.md">第一性原理 / First Principles</a> ·
-  <a href="open-deep-mind/references/method-atlas.md">方法图谱 / Method Atlas</a>
+  <a href="open-deep-mind/references/method-atlas.md">方法图谱 / Method Atlas</a> ·
+  <a href="open-deep-mind/references/worked-examples.md">案例 / Cases</a>
 </p>
 
 <p align="center">
   <img alt="Agent Skills" src="https://img.shields.io/badge/Agent_Skills-compatible-6f5cff?style=flat-square">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-2aa8ff?style=flat-square">
-  <img alt="Languages" src="https://img.shields.io/badge/languages-中文%20%7C%20English-3bc9a7?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-2a8cff?style=flat-square">
   <img alt="Core engines" src="https://img.shields.io/badge/core_engines-2-f2a649?style=flat-square">
-  <img alt="Runtime dependencies" src="https://img.shields.io/badge/runtime_dependencies-0-91a7bd?style=flat-square">
+  <img alt="Method cards" src="https://img.shields.io/badge/method_cards-30%2B-2fbf9f?style=flat-square">
+  <img alt="Quality dimensions" src="https://img.shields.io/badge/quality_dimensions-12-8654f2?style=flat-square">
+  <img alt="Runtime dependencies" src="https://img.shields.io/badge/runtime_dependencies-0-60758a?style=flat-square">
 </p>
 
-> **OpenDeepMind_skill** 是一套面向复杂问题、科研论证、工程设计、战略决策和创造实践的通用双引擎思维系统。它先审查“什么有资格成为基础”，再从通过审查的基础向上推导，并要求每项关键结论都能追溯、竞争、证伪和修正。
->
-> **OpenDeepMind_skill** is a domain-general dual-engine reasoning system for complex inquiry, scientific argument, engineering design, strategy, and creative practice. It first qualifies what may count as a foundation, then reasons upward while keeping every material claim traceable, contestable, falsifiable, and revisable.
->
-> **独立项目声明 / Independent project:** 本项目与 Google DeepMind 无隶属、合作或背书关系。The repository name denotes an open methodology for deep and auditable reasoning; it is not affiliated with or endorsed by Google DeepMind.
-
 ---
 
-## 1. 核心命题 / Core Thesis
+## 项目定位 / Positioning
 
-普通的“第一性原理思维”经常直接拆解问题，却没有先审查问题框架本身。OpenDeepMind 在第一性原理之前加入第一哲学基础审查，并把推理组织为闭环：
+**OpenDeepMind_skill** 是一套面向复杂问题与重大决策的双引擎思维系统。它不把“第一性原理”当作一句从零思考的口号，而是先解决一个更基础的问题：
 
-Many “first-principles” workflows decompose too early. OpenDeepMind inserts a foundation audit before decomposition and organizes reasoning as a closed loop:
+> **什么有资格成为当前研究、设计或决策的基础？**
 
-$$
+完成基础资格审查后，系统才从通过审查的定义、事实、规律、约束、假设、经验闭合、价值和未知项出发，构造竞争模型，进行推导、计算、证伪与决策。
+
+OpenDeepMind_skill is a dual-engine reasoning system for complex inquiry and consequential decisions. It first qualifies what may legitimately count as a foundation, then decomposes and reconstructs the problem from explicit claims, constraints, evidence, assumptions, values, and unknowns.
+
+```math
 \boxed{
-\text{问题框架 / Frame}
+\text{First Philosophy}
 \rightarrow
-\text{第一哲学 / First Philosophy}
+\text{First Principles}
 \rightarrow
-\text{第一性原理 / First Principles}
+\text{Competing Models}
 \rightarrow
-\text{竞争模型 / Rival Models}
+\text{Falsification and Quality Gates}
 \rightarrow
-\text{证伪与质量门 / Falsification \& Quality Gate}
-\rightarrow
-\text{行动与修正 / Action \& Revision}
+\text{Action and Revision}
 }
-$$
+```
 
-这不是哲学百科，也不是任意发散的头脑风暴工具。它是一套可执行协议，用于把模糊问题转化为：
-
-It is neither a philosophy encyclopedia nor an unconstrained brainstorming toy. It is an executable protocol for converting ambiguous questions into:
-
-- 类型明确的命题 / typed claims;
-- 可辩护的基础 / qualified foundations;
-- 可比较的竞争模型 / comparable rival models;
-- 可证伪的推导 / falsifiable derivations;
-- 可执行、可监测、可复审的决策 / actionable, monitorable, reviewable decisions.
+它适用于：科研论证、机理分析、数理建模、工程设计、软件架构、商业战略、政策伦理、个人决策、创意设计与 AI 协作。
 
 ---
 
-## 2. 双引擎架构 / Dual-Engine Architecture
+## 双引擎架构 / Dual-Engine Architecture
 
-| 引擎 / Engine | 核心问题 / Governing question | 主要输出 / Primary output | 文件 / File |
-|---|---|---|---|
-| **Φ 第一哲学 / First Philosophy** | 在当前问题中，什么有资格成为基础？ / What may legitimately count as a foundation? | 《基础章程》、定义、本体、证据状态、边界、价值与阻断项 / Foundation Charter | [`FIRST_PHILOSOPHY.md`](open-deep-mind/FIRST_PHILOSOPHY.md) |
-| **P 第一性原理 / First Principles** | 从通过审查的基础能够推出什么？ / What follows from the qualified foundations? | 基底命题、模型、竞争方案、证伪条件、行动与复审触发器 / Derived models and decisions | [`FIRST_PRINCIPLES.md`](open-deep-mind/FIRST_PRINCIPLES.md) |
-
-### Φ：第一哲学 / First Philosophy
-
-第一哲学引擎审查八个基础维度：
-
-The First Philosophy engine audits eight foundational dimensions:
-
-$$
-\mathcal{F}_{\Phi}
-=
-\{\text{语义},\text{本体},\text{认识},\text{逻辑},\text{因果},\text{边界},\text{价值},\text{实践}\}
-$$
-
-它要求明确：
-
-- 核心术语如何定义；
-- 对象、过程、关系和属性是什么；
-- 哪些内容是观测、推断、模型输出、假设或价值判断；
-- 因果主张依赖什么识别条件；
-- 系统边界、时间尺度和适用域在哪里；
-- 谁承担风险，谁获得收益，哪些义务不可被优化掉。
-
-It clarifies definitions, ontology, epistemic status, causal commitments, system boundaries, scales, values, affected parties, and non-negotiable duties.
-
-### P：第一性原理 / First Principles
-
-第一性原理引擎执行 P9 拆解—重构协议：
-
-The First Principles engine executes the P9 decomposition–reconstruction protocol:
-
-1. 删除、修改或证明需求合理 / delete, modify, or justify the requirement;
-2. 定义真实结果和系统边界 / define outcomes and boundaries;
-3. 暴露并分类假设 / expose and type assumptions;
-4. 沿依赖关系向下拆解 / decompose dependencies;
-5. 审查候选基底命题 / qualify primitive claims;
-6. 建立约束、因果、动态或数理模型 / build models and constraints;
-7. 构造结构不同的竞争方案 / construct rival solutions;
-8. 推导、计算、证伪和鲁棒性检验 / derive, compute, falsify, and stress-test;
-9. 决策、监测、复审与更新 / decide, monitor, review, and update.
-
----
-
-## 3. 命题账本 / Proposition Ledger
-
-OpenDeepMind 不允许不同类型的命题互相借用权威。所有承重命题必须分类：
-
-OpenDeepMind prevents unlike claims from borrowing one another’s authority. Every load-bearing claim is typed:
-
-| 编码 | 类型 | 含义 |
+| 引擎 / Engine | 核心问题 / Core question | 主要输出 / Primary output |
 |---|---|---|
-| `D` | 定义 / Definition | 约定、词汇、操作性或理论定义 |
-| `O` | 观测 / Observation | 测量、记录或直接来源 |
-| `L` | 规律 / Law or invariant | 在明确适用域内得到支持的规律 |
-| `C` | 约束 / Constraint | 物理、逻辑、法律、伦理或资源边界 |
-| `A` | 假设 / Assumption | 仍需检验或敏感性审查的前提 |
-| `E` | 经验闭合 / Empirical closure | 拟合、代理、本构关系、启发式或学习型近似 |
-| `V` | 价值 / Value | 目标、义务、偏好、效用和风险容忍度 |
-| `U` | 未知 / Unknown | 足以改变结论但尚未解决的事项 |
+| **Φ：第一哲学 / First Philosophy** | 什么可以作为基础？概念、对象、证据、因果、边界和价值是否清楚？ | 《基础章程》、概念定义、本体图、证据状态、尺度边界、价值与阻断项 |
+| **P：第一性原理 / First Principles** | 在明确的领域、尺度、目的和条件下，从这些基础能够推出什么？ | 基底命题、约束模型、竞争方案、推导链、证伪条件、决策与复审触发器 |
 
-每项关键命题还应记录：
+### Φ8：第一哲学八阶段 / Eight foundation audits
+
+1. 问题重构 / Problem framing  
+2. 语义审计 / Semantic audit  
+3. 本体审计 / Ontological audit  
+4. 认识论审计 / Epistemic audit  
+5. 逻辑、因果与解释审计 / Logic, causality and explanation  
+6. 边界、尺度与时间审计 / Boundary, scale and time  
+7. 价值、伦理与利益相关者审计 / Values, ethics and stakeholders  
+8. 基础资格判定 / Foundation qualification  
+
+详见 [`FIRST_PHILOSOPHY.md`](open-deep-mind/FIRST_PHILOSOPHY.md)。
+
+### P9：第一性原理九阶段 / Nine decomposition–reconstruction stages
+
+1. 删除、修改或证明需求合理；
+2. 定义真实结果与系统边界；
+3. 暴露并分类所有假设；
+4. 沿依赖关系向下拆解；
+5. 识别并审查基底命题；
+6. 建立约束、因果、动态或数理模型；
+7. 从基础向上构造结构不同的方案；
+8. 推导、计算、竞争模型与证伪；
+9. 决策、监测、复审与更新。
+
+详见 [`FIRST_PRINCIPLES.md`](open-deep-mind/FIRST_PRINCIPLES.md)。
+
+---
+
+## 命题账本 / Claim Ledger
+
+OpenDeepMind 不允许不同类型的命题互相借用权威。所有承重命题必须进入账本：
+
+```math
+\mathcal{B}=\{D,O,L,C,A,E,V,U\}
+```
+
+| 编码 | 类型 | 含义 | 典型依据 |
+|---|---|---|---|
+| `D` | Definition / 定义 | 术语的约定、操作性或理论定义 | 定义域、测量方法、理论语境 |
+| `O` | Observation / 观测 | 测量、记录或直接来源 | 原始数据、实验记录、正式文件 |
+| `L` | Law / invariant / 规律 | 在特定领域和范围内得到支持的规律或不变量 | 理论、重复实验、守恒与对称性 |
+| `C` | Constraint / 约束 | 物理、逻辑、资源、法律、安全或伦理边界 | 硬约束与经核验的限制 |
+| `A` | Assumption / 假设 | 尚未被确立为事实的前提 | 敏感性分析、替代假设、检验 |
+| `E` | Empirical closure / 经验闭合 | 拟合、本构关系、代理变量、启发式或学习型近似 | 标定数据、适用域、误差模型 |
+| `V` | Value / 价值 | 目标、义务、偏好、效用与风险容忍度 | 利益相关者与目标函数 |
+| `U` | Unknown / 未知 | 足以改变结论但尚未解决的问题 | 不确定性、待判别证据、复审条件 |
+
+每项关键命题还需记录：
 
 ```text
 status · scope · source · dependencies · confidence · falsifier · owner · review date
@@ -148,107 +125,162 @@ status · scope · source · dependencies · confidence · falsifier · owner ·
 
 ---
 
-## 4. 跨尺度推理 / Cross-Scale Reasoning
+## “第一”是相对层级 / Firstness Is Level-Relative
 
-“第一”总是相对于领域、尺度、目标和理论层级而言。任何跨尺度箭头都必须声明映射、闭合和不确定性：
+某个原理可以是一个模型的基础，同时又是另一套更低层理论的推导结果。任何跨尺度结论都必须声明映射、闭合、信息损失、参数来源、不确定性和验证域。
 
-“First” is always relative to a domain, scale, purpose, and theory level. Every cross-scale bridge must expose its mapping, closure, and uncertainty:
-
-$$
-\text{低尺度状态 / Lower-scale state}
+```math
+x_{\mathrm{low}}
 \xrightarrow[\text{uncertainty}]{\text{mapping + closure}}
-\text{有效变量 / Effective variables}
+z_{\mathrm{effective}}
 \xrightarrow[\text{validation}]{\text{higher-scale model}}
-\text{可观测结果 / Observable outcome}
-$$
+y_{\mathrm{observable}}
+```
 
-每个尺度桥必须回答：
+典型跨尺度链：
 
-- 映射变量是什么；
-- 使用了何种粗粒化、同质化或闭合假设；
-- 丢失了哪些信息；
-- 参数来自理论、计算、实验还是拟合；
-- 不确定性如何传播；
-- 模型在哪些条件下失效。
+```math
+\hat H\Psi=E\Psi
+\rightarrow
+m_i\ddot{\mathbf r}_i=-\nabla_i U
+\rightarrow
+\frac{\partial\phi}{\partial t}=-L\frac{\delta\mathcal F}{\delta\phi}
+\rightarrow
+\frac{\partial u}{\partial t}+\nabla\cdot F(u)=S
+\rightarrow
+x^{*}=\arg\min J(x,u)
+```
+
+这条链不是自动成立的。每个箭头都必须具有独立的尺度桥与验证证据。
 
 ---
 
-## 5. 质量门 / Quality Gate
+## 竞争模型与证伪 / Competing Models and Falsification
 
-OpenDeepMind 采用“阻断项优先、评分随后”的两层质量体系。
+系统不允许只构造一个看似合理的故事。标准模式至少保留：
 
-OpenDeepMind uses a two-layer quality system: blockers first, scoring second.
+- 当前主模型；
+- 一个结构不同的严肃竞争模型；
+- 不采取行动的基线；
+- 能够区分模型的观测、实验或现实事件。
 
-### 红色阻断项 / Red Blockers
+模型选择不是“哪个故事更顺”，而是：
 
-出现任意一项时，不得把结果称为最终、已验证或高可信：
+```math
+M^{*}=\arg\max_M
+\left[
+\operatorname{Evidence}(M)
+-\lambda_1\operatorname{Bias}(M)
+-\lambda_2\operatorname{Complexity}(M)
+-\lambda_3\operatorname{UnresolvedRisk}(M)
+\right]
+```
+
+每个模型必须说明：
+
+- 哪些结果支持它；
+- 哪些结果会削弱或推翻它；
+- 与竞争模型相比，它产生了哪些不同预测；
+- 在何种范围内有效；
+- 哪些结论仍然不能由现有证据推出。
+
+---
+
+## 质量门 / Quality Gates
+
+### 红色阻断项 / Red blockers
+
+出现任何一项，不得用高分、漂亮图表或流畅措辞掩盖：
 
 - 核心术语未定义或前后变义；
-- 关键事实无可靠来源；
-- 结论不由前提推出；
+- 关键事实没有可靠来源；
+- 结论并不由前提推出；
 - 把相关性写成因果性；
 - 把模型输出写成直接观测；
-- 隐藏目标函数或价值权重；
 - 未建立尺度桥就跨尺度下结论；
 - 没有严肃竞争模型或证伪条件；
-- 虚构文献、数据、实验、引文或共识；
-- 未核验就删除法律、安全或伦理保护。
+- 隐藏目标函数、价值权重或利益相关者；
+- 未核验就删除法律、安全或伦理保护；
+- 虚构文献、数据、实验、引文或共识。
 
-### 100 分质量评分 / 100-Point Reasoning Score
+### 100 分推理质量 / 100-point reasoning quality
 
-$$
-Q=\sum_{i=1}^{12} w_i s_i-\lambda B,
-\qquad B>0\Rightarrow\text{阻断交付 / reject delivery}
-$$
+```math
+Q=\sum_{i=1}^{12}w_i s_i-\lambda B,
+\qquad B>0\Rightarrow\text{reject delivery}
+```
 
-十二个维度覆盖基础清晰度、命题分类、证据质量、拆解完整性、因果解释、模型完整性、可追溯性、竞争方案、可证伪性、不确定性、价值伦理和可执行性。
+十二个维度：基础清晰度、命题分类、证据质量、拆解完整性、因果与解释、模型完整性、可追溯性、替代方案、可证伪性、不确定性与鲁棒性、价值与伦理、可执行性。
 
-Full rubric: [`quality-gates.md`](open-deep-mind/references/quality-gates.md)
+| 模式 | 最低质量门 | 适用情况 |
+|---|---:|---|
+| Rapid / 快速 | 70 | 可逆、低风险决策；无红色阻断项 |
+| Standard / 标准 | 80 | 至少一个严肃竞争模型 |
+| Deep / 深度 | 88 | 完成来源、尺度和不确定性审计 |
+| Research / High-stakes | 90 | 可复现验证或适用的专业核验 |
+
+完整规则见 [`quality-gates.md`](open-deep-mind/references/quality-gates.md)。
 
 ---
 
-## 6. 领域路由 / Domain Routing
+## 领域路由 / Domain Routing
 
-同一套核心语法会根据任务领域切换证据标准和方法组合：
-
-The same core grammar adapts its evidence standard and method bundle by domain:
-
-| 领域 / Domain | 默认重点 / Default emphasis |
+| 领域 | 默认重点 |
 |---|---|
-| 科学研究 / Scientific research | 测量、机制、竞争解释、前瞻预测与判别实验 |
-| 工程与软件 / Engineering and software | 功能、硬约束、故障、运维、可逆性与安全裕度 |
-| 数理建模 / Quantitative modeling | 控制方程、闭合、参数、初边值、收敛与不确定性 |
-| 商业与战略 / Business and strategy | 价值机制、经济性、竞争响应、实物期权与退出条件 |
-| 政策、法律与伦理 / Policy, law, and ethics | 权限、权利、证据、分配、申诉与退出机制 |
+| 科学研究 / Science | 测量、机理、竞争模型、前瞻预测与判别实验 |
+| 工程与软件 / Engineering | 功能、硬约束、故障、运维、可逆性与安全余量 |
+| 数理建模 / Quantitative modeling | 控制方程、闭合关系、参数、初边值、收敛与不确定性 |
+| 商业战略 / Strategy | 价值机制、经济性、竞争者响应、实物期权与退出条件 |
+| 政策法律伦理 / Policy and ethics | 权限、权利、证据、分配、申诉、日落与责任机制 |
 | 个人决策 / Personal decisions | 真实价值、观察行为、可逆试验与复审触发器 |
-| 创意与产品 / Creative and product innovation | 张力、矛盾、结构性新颖、效用和价值验证 |
+| 创意与产品 / Creative and product | 张力、矛盾、结构性新颖、效用与价值验证 |
+| AI 协作 / AI collaboration | 任务边界、证据来源、反幻觉、可审计推导与责任归属 |
 
-跨领域总规则：**采用所有相关领域中最严格的证据、安全、法律和伦理标准。**
+跨领域总规则：
 
-Full router: [`domain-routing.md`](open-deep-mind/references/domain-routing.md)
+> **同时涉及多个领域时，采用其中最严格的证据、安全、法律和伦理标准。**
+
+完整路由见 [`domain-routing.md`](open-deep-mind/references/domain-routing.md)。
 
 ---
 
-## 7. 视觉图谱 / Visual Atlas
+## 方法图谱 / Method Atlas
 
-仓库包含中英文两套可编辑、公式化 SVG 思维图，用于解释而非替代正式方法文本。
+仓库提供三十余张可执行方法卡，分为五类：
 
-The repository contains separate Chinese and English editable SVG systems. The visuals explain the method; the Markdown files remain authoritative.
-
-| 中文视觉 / Chinese | English Visual |
+| 层级 | 代表方法 |
 |---|---|
-| [双引擎架构](open-deep-mind/assets/diagrams/zh/dual-engine.svg) | [Dual-engine architecture](open-deep-mind/assets/diagrams/en/dual-engine.svg) |
-| [第一哲学八重透镜](open-deep-mind/assets/diagrams/zh/philosophy-lenses.svg) | [First Philosophy lenses](open-deep-mind/assets/diagrams/en/philosophy-lenses.svg) |
-| [第一性原理循环](open-deep-mind/assets/diagrams/zh/principles-loop.svg) | [First Principles loop](open-deep-mind/assets/diagrams/en/principles-loop.svg) |
-| [命题账本](open-deep-mind/assets/diagrams/zh/proposition-ledger.svg) | [Proposition ledger](open-deep-mind/assets/diagrams/en/proposition-ledger.svg) |
-| [跨尺度阶梯](open-deep-mind/assets/diagrams/zh/scale-ladder.svg) | [Cross-scale ladder](open-deep-mind/assets/diagrams/en/scale-ladder.svg) |
-| [质量门](open-deep-mind/assets/diagrams/zh/quality-gates.svg) | [Quality gates](open-deep-mind/assets/diagrams/en/quality-gates.svg) |
+| 基础审查 | 概念分析、范畴分析、方法怀疑、先验条件、现象学还原、伦理优先审查 |
+| 结构拆解 | 5 Whys、依赖图、功能分解、约束分解、因果图、故障树、量纲分析 |
+| 构造创新 | 形态学分析、TRIZ、SIT、SCAMPER、反转、类比迁移、零基设计 |
+| 对抗检验 | 竞争模型、反例、红队、预演失败、极限情形、反事实、反证法 |
+| 校准验证 | 贝叶斯更新、敏感性分析、不确定性传播、留出验证、收敛检验、证据分级 |
+
+复杂问题的默认组合为：
+
+```math
+\text{基础审查}
++\text{因果或机制图}
++\text{形态学构造}
++\text{逆向攻击}
++\text{证据校准}
+```
+
+方法不是越多越好。只有在明确指出当前最弱的推理环节后，才允许切换方法。
+
+完整图谱见 [`method-atlas.md`](open-deep-mind/references/method-atlas.md)。
 
 ---
 
-## 8. 快速开始 / Quick Start
+## 安装 / Installation
 
-### 安装 / Install
+### Skills CLI
+
+```bash
+npx skills add SUNHAOJUN22/OpenDeepMind_skill --skill open-deep-mind
+```
+
+### 手动安装 / Manual installation
 
 ```bash
 git clone https://github.com/SUNHAOJUN22/OpenDeepMind_skill.git
@@ -265,52 +297,117 @@ git clone https://github.com/SUNHAOJUN22/OpenDeepMind_skill.git
 .agent/skills/
 ```
 
-### 直接调用 / Direct Invocation
-
-```text
-读取 open-deep-mind/SKILL.md。
-对当前问题执行“第一哲学 → 第一性原理”双引擎模式。
-先审查定义、本体、证据、因果、边界和价值，再拆解至基底命题并向上重构。
-输出基础章程、命题账本、竞争模型、质量门、结论、证伪条件和复审触发器。
-```
-
-```text
-Read open-deep-mind/SKILL.md.
-Apply the First Philosophy → First Principles dual-engine mode.
-Return the Foundation Charter, proposition ledger, rival models,
-quality gate, recommendation, falsifier, and review trigger.
-```
-
-### 示例任务 / Example Tasks
-
-```text
-从第一性原理审查这个软件架构，但不要默认需求本身合理。
-```
-
-```text
-审计这项科研机制主张，区分直接观测、模型输出、假设、经验闭合和尺度桥。
-```
-
-```text
-Rebuild this strategy from first principles. Include the no-action baseline,
-competitor response, uncertainty, falsifiers, and reversible next steps.
-```
-
-Worked cases: [`worked-examples.md`](open-deep-mind/references/worked-examples.md)
+核心方法不依赖第三方运行库。事实可能变化、存在争议、属于高风险或需要精确出处时，应启用联网检索与来源核验。
 
 ---
 
-## 9. 仓库结构 / Repository Structure
+## 调用方式 / Invocation
+
+### 中文深度模式
+
+```text
+调用 open-deep-mind，执行“第一哲学 → 第一性原理”双引擎深度分析。
+
+要求：
+1. 先审查问题框架、定义、本体、证据、因果、边界、尺度和价值；
+2. 建立 D/O/L/C/A/E/V/U 命题账本；
+3. 从通过审查的基底命题向上构造至少两个竞争模型；
+4. 给出推导链、证伪条件、不确定性和红色阻断项；
+5. 输出可执行结论、下一项判别行动与复审触发器。
+```
+
+### English deep mode
+
+```text
+Read open-deep-mind/SKILL.md and run the full dual-engine mode.
+
+First qualify the problem's semantics, ontology, evidence, causality,
+boundaries, scale, values, and stakeholders. Then decompose the problem
+into typed claims, reconstruct at least two serious competing models,
+state falsifiers and uncertainty, run the quality gate, and return an
+auditable recommendation with a review trigger.
+```
+
+### 快速模式 / Rapid mode
+
+```text
+使用 OpenDeepMind 快速模式：只保留承重定义、事实、约束、假设、价值、
+一个竞争模型、一个证伪条件、一个建议动作和一个复审触发器。
+```
+
+---
+
+## 输出契约 / Output Contract
+
+每份实质性输出至少包括：
+
+```text
+1. 问题重构 / Reframed problem
+2. 基础章程 / Foundation Charter
+3. 命题账本 / Claim Ledger
+4. 因果、机制或约束模型 / Causal, mechanism or constraint model
+5. 竞争模型 / Competing models
+6. 推导、计算与证据链 / Derivation and evidence chain
+7. 证伪条件 / Falsifiers
+8. 不确定性与适用域 / Uncertainty and validity domain
+9. 质量门与阻断项 / Quality gate and blockers
+10. 决策或结论 / Decision or conclusion
+11. 下一项判别行动 / Next discriminating action
+12. 复审触发器 / Review trigger
+```
+
+内置模板见 [`output-templates.md`](open-deep-mind/assets/output-templates.md)。
+
+---
+
+## 应用示例 / Example Prompts
+
+<details>
+<summary><strong>科研机理审计 / Scientific mechanism audit</strong></summary>
+
+```text
+审查这项机理结论。将直接观测、文献事实、模型输出、假设、经验闭合、
+价值判断和未知项分开。识别所有跨尺度跳跃，构造至少一个竞争机制，
+并说明哪项新证据最能区分这些机制。
+```
+</details>
+
+<details>
+<summary><strong>工程架构决策 / Engineering architecture decision</strong></summary>
+
+```text
+从第一哲学和第一性原理审查这套系统架构。先判断需求是否真实存在，
+再列出硬约束、负载、故障模式、安全边界和维护能力；构造最小充分方案、
+主流方案和一个结构不同的替代方案，最后给出可逆实施路径。
+```
+</details>
+
+<details>
+<summary><strong>战略重构 / Strategy reconstruction</strong></summary>
+
+```text
+重构这项战略，不接受既有行业惯例作为事实。明确价值机制、客户行为、
+成本结构、竞争者响应、无行动基线和退出条件。给出竞争方案、实物期权、
+先导指标和会改变建议的事件。
+```
+</details>
+
+更多完整案例见 [`worked-examples.md`](open-deep-mind/references/worked-examples.md)。
+
+---
+
+## 仓库结构 / Repository Structure
 
 ```text
 OpenDeepMind_skill/
 ├── README.md
-├── README.zh-CN.md
 ├── AGENTS.md
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
+├── SECURITY.md
 ├── LICENSE.md
 ├── NOTICE.md
+├── CITATION.cff
 ├── .github/
 │   └── workflows/
 │       └── validate.yml
@@ -327,14 +424,12 @@ OpenDeepMind_skill/
     │   ├── glossary.md
     │   └── worked-examples.md
     ├── assets/
+    │   ├── diagrams/
+    │   │   └── homepage-bilingual.svg
     │   ├── output-templates.md
     │   ├── claim-ledger-template.md
     │   ├── claim-ledger.schema.json
-    │   ├── example-ledger.json
-    │   └── diagrams/
-    │       ├── homepage-bilingual-20260808.webp
-    │       ├── zh/
-    │       └── en/
+    │   └── example-ledger.json
     └── scripts/
         ├── validate_repository.py
         └── validate_ledger.py
@@ -342,9 +437,7 @@ OpenDeepMind_skill/
 
 ---
 
-## 10. 验证 / Validation
-
-核心验证不依赖第三方 Python 包：
+## 验证 / Validation
 
 ```bash
 python open-deep-mind/scripts/validate_repository.py .
@@ -352,44 +445,82 @@ python open-deep-mind/scripts/validate_ledger.py \
   open-deep-mind/assets/example-ledger.json
 ```
 
-验证范围包括：
+验证器检查：
 
 - Agent Skills frontmatter；
 - 第一哲学与第一性原理两个核心文件的独立性；
-- Markdown 相对链接；
+- 相对链接；
 - JSON 与 Schema；
 - SVG XML；
 - Python 语法；
-- 未解决阻断标记；
-- 示例命题账本的结构和语义。
+- 未解决占位符与阻断标记；
+- 示例命题账本的结构和推断依赖。
 
-GitHub Actions 在 push 和 pull request 时执行相同检查。
-
----
-
-## 11. 思想谱系与许可 / Intellectual Lineage and License
-
-仓库架构与方法表达受到以下开源项目启发：
-
-- [`danyuchn/first-principles-skill`](https://github.com/danyuchn/first-principles-skill)：需求删除测试与第一性原理拆解；
-- [`smixs/creative-director-skill`](https://github.com/smixs/creative-director-skill)：阶段路由、方法选择、递归评估、交付纪律与视觉 README；
-- Open Agent Skills pattern：简洁入口文件与按需加载的 references、assets 和 scripts。
-
-OpenDeepMind 的双引擎架构、Φ8/P9 协议、《基础章程》、命题账本、跨尺度审计、质量门、领域路由、图形、脚本和示例均在本仓库中重新创作与封装。
-
-详细来源与归因：[`intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md) · [`NOTICE.md`](NOTICE.md)
-
-- 代码、脚本、Schema 和工作流：Apache-2.0；
-- 方法、文档和视觉资产：CC BY 4.0。
-
-完整条款：[`LICENSE.md`](LICENSE.md)
+GitHub Actions 在 push 和 pull request 时执行同一套检查。
 
 ---
 
-## 12. 状态 / Status
+## 决策形式 / Decision Form
 
-**Version 1.0.0 — universal dual-engine methodology build.**
+最终建议不是脱离价值和风险的单一最优值，而是受约束、可复审的行动：
 
-本项目坚持可证伪和可修正：未来任何规则变更都应记录失败假设、触发证据、修改内容、预期改善及兼容性影响。
+```math
+a^{*}=\arg\min_a
+\left[
+\operatorname{Cost}(a)
++\operatorname{Risk}(a)
+-\operatorname{Value}(a)
++\operatorname{Irreversibility}(a)
+\right]
+```
 
-The project is intentionally falsifiable and revisable. Future rule changes should record the failed assumption, triggering evidence, method change, expected improvement, and compatibility impact.
+```math
+\text{s.t.}\quad g(a)\le 0,\qquad h(a)=0
+```
+
+其中目标函数、权重、约束、风险承担者和复审条件必须显式记录。
+
+---
+
+## 设计原则 / Design Principles
+
+1. 基础先于方案 / Foundation before solution.  
+2. “第一”必须说明相对于哪个层级 / Firstness must be level-relative.  
+3. 命题分类先于推断 / Typed claims before inference.  
+4. 机制与约束先于标签 / Mechanisms and constraints before labels.  
+5. 替代方案先于推荐 / Alternatives before recommendation.  
+6. 证伪条件先于置信度 / Falsifiers before confidence.  
+7. 价值声明先于优化 / Values before optimization.  
+8. 尺度桥先于宏观结论 / Scale bridges before macro claims.  
+9. 以行动和复审替代永久确定性 / Action with review triggers, not permanent certainty.  
+10. 透明度优先于复杂度 / Transparency over complexity.  
+
+---
+
+## 思想谱系与归因 / Intellectual Lineage
+
+本项目受到以下开放工作启发：
+
+- [`danyuchn/first-principles-skill`](https://github.com/danyuchn/first-principles-skill)：需求删除、假设挑战、基底事实与向上重构；
+- [`smixs/creative-director-skill`](https://github.com/smixs/creative-director-skill)：阶段路由、方法选择、递归评估、输出纪律与视觉化 README；
+- 开放的 Agent Skills 目录结构与渐进披露原则。
+
+OpenDeepMind 的双引擎架构、《基础章程》、D/O/L/C/A/E/V/U 命题账本、跨尺度审计、竞争模型协议、质量门、领域路由、示例、图形和验证脚本均为本仓库重新构造的通用方法体系。
+
+详细来源和许可说明见 [`intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md) 与 [`NOTICE.md`](NOTICE.md)。
+
+---
+
+## License
+
+- 代码、脚本、Schema 与工作流：**Apache-2.0**；
+- 方法论、文档与视觉资产：**CC BY 4.0**。
+
+详见 [`LICENSE.md`](LICENSE.md)。
+
+---
+
+<p align="center">
+  <strong>Foundation → Principle → Model → Test → Action → Revision</strong><br>
+  <sub>开放基础，严格推导，允许证伪，持续修正。</sub>
+</p>
