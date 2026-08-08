@@ -1,6 +1,7 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/hero.svg" alt="OpenDeepMind 双引擎思维系统" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/hero.svg?v=20260808-overview2" alt="OpenDeepMind 中文 AI 设计总览" width="100%">
 </p>
+<p align="center"><sub>中文 AI 设计总览：第一哲学 × 第一性原理 × 竞争模型 × 跨尺度建模 × 质量门 × 行动迭代。</sub></p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
 
