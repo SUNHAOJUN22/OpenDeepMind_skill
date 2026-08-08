@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/en/hero.svg?v=20260808-overview2" alt="OpenDeepMind English AI-designed system overview" width="100%">
+  <img src="open-deep-mind/assets/diagrams/homepage-bilingual.webp?v=20260808-bilingual-final" alt="OpenDeepMind bilingual Chinese-English system overview" width="100%">
 </p>
-<p align="center"><sub>English AI-designed overview: First Philosophy × First Principles × competing models × cross-scale modeling × quality gates × iterative action.</sub></p>
+<p align="center"><sub><b>中英双语首页总览 / Bilingual homepage overview</b> · 第一哲学 × First Philosophy · 第一性原理 × First Principles · 跨尺度建模 × Quality Gates</sub></p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
 
@@ -25,7 +25,7 @@
 
 > **Independent project.** OpenDeepMind_skill is not affiliated with or endorsed by Google DeepMind. The repository name refers to an open methodology for deep, auditable reasoning.
 
-> **Visual-language contract.** This README uses eight English-only AI-designed SVG systems with deterministic mathematical typesetting. The Chinese README uses a separate set of Chinese-only visuals; no bilingual labels are mixed inside the same diagram.
+> **Bilingual homepage.** The repository homepage uses one integrated Chinese–English system overview. Detailed sections retain language-specific diagrams for readability and deterministic mathematical typesetting.
 
 ---
 
@@ -385,8 +385,9 @@ OpenDeepMind_skill/
     │   ├── claim-ledger.schema.json
     │   ├── example-ledger.json
     │   └── diagrams/
-    │       ├── en/                 # 8 English AI-designed, formula-rich SVG diagrams
-    │       └── zh/                 # 8 Chinese AI-designed, formula-rich SVG diagrams
+    │       ├── homepage-bilingual.webp  # bilingual repository hero
+    │       ├── en/                     # English AI-designed, formula-rich SVG diagrams
+    │       └── zh/                     # Chinese AI-designed, formula-rich SVG diagrams
     └── scripts/
         ├── validate_repository.py
         └── validate_ledger.py
