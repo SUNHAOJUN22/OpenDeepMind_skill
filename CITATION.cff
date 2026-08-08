@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use OpenDeepMind_skill, cite this repository and the underlying historical or technical method sources."
+title: "OpenDeepMind_skill: A Dual-Engine First Philosophy and First-Principles Reasoning Skill"
+type: software
+authors:
+  - family-names: "Sun"
+    given-names: "Haojun"
+repository-code: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
+url: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
+version: "1.0.0"
+date-released: "2026-08-08"
+license: "Apache-2.0 AND CC-BY-4.0"
+keywords:
+  - first philosophy
+  - first principles
+  - reasoning
+  - agent skills
+  - causal inference
+  - systems thinking
+  - scientific method
