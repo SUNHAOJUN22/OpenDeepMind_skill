@@ -19,35 +19,36 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Delete old hero and decode freshly uploaded image
+      - name: Delete and freshly re-upload the README hero
         shell: bash
         run: |
           set -euo pipefail
           old='open-deep-mind/assets/diagrams/homepage-bilingual-final.webp'
-          new='open-deep-mind/assets/diagrams/homepage-bilingual-rerender-v2.webp'
-          payload='/tmp/homepage-bilingual-rerender-v2.webp.b64'
+          new='open-deep-mind/assets/diagrams/homepage-bilingual-reuploaded-20260808.webp'
+          tmp='/tmp/homepage-bilingual-reuploaded-20260808.webp'
 
           test -f bootstrap/READY
-          cat bootstrap/homepage-bilingual-rerender-v2.part-* > "$payload"
+          test -f "$old"
+          cp "$old" "$tmp"
           rm -f "$old" "$new"
-          base64 --decode "$payload" > "$new"
+          install -m 0644 "$tmp" "$new"
 
           python - <<'PY'
           from pathlib import Path
 
-          image = Path('open-deep-mind/assets/diagrams/homepage-bilingual-rerender-v2.webp')
+          image = Path('open-deep-mind/assets/diagrams/homepage-bilingual-reuploaded-20260808.webp')
           data = image.read_bytes()
           if len(data) < 100_000 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
-              raise SystemExit('decoded homepage image is not a valid WebP payload')
+              raise SystemExit('re-uploaded homepage image is not a valid WebP file')
 
           readme = Path('README.md')
           text = readme.read_text(encoding='utf-8')
           old_name = 'homepage-bilingual-final.webp'
-          new_name = 'homepage-bilingual-rerender-v2.webp'
+          new_name = 'homepage-bilingual-reuploaded-20260808.webp'
           if old_name not in text:
               raise SystemExit('README does not contain the expected previous hero path')
           text = text.replace(old_name, new_name)
-          text = text.replace('?v=20260808-final-r1', '?v=20260808-rerender-v2')
+          text = text.replace('?v=20260808-final-r1', '?v=20260808-reupload-r3')
           readme.write_text(text, encoding='utf-8')
           PY
 
