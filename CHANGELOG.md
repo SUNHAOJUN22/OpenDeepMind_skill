@@ -2,6 +2,22 @@
 
 All notable changes are documented here.
 
+## [1.1.0] — 2026-08-09
+
+### Added
+
+- Separate `open-deep-mind/TRIZ_ENGINEERING.md` optional engineering-invention module.
+- Explicit TRIZ activation gate: the module is not loaded during normal First Philosophy/First Principles routing unless the user asks for or accepts TRIZ.
+- T10 TRIZ workflow covering function and key-problem identification, ideality and IFR, engineering/physical contradictions, 39 typical parameters, 40 inventive principles, separation, Su-Field, standard-solution classes, ARIZ-85C, engineering-system evolution, concept scoring, and validation handoff.
+- Current MATRIZ and Altshuller Institute source links and attribution to the MIT-licensed `Antropocosmist/triz-engineering-solver` design influence.
+
+### Changed
+
+- Updated `SKILL.md` routing, boundaries, output behavior, and version metadata.
+- Updated the main README with an optional TRIZ section, invocation example, and repository structure.
+- Extended repository validation to require a separate TRIZ file and enforce its opt-in routing markers.
+- Updated intellectual-lineage, notice, and citation metadata.
+
 ## [1.0.0] — 2026-08-08
 
 ### Added
