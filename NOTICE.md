@@ -34,6 +34,22 @@ License URL: <https://creativecommons.org/licenses/by/4.0/>
 
 ---
 
+## Antropocosmist/triz-engineering-solver
+
+- Repository: <https://github.com/Antropocosmist/triz-engineering-solver>
+- License: MIT
+- Copyright notice in source repository: Copyright (c) 2026 useful-skills contributors
+
+**Influence on OpenDeepMind:** an explicit engineering scope gate; Ideal Final Result framing; technical and physical contradiction routing; 39-parameter/40-principle awareness; resource analysis; separation principles; Su-Field and standard-solution routing; ARIZ-85C escalation; engineering-evolution analysis; traceable inventive-concept outputs; and refuse-with-reframe discipline.
+
+**Modifications and limits:** OpenDeepMind places TRIZ in a separate optional file, does not load it by default, integrates it only after First Philosophy/First Principles qualification, and sends concepts back to physics, evidence, safety, feasibility, and quality-gate validation. The full contradiction-matrix dataset, example corpus, and source repository resource files are not reproduced in OpenDeepMind. The new `TRIZ_ENGINEERING.md` is an independently written synthesis informed by classical TRIZ, current MATRIZ materials, Altshuller Institute materials, and the repository above.
+
+Attribution URL: <https://github.com/Antropocosmist/triz-engineering-solver>
+
+License URL: <https://opensource.org/license/mit/>
+
+---
+
 ## Agent Skills specification
 
 - Specification repository: <https://github.com/agentskills/agentskills>
@@ -47,7 +63,7 @@ License URL: <https://creativecommons.org/licenses/by/4.0/>
 
 ## Historical and technical sources
 
-Philosophical, scientific, causal, systems, engineering, and computational sources are listed in:
+Philosophical, scientific, causal, systems, engineering, computational, and TRIZ sources are listed in:
 
 [`open-deep-mind/references/intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md)
 
@@ -59,4 +75,4 @@ Those methods remain attributable to their original authors and traditions. Open
 
 Google DeepMind and other names mentioned in sources may be trademarks of their respective owners.
 
-OpenDeepMind_skill is not affiliated with, sponsored by, or endorsed by Google DeepMind, Anthropic, OpenAI, or the maintainers of the referenced repositories.
+OpenDeepMind_skill is not affiliated with, sponsored by, or endorsed by Google DeepMind, Anthropic, OpenAI, MATRIZ, the Altshuller Institute, or the maintainers of the referenced repositories.
