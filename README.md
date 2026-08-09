@@ -13,14 +13,16 @@
   <a href="open-deep-mind/SKILL.md">Agent Skill</a> ·
   <a href="open-deep-mind/FIRST_PHILOSOPHY.md">第一哲学 / First Philosophy</a> ·
   <a href="open-deep-mind/FIRST_PRINCIPLES.md">第一性原理 / First Principles</a> ·
+  <a href="open-deep-mind/TRIZ_ENGINEERING.md">TRIZ（可选） / Optional TRIZ</a> ·
   <a href="open-deep-mind/references/method-atlas.md">方法图谱 / Method Atlas</a> ·
   <a href="open-deep-mind/references/worked-examples.md">案例 / Cases</a>
 </p>
 
 <p align="center">
   <img alt="Agent Skills" src="https://img.shields.io/badge/Agent_Skills-compatible-6f5cff?style=flat-square">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-2a8cff?style=flat-square">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-2a8cff?style=flat-square">
   <img alt="Core engines" src="https://img.shields.io/badge/core_engines-2-f2a649?style=flat-square">
+  <img alt="Optional module" src="https://img.shields.io/badge/optional_module-TRIZ-e75f3c?style=flat-square">
   <img alt="Method cards" src="https://img.shields.io/badge/method_cards-30%2B-2fbf9f?style=flat-square">
   <img alt="Quality dimensions" src="https://img.shields.io/badge/quality_dimensions-12-8654f2?style=flat-square">
   <img alt="Runtime dependencies" src="https://img.shields.io/badge/runtime_dependencies-0-60758a?style=flat-square">
@@ -53,6 +55,8 @@ OpenDeepMind_skill is a dual-engine reasoning system for complex inquiry and con
 ```
 
 它适用于：科研论证、机理分析、数理建模、工程设计、软件架构、商业战略、政策伦理、个人决策、创意设计与 AI 协作。
+
+TRIZ 不是第三个基础引擎，而是一个**独立、可选、显式调用**的工程发明模块。未明确调用 TRIZ 时，系统继续使用常规 `Φ → P` 路由。
 
 ---
 
@@ -89,6 +93,31 @@ OpenDeepMind_skill is a dual-engine reasoning system for complex inquiry and con
 9. 决策、监测、复审与更新。
 
 详见 [`FIRST_PRINCIPLES.md`](open-deep-mind/FIRST_PRINCIPLES.md)。
+
+### T10：可选 TRIZ 工程发明模块 / Optional TRIZ Engineering Module
+
+TRIZ 与第一性原理文件严格分开：
+
+```text
+默认：Φ → P → 竞争模型 → 质量门
+显式 TRIZ：Φ/P 资格审查 → T 发明构造 → P 物理与证据验证 → 质量门
+```
+
+只有在用户明确提出 `TRIZ`、`ARIZ`、矛盾矩阵、40 个发明原理、物理矛盾、Su-Field、IFR 或技术系统进化分析时，才加载 [`TRIZ_ENGINEERING.md`](open-deep-mind/TRIZ_ENGINEERING.md)。
+
+该模块包括：
+
+- 功能、关键缺点和因果链识别；
+- 技术矛盾与物理矛盾；
+- 理想性和理想最终结果；
+- 39 个典型工程参数与 40 个发明原理；
+- 时间、空间、条件和系统层级分离；
+- Su-Field 与标准解类别；
+- ARIZ-85C 深度路线；
+- S 曲线和工程系统进化；
+- 概念理想性、风险与判别验证。
+
+**默认不调用规则：**仅仅发现“权衡”或日常语言中的“矛盾”，不构成运行 TRIZ 的授权。系统可以提示一次该模块可用，但不会静默执行。
 
 ---
 
@@ -184,6 +213,8 @@ M^{*}=\arg\max_M
 - 在何种范围内有效；
 - 哪些结论仍然不能由现有证据推出。
 
+TRIZ 生成的概念同样必须具有非 TRIZ 替代方案、验证实验和证伪条件。
+
 ---
 
 ## 质量门 / Quality Gates
@@ -240,6 +271,8 @@ Q=\sum_{i=1}^{12}w_i s_i-\lambda B,
 
 > **同时涉及多个领域时，采用其中最严格的证据、安全、法律和伦理标准。**
 
+TRIZ 的规范应用聚焦物理或技术工程系统。商业、组织、UX、政策和纯软件任务只有在用户明确要求时才允许做类比迁移，并必须标记为 `analogical TRIZ`。
+
 完整路由见 [`domain-routing.md`](open-deep-mind/references/domain-routing.md)。
 
 ---
@@ -252,7 +285,7 @@ Q=\sum_{i=1}^{12}w_i s_i-\lambda B,
 |---|---|
 | 基础审查 | 概念分析、范畴分析、方法怀疑、先验条件、现象学还原、伦理优先审查 |
 | 结构拆解 | 5 Whys、依赖图、功能分解、约束分解、因果图、故障树、量纲分析 |
-| 构造创新 | 形态学分析、TRIZ、SIT、SCAMPER、反转、类比迁移、零基设计 |
+| 构造创新 | 形态学分析、SIT、SCAMPER、反转、类比迁移、零基设计；TRIZ 仅显式调用 |
 | 对抗检验 | 竞争模型、反例、红队、预演失败、极限情形、反事实、反证法 |
 | 校准验证 | 贝叶斯更新、敏感性分析、不确定性传播、留出验证、收敛检验、证据分级 |
 
@@ -266,7 +299,7 @@ Q=\sum_{i=1}^{12}w_i s_i-\lambda B,
 +\text{证据校准}
 ```
 
-方法不是越多越好。只有在明确指出当前最弱的推理环节后，才允许切换方法。
+TRIZ 不在默认组合中。方法不是越多越好；只有在明确指出当前最弱的推理环节，并满足对应调用条件后，才允许切换方法。
 
 完整图谱见 [`method-atlas.md`](open-deep-mind/references/method-atlas.md)。
 
@@ -328,11 +361,23 @@ state falsifiers and uncertainty, run the quality gate, and return an
 auditable recommendation with a review trigger.
 ```
 
+### 显式 TRIZ 工程模式 / Explicit TRIZ engineering mode
+
+```text
+调用 OpenDeepMind 的 TRIZ 工程发明模块。
+先用第一哲学/第一性原理核验系统边界、功能、证据、硬约束和安全条件，
+再读取 open-deep-mind/TRIZ_ENGINEERING.md。
+建立功能模型、IFR、资源清单、基础与反向技术矛盾、必要时的物理矛盾；
+选择矛盾矩阵/40原理、分离、Su-Field/标准解、ARIZ 或技术进化路线；
+生成至少三个结构不同的工程概念，并返回第一性原理和质量门进行验证。
+```
+
 ### 快速模式 / Rapid mode
 
 ```text
 使用 OpenDeepMind 快速模式：只保留承重定义、事实、约束、假设、价值、
 一个竞争模型、一个证伪条件、一个建议动作和一个复审触发器。
+除非本请求明确写出 TRIZ，否则不要调用 TRIZ。
 ```
 
 ---
@@ -355,6 +400,8 @@ auditable recommendation with a review trigger.
 11. 下一项判别行动 / Next discriminating action
 12. 复审触发器 / Review trigger
 ```
+
+TRIZ 输出还必须注明：调用触发词、技术/物理矛盾、IFR、使用资源、原理或路线、概念机制、次生矛盾、理想性变化和验证试验。
 
 内置模板见 [`output-templates.md`](open-deep-mind/assets/output-templates.md)。
 
@@ -383,12 +430,23 @@ auditable recommendation with a review trigger.
 </details>
 
 <details>
+<summary><strong>TRIZ 工程矛盾 / TRIZ engineering contradiction</strong></summary>
+
+```text
+显式调用 TRIZ：换热器提高传热强度时压降和结垢风险上升。
+请先核验系统边界、工况和约束，再建立基础/反向技术矛盾和可能的物理矛盾，
+形成 IFR 与资源清单，使用不同 TRIZ 路线构造 3–5 个具体机理方案，
+最后用流体、传热、材料、制造与安全模型筛选并设计判别实验。
+```
+</details>
+
+<details>
 <summary><strong>战略重构 / Strategy reconstruction</strong></summary>
 
 ```text
 重构这项战略，不接受既有行业惯例作为事实。明确价值机制、客户行为、
 成本结构、竞争者响应、无行动基线和退出条件。给出竞争方案、实物期权、
-先导指标和会改变建议的事件。
+先导指标和会改变建议的事件。不要调用 TRIZ。
 ```
 </details>
 
@@ -415,6 +473,7 @@ OpenDeepMind_skill/
     ├── SKILL.md
     ├── FIRST_PHILOSOPHY.md
     ├── FIRST_PRINCIPLES.md
+    ├── TRIZ_ENGINEERING.md       # 可选；仅显式调用
     ├── references/
     │   ├── method-atlas.md
     │   ├── domain-routing.md
@@ -448,7 +507,7 @@ python open-deep-mind/scripts/validate_ledger.py \
 验证器检查：
 
 - Agent Skills frontmatter；
-- 第一哲学与第一性原理两个核心文件的独立性；
+- 第一哲学、第一性原理和可选 TRIZ 文件的独立性；
 - 相对链接；
 - JSON 与 Schema；
 - SVG XML；
@@ -494,6 +553,7 @@ a^{*}=\arg\min_a
 8. 尺度桥先于宏观结论 / Scale bridges before macro claims.  
 9. 以行动和复审替代永久确定性 / Action with review triggers, not permanent certainty.  
 10. 透明度优先于复杂度 / Transparency over complexity.  
+11. TRIZ 仅显式调用，发明概念必须回到证据与物理验证 / TRIZ is opt-in; inventive concepts return to evidence and physics.  
 
 ---
 
@@ -503,9 +563,10 @@ a^{*}=\arg\min_a
 
 - [`danyuchn/first-principles-skill`](https://github.com/danyuchn/first-principles-skill)：需求删除、假设挑战、基底事实与向上重构；
 - [`smixs/creative-director-skill`](https://github.com/smixs/creative-director-skill)：阶段路由、方法选择、递归评估、输出纪律与视觉化 README；
-- 开放的 Agent Skills 目录结构与渐进披露原则。
+- [`Antropocosmist/triz-engineering-solver`](https://github.com/Antropocosmist/triz-engineering-solver)：TRIZ 作用域门、IFR、矛盾分类、资源分析、分离、Su-Field、ARIZ 升级与可追溯工程概念输出；
+- MATRIZ TRIZ Knowledge Base、Altshuller Institute 和开放的 Agent Skills 目录结构与渐进披露原则。
 
-OpenDeepMind 的双引擎架构、《基础章程》、D/O/L/C/A/E/V/U 命题账本、跨尺度审计、竞争模型协议、质量门、领域路由、示例、图形和验证脚本均为本仓库重新构造的通用方法体系。
+OpenDeepMind 的双引擎架构、《基础章程》、D/O/L/C/A/E/V/U 命题账本、跨尺度审计、竞争模型协议、质量门、领域路由、可选 TRIZ 集成协议、示例、图形和验证脚本均为本仓库重新构造的通用方法体系。完整矛盾矩阵数据未复制进本仓库。
 
 详细来源和许可说明见 [`intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md) 与 [`NOTICE.md`](NOTICE.md)。
 
@@ -522,5 +583,5 @@ OpenDeepMind 的双引擎架构、《基础章程》、D/O/L/C/A/E/V/U 命题账
 
 <p align="center">
   <strong>Foundation → Principle → Model → Test → Action → Revision</strong><br>
-  <sub>开放基础，严格推导，允许证伪，持续修正。</sub>
+  <sub>开放基础，严格推导，选择性发明，允许证伪，持续修正。</sub>
 </p>
