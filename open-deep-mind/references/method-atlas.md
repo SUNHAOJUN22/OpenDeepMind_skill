@@ -2,6 +2,8 @@
 
 This atlas routes methods by the **kind of uncertainty** in the problem. Use methods as instruments, not as authorities.
 
+> **TRIZ routing override:** TRIZ is an optional specialist module. Do not load or apply it from the default method bundle or routing table. Use [../TRIZ_ENGINEERING.md](../TRIZ_ENGINEERING.md) only when the user explicitly requests or accepts the TRIZ route.
+
 ---
 
 ## 1. Selection rule
@@ -28,6 +30,8 @@ Default bundle:
 \text{evidence audit}
 \]
 
+TRIZ is deliberately absent from this default bundle.
+
 Do not use more methods merely to make the process look sophisticated.
 
 ---
@@ -45,7 +49,8 @@ Do not use more methods merely to make the process look sophisticated.
 | Strategy/business | value and stakeholder audit | value chain/constraint map | portfolio options | competitor/inversion | scenarios and real options |
 | Policy/ethics | ethical-first audit | stakeholder and institutional map | policy alternatives | role reversal/red team | rights, distribution, evidence |
 | Personal decision | value clarification | option dependency map | reversible experiments | regret/pre-mortem | review date and signals |
-| Creative/product innovation | semantic reframing | job/tension decomposition | TRIZ/morphology/bisociation | worst idea/inversion | usefulness, novelty, feasibility |
+| Creative/product innovation | semantic reframing | job/tension decomposition | morphology/bisociation; TRIZ only by explicit request | worst idea/inversion | usefulness, novelty, feasibility |
+| Explicit engineering TRIZ request | foundation and engineering-scope audit | function/CECA/contradiction model | load `TRIZ_ENGINEERING.md` | inverted contradiction/pre-mortem | physics, feasibility, experiment, quality gate |
 
 ---
 
@@ -350,24 +355,25 @@ Delete or defer components with no positive decision-relevant contribution.
 
 ---
 
-### 5.3 TRIZ contradiction analysis
+### 5.3 TRIZ contradiction analysis — opt-in only
+
+**Activation:** use only when the user explicitly asks for or accepts TRIZ. Load the complete protocol in [../TRIZ_ENGINEERING.md](../TRIZ_ENGINEERING.md).
 
 Formulate:
 
-> Improving \(A\) worsens \(B\) under current design assumptions.
+> Improving \(A\) worsens \(B\) under a specified engineering action and verified conditions.
 
-Then seek:
+Then route through the appropriate TRIZ model:
 
-- separation in time;
-- separation in space;
-- separation by condition;
-- change in system level;
-- feedback;
-- intermediary;
-- segmentation;
-- dynamic adjustment.
+- technical contradiction → typical parameters, matrix, and inventive principles;
+- physical contradiction → separation in time, space, condition, or system level;
+- defective interaction → Su-Field and standard-solution classes;
+- stubborn mini-problem → ARIZ-85C;
+- explicit roadmap → S-curve and engineering-system evolution.
 
-**Failure risk:** applying generic principles without mapping the actual contradiction.
+TRIZ concepts must return to First Principles for physical, mathematical, safety, feasibility, and evidence validation.
+
+**Failure risks:** applying generic principles without a real contradiction; treating a matrix cell as proof; using TRIZ automatically on business, UX, policy, or pure software tasks; naming a principle without a concrete mechanism.
 
 ---
 
@@ -558,7 +564,8 @@ Hard rules:
 - do not use the same adversarial method twice in succession;
 - do not add methods without identifying the weakness they address;
 - if the rival model remains observationally equivalent, seek a discriminating test;
-- if the frame itself is unstable, return to First Philosophy rather than iterating inside the same frame.
+- if the frame itself is unstable, return to First Philosophy rather than iterating inside the same frame;
+- do not introduce TRIZ during method rotation unless its explicit activation contract is satisfied.
 
 ---
 
@@ -567,7 +574,8 @@ Hard rules:
 | Combination | Risk | Mitigation |
 |---|---|---|
 | Five Whys + single causal chain | false root cause | branch causes and test them |
-| TRIZ + unverified constraints | solving an invented contradiction | verify constraint ledger first |
+| TRIZ + unverified constraints | solving an invented contradiction | verify constraint ledger and explicit activation first |
+| TRIZ principle + no mechanism | vocabulary presented as solution | translate principle into physical change and test |
 | Morphology + many soft criteria | arbitrary ranking | separate hard pruning from value scoring |
 | Bayesian numbers + weak elicitation | precision theater | report ranges and sensitivity |
 | Analogy + bisociation | surface transfer | require structural correspondence |
