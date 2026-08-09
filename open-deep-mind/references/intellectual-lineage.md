@@ -1,6 +1,6 @@
 # Intellectual Lineage and Sources
 
-OpenDeepMind is an original synthesis. It does not claim that all listed thinkers endorse this workflow, nor that historical concepts map one-to-one onto modern engineering methods. The sources below provide conceptual lineage, constraints, and vocabulary.
+OpenDeepMind is an original synthesis. It does not claim that all listed thinkers endorse this workflow, nor that historical concepts map one-to-one onto modern engineering methods. The sources below provide conceptual lineage, constraints, vocabulary, and design precedents.
 
 ---
 
@@ -115,9 +115,31 @@ OpenDeepMind is an original synthesis. It does not claim that all listed thinker
 
 ### TRIZ
 
-- Genrich Altshuller and the theory of inventive problem solving.
+Primary theoretical lineage:
 
-**Used here for:** explicit contradiction analysis, separation principles, and structured invention.
+- Genrich Altshuller, *Creativity as an Exact Science*.
+- Genrich Altshuller, *The Innovation Algorithm*.
+- Classical TRIZ work on engineering and physical contradictions, 40 inventive principles, ideality, Ideal Final Result, resources, Su-Field modeling, standard inventive solutions, ARIZ, and engineering-system evolution.
+
+Current reference sources:
+
+- [MATRIZ TRIZ Knowledge Base](https://wiki.matriz.org/)
+- [MATRIZ — engineering contradiction](https://wiki.matriz.org/docs/triz/problem-solving-tools-5890/contradictions/engineering-contradiction-5995/)
+- [MATRIZ — contradiction matrix](https://wiki.matriz.org/docs/triz/problem-solving-tools-5890/contradictions/engineering-contradiction-5995/contradiction-matrix-6026/)
+- [MATRIZ — Ideal Final Result](https://wiki.matriz.org/docs/triz/problem-solving-tools-5890/ariz-5892/ideal-final-result-5922/)
+- [MATRIZ — ARIZ](https://wiki.matriz.org/docs/triz/problem-solving-tools-5890/ariz-5892/)
+- [MATRIZ — substance-field modeling](https://wiki.matriz.org/knowledge-base/triz/problem-solving-tools-5890/substance-field-modeling/)
+- [Altshuller Institute — 40 Principles](https://triz.org/principles/)
+- [Altshuller Institute — contradictions](https://triz.org/contradictions/)
+- [Altshuller Institute — ideality](https://triz.org/ideality/)
+
+Repository design influence:
+
+- [Antropocosmist/triz-engineering-solver](https://github.com/Antropocosmist/triz-engineering-solver), MIT License.
+
+**Used here for:** an explicitly scoped, opt-in engineering-invention module; function and contradiction framing; IFR; resource analysis; technical/physical contradiction routing; separation principles; Su-Field and standard-solution awareness; ARIZ-85C escalation; traceable concept output; and refuse-with-reframe behavior.
+
+**Important differences:** OpenDeepMind keeps TRIZ separate from First Principles, does not load it by default, does not reproduce the full contradiction-matrix dataset, treats matrix cells as heuristic prompts rather than proof, and requires every TRIZ concept to return to physical, empirical, safety, and quality-gate validation.
 
 ### Morphological analysis
 
@@ -154,12 +176,13 @@ OpenDeepMind is an original synthesis. It does not claim that all listed thinker
 
 The packaging follows the open [Agent Skills specification](https://agentskills.io/specification): a `SKILL.md` with optional `references/`, `scripts/`, and `assets/`, using progressive disclosure.
 
-Two repositories informed the design review:
+Repositories that informed the design review:
 
 1. [danyuchn/first-principles-skill](https://github.com/danyuchn/first-principles-skill), MIT License — especially the explicit requirement-deletion phase and upward reconstruction pattern.
 2. [smixs/creative-director-skill](https://github.com/smixs/creative-director-skill), CC BY 4.0 — especially its phase router, method-selection matrix, recursive evaluation loop, output templates, and visual README discipline.
+3. [Antropocosmist/triz-engineering-solver](https://github.com/Antropocosmist/triz-engineering-solver), MIT License — especially its engineering scope gate, contradiction-centered workflow, IFR/resource discipline, ARIZ escalation, and traceable inventive-concept output.
 
-OpenDeepMind's terminology, dual-engine architecture, proposition ledger, quality rubric, domain routing, files, diagrams, and examples are newly authored. See the repository `NOTICE.md` for attribution.
+OpenDeepMind's terminology, dual-engine architecture, opt-in TRIZ integration, proposition ledger, quality rubric, domain routing, files, diagrams, and examples are newly authored. See the repository `NOTICE.md` for attribution.
 
 ---
 
@@ -169,7 +192,8 @@ Suggested software citation:
 
 ```text
 SUNHAOJUN22. OpenDeepMind_skill: A Dual-Engine First Philosophy and
-First-Principles Reasoning Skill. Version 1.0.0.
+First-Principles Reasoning Skill with an Optional TRIZ Engineering Module.
+Version 1.1.0.
 https://github.com/SUNHAOJUN22/OpenDeepMind_skill
 ```
 
