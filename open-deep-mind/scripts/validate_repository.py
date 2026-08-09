@@ -22,6 +22,7 @@ REQUIRED = (
     "open-deep-mind/SKILL.md",
     "open-deep-mind/FIRST_PHILOSOPHY.md",
     "open-deep-mind/FIRST_PRINCIPLES.md",
+    "open-deep-mind/TRIZ_ENGINEERING.md",
     "open-deep-mind/references/method-atlas.md",
     "open-deep-mind/references/domain-routing.md",
     "open-deep-mind/references/quality-gates.md",
@@ -98,6 +99,26 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         line_count = len(text.splitlines())
         if line_count > 500:
             warnings.append(f"SKILL.md is {line_count} lines; progressive-disclosure target is <=500")
+        if "TRIZ is opt-in" not in text:
+            errors.append("SKILL.md must state that TRIZ is opt-in")
+        if "TRIZ_ENGINEERING.md" not in text:
+            errors.append("SKILL.md must route explicit TRIZ requests to TRIZ_ENGINEERING.md")
+
+    triz_path = root / "open-deep-mind" / "TRIZ_ENGINEERING.md"
+    if triz_path.is_file():
+        triz_text = triz_path.read_text(encoding="utf-8")
+        required_triz_markers = (
+            "optional, opt-in",
+            "Do not load",
+            "Engineering contradiction",
+            "Physical contradiction",
+            "Ideal Final Result",
+            "ARIZ-85C",
+            "Return to OpenDeepMind",
+        )
+        for marker in required_triz_markers:
+            if marker not in triz_text:
+                errors.append(f"TRIZ module missing routing/theory marker: {marker!r}")
 
     for path in root.rglob("*"):
         if not path.is_file():
@@ -160,10 +181,14 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
     if diagram_count < 8:
         errors.append(f"expected at least 8 SVG diagrams, found {diagram_count}")
 
-    if (root / "open-deep-mind/FIRST_PHILOSOPHY.md").resolve() == (
-        root / "open-deep-mind/FIRST_PRINCIPLES.md"
-    ).resolve():
-        errors.append("First Philosophy and First Principles must be separate files")
+    core_paths = [
+        root / "open-deep-mind/FIRST_PHILOSOPHY.md",
+        root / "open-deep-mind/FIRST_PRINCIPLES.md",
+        root / "open-deep-mind/TRIZ_ENGINEERING.md",
+    ]
+    resolved = [path.resolve() for path in core_paths]
+    if len(set(resolved)) != len(resolved):
+        errors.append("First Philosophy, First Principles, and TRIZ must be separate files")
 
     return errors, warnings
 
