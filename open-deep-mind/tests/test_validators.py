@@ -77,6 +77,8 @@ class ModuleValidationTests(unittest.TestCase):
             "triz-positive": 10,
             "triz-negative": 8,
         })
+        self.assertEqual(data["configurations"], 4)
+        self.assertTrue(data["triz_ablation"])
         self.assertGreaterEqual(data["repetitions"], 3)
 
     def test_behavioral_eval_is_measurement_not_runtime_module(self) -> None:
@@ -84,11 +86,30 @@ class ModuleValidationTests(unittest.TestCase):
         self.assertFalse(config["publication"]["publish_scores_before_real_runs"])
         self.assertEqual(config["splits"], {"train": 36, "validation": 12, "holdout": 12})
         cfgs = {c["id"]: c for c in config["configurations"]}
+        self.assertEqual(set(cfgs), {
+            "no_skill",
+            "first_principles_baseline",
+            "opendeepmind_full",
+            "opendeepmind_no_triz_ablation",
+        })
         self.assertEqual(
             cfgs["first_principles_baseline"]["commit"],
             "5623c2fa7c5a6ab47eee0d308431437f52c6ff1e",
         )
-        self.assertEqual(cfgs["opendeepmind_core"]["triz_policy"], "explicit-only")
+        self.assertEqual(cfgs["opendeepmind_full"]["triz_policy"], "explicit-only")
+        ablation = cfgs["opendeepmind_no_triz_ablation"]
+        self.assertEqual(ablation["case_categories"], ["triz-positive"])
+        self.assertIn("triz", ablation["disabled_modules"])
+        self.assertEqual(ablation["forced_route"], "p")
+        self.assertFalse(ablation["score_routing_accuracy"])
+
+        comparisons = {c["id"]: c for c in config["comparisons"]}
+        self.assertEqual(set(comparisons), {
+            "full_vs_no_skill",
+            "full_vs_first_principles_baseline",
+            "triz_module_ablation",
+        })
+        self.assertEqual(comparisons["triz_module_ablation"]["scope"], "triz-positive")
 
         eval_data = json.loads((REPO / "open-deep-mind/evals/evals.json").read_text(encoding="utf-8"))
         splits = Counter(case["split"] for case in eval_data["evals"])
