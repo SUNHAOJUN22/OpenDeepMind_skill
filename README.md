@@ -5,8 +5,8 @@
 <h1 align="center">OpenDeepMind_skill</h1>
 
 <p align="center">
-  <strong>先审查基础，再从基础推导；需要发明时，显式进入 TRIZ。</strong><br>
-  <strong>Qualify the foundation, derive from it, and enter TRIZ only by explicit choice.</strong>
+  <strong>先审查什么有资格成为基础，再从基础向上推导；需要发明时，显式进入 TRIZ。</strong><br>
+  <strong>Qualify foundations, derive from them, and enter TRIZ only by explicit choice.</strong>
 </p>
 
 <p align="center">
@@ -23,150 +23,178 @@
 <p align="center">
   <img alt="Agent Skills" src="https://img.shields.io/badge/Agent_Skills-compatible-6f5cff?style=flat-square">
   <img alt="Version" src="https://img.shields.io/badge/version-1.2.0-2a8cff?style=flat-square">
-  <img alt="Core modules" src="https://img.shields.io/badge/core_modules-2-f2a649?style=flat-square">
-  <img alt="Optional TRIZ" src="https://img.shields.io/badge/optional_TRIZ-explicit--only-e75f3c?style=flat-square">
+  <img alt="Reasoning modules" src="https://img.shields.io/badge/reasoning_modules-3-f2a649?style=flat-square">
+  <img alt="TRIZ activation" src="https://img.shields.io/badge/TRIZ-explicit--only-e75f3c?style=flat-square">
   <img alt="Behavioral evals" src="https://img.shields.io/badge/behavioral_evals-60_cases-2fbf9f?style=flat-square">
-  <img alt="Benchmark scores" src="https://img.shields.io/badge/published_benchmark_scores-none_yet-91a7bd?style=flat-square">
+  <img alt="Published benchmark" src="https://img.shields.io/badge/published_benchmark-none_yet-91a7bd?style=flat-square">
   <img alt="TRIZ matrix" src="https://img.shields.io/badge/TRIZ_matrix-1190_cells-1565c0?style=flat-square">
   <img alt="TRIZ SIS" src="https://img.shields.io/badge/TRIZ_SIS-76-7b61ff?style=flat-square">
 </p>
 
 > **Independent project / 独立项目：** OpenDeepMind_skill is not affiliated with, sponsored by, or endorsed by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute, or the maintainers of referenced repositories.
 
-> **Benchmark status / 评测状态：** the behavioral benchmark framework and 60 authored cases are committed, but **no performance score is published yet**. Scores will be published only after reproducible model runs, raw grading/timing artifacts, model/version metadata, and aggregate results exist.
+> **Benchmark status / 评测状态：** the evaluation framework and 60 authored cases are committed. **No behavioral performance score is published yet.** Real scores require controlled model runs, raw outputs, grading artifacts, model/settings metadata, and complete aggregate results.
 
 ---
 
-## 1. Repository thesis / 仓库核心命题
+## 1. What OpenDeepMind is / 项目定位
 
-OpenDeepMind is a **reasoning operating system**, not a single thinking trick.
+OpenDeepMind is a domain-general reasoning system for problems where definitions, evidence, mechanisms, constraints, values, uncertainty, and decision consequences matter.
 
-It separates three different jobs that are often mixed together:
+It deliberately separates three jobs that are often collapsed into one prompt:
 
-1. **First Philosophy / 第一哲学** — decide what is qualified to serve as a foundation.
-2. **First Principles / 第一性原理** — decompose to explicit foundations, reconstruct models/solutions, and test them.
-3. **TRIZ Engineering / TRIZ 工程发明** — when explicitly requested, systematically generate engineering invention concepts from contradictions, functions, resources, Su-Fields, ARIZ, effects, and evolution patterns.
+| Module | Core question | Canonical entry |
+|---|---|---|
+| **Φ First Philosophy / 第一哲学** | What is qualified to count as a foundation? | [`first-philosophy/METHOD.md`](open-deep-mind/first-philosophy/METHOD.md) |
+| **P First Principles / 第一性原理** | What follows from qualified foundations, and how can it be tested? | [`first-principles/METHOD.md`](open-deep-mind/first-principles/METHOD.md) |
+| **T TRIZ Engineering** | When explicitly requested, what inventive engineering concepts resolve the selected problem model? | [`triz/ROUTER.md`](open-deep-mind/triz/ROUTER.md) |
 
-The default route is:
-
-```text
-Frame
-  -> First Philosophy Φ
-  -> First Principles P
-  -> rival models / falsification
-  -> shared quality gate
-  -> action / revision
-```
-
-TRIZ is deliberately outside the default path:
+The normal reasoning loop is:
 
 ```text
-explicit TRIZ request/acceptance
-  -> Φ/P qualification
-  -> TRIZ T inventive synthesis
-  -> P validation
-  -> shared quality gate
+problem/frame
+    ↓
+First Philosophy Φ
+    ↓ Foundation Charter
+First Principles P
+    ↓
+competing models / alternatives
+    ↓
+falsification + uncertainty + quality gate
+    ↓
+action / experiment / revision
 ```
 
-A named philosophy, principle, matrix cell, invention pattern, equation, or model output is never treated as proof by vocabulary alone.
+TRIZ sits outside the default route:
+
+```text
+explicit TRIZ request or explicit acceptance
+    ↓
+Φ/P qualification
+    ↓
+TRIZ inventive synthesis
+    ↓
+First-Principles physical/evidential validation
+    ↓
+shared quality gate
+```
+
+The repository therefore rejects three common shortcuts:
+
+```text
+first-principles vocabulary ≠ proof
+TRIZ pattern ≠ validated engineering solution
+high model fit ≠ causal/mechanistic truth
+```
 
 ---
 
-## 2. True module isolation / 真正的模块隔离
+## 2. Physical module isolation / 模块隔离
 
-Version 1.2.0 moves the canonical method bodies into separate directories.
-
-```text
-open-deep-mind/
-├── SKILL.md                         # thin router only
-├── ARCHITECTURE.md                  # module boundaries / handoffs
-├── MODULES.json                     # machine-readable registry
-│
-├── first-philosophy/
-│   ├── METHOD.md                    # canonical Φ8 method
-│   ├── README.md                    # module contract
-│   ├── module.json                  # manifest
-│   ├── foundation-charter.schema.json
-│   ├── example-foundation-charter.json
-│   └── scripts/validate_module.py
-│
-├── first-principles/
-│   ├── METHOD.md                    # canonical P9 method
-│   ├── README.md                    # module contract
-│   ├── module.json                  # manifest
-│   ├── model-contract.schema.json
-│   ├── decision-record.schema.json
-│   ├── example-model-contract.json
-│   ├── example-decision-record.json
-│   └── scripts/validate_module.py
-│
-├── triz/
-│   ├── ROUTER.md                    # canonical explicit-only T10 router
-│   ├── README.md                    # complete TRIZ subsystem map
-│   ├── module.json                  # manifest
-│   ├── resources/                   # classical + modern operational resources
-│   ├── examples/
-│   └── scripts/
-│
-├── evals/                           # behavioral evaluation layer; NOT a reasoning module
-│   ├── evals.json                   # 60 authored cases
-│   ├── benchmark-config.json        # baselines / repetitions / metrics
-│   ├── rubric.md                    # semantic + blind pairwise grading
-│   ├── *.schema.json                # run / grading / aggregate contracts
-│   └── scripts/                     # validation / workspace / aggregation
-│
-├── references/                      # shared method-neutral references
-├── assets/                          # shared schemas/templates/visuals
-└── scripts/                         # repository + ledger validators
-```
-
-The historical root files remain only as thin compatibility aliases:
+Canonical architecture:
 
 ```text
-FIRST_PHILOSOPHY.md  -> first-philosophy/METHOD.md
-FIRST_PRINCIPLES.md  -> first-principles/METHOD.md
-TRIZ_ENGINEERING.md  -> triz/ROUTER.md
+OpenDeepMind_skill/
+│
+├── README.md
+├── BENCHMARK.md
+├── VERSION
+├── CHANGELOG.md
+├── LICENSE.md
+├── NOTICE.md
+│
+└── open-deep-mind/
+    ├── SKILL.md                    # thin runtime router
+    ├── ARCHITECTURE.md             # dependency / handoff contract
+    ├── MODULES.json                # exactly 3 reasoning modules
+    │
+    ├── first-philosophy/
+    │   ├── METHOD.md
+    │   ├── README.md
+    │   ├── module.json
+    │   ├── foundation-charter.schema.json
+    │   ├── example-foundation-charter.json
+    │   └── scripts/validate_module.py
+    │
+    ├── first-principles/
+    │   ├── METHOD.md
+    │   ├── README.md
+    │   ├── module.json
+    │   ├── model-contract.schema.json
+    │   ├── decision-record.schema.json
+    │   ├── example-model-contract.json
+    │   ├── example-decision-record.json
+    │   └── scripts/validate_module.py
+    │
+    ├── triz/
+    │   ├── ROUTER.md
+    │   ├── README.md
+    │   ├── module.json
+    │   ├── VENDORED_LICENSE.md
+    │   ├── resources/
+    │   ├── examples/
+    │   └── scripts/
+    │
+    ├── evals/                      # measurement plane; NOT a reasoning module
+    │   ├── evals.json
+    │   ├── benchmark-config.json
+    │   ├── rubric.md
+    │   ├── *.schema.json
+    │   └── scripts/
+    │
+    ├── references/                 # shared method-neutral references
+    ├── assets/                     # shared schemas/templates/visuals
+    ├── scripts/                    # repository + ledger validation
+    └── tests/                      # regression tests
 ```
 
-The evaluation layer measures the three reasoning modules but never participates in task routing or reasoning.
+The historical files below are compatibility aliases only:
 
-Full contract: [`open-deep-mind/ARCHITECTURE.md`](open-deep-mind/ARCHITECTURE.md).
+```text
+open-deep-mind/FIRST_PHILOSOPHY.md -> first-philosophy/METHOD.md
+open-deep-mind/FIRST_PRINCIPLES.md -> first-principles/METHOD.md
+open-deep-mind/TRIZ_ENGINEERING.md -> triz/ROUTER.md
+```
+
+The benchmark/evals layer is **not** registered in [`MODULES.json`](open-deep-mind/MODULES.json) and must never enter runtime reasoning context.
+
+Full dependency contract: [`open-deep-mind/ARCHITECTURE.md`](open-deep-mind/ARCHITECTURE.md).
 
 ---
 
 ## 3. Module Φ — First Philosophy / 第一哲学
 
-Canonical file:
+First Philosophy does not begin with “How do I solve this?” It asks:
 
-[`open-deep-mind/first-philosophy/METHOD.md`](open-deep-mind/first-philosophy/METHOD.md)
+> **What must be clarified, justified, or accepted before this is a coherent problem and before a solution can count as warranted?**
 
-First Philosophy asks:
-
-> **What must be clarified, accepted, or justified before this can count as a coherent problem and before a solution can count as warranted?**
-
-Its eight-stage protocol is exactly:
+Its protocol is exactly:
 
 ```text
-Φ0 Suspend the inherited frame
-Φ1 Semantic audit
-Φ2 Ontology map
-Φ3 Epistemic audit
-Φ4 Logical audit
-Φ5 Causality and explanation audit
-Φ6 Boundary, scale and time audit
-Φ7 Value, ethics and praxis audit
+Φ0  Suspend the inherited frame
+Φ1  Semantic audit
+Φ2  Ontology map
+Φ3  Epistemic audit
+Φ4  Logical audit
+Φ5  Causality and explanation audit
+Φ6  Boundary, scale and time audit
+Φ7  Value, ethics and praxis audit
 ```
 
-That is **Φ8 = Φ0..Φ7**, eight stages.
+So:
 
-Its main output is a **Foundation Charter**, not a solution:
+\[
+\Phi8 = \{\Phi_0,\Phi_1,\ldots,\Phi_7\}
+\]
+
+The principal output is the **Foundation Charter**:
 
 ```text
-neutral + rival frames
-definitions
+question + rival frames
+definitions / operationalization
 ontology
-epistemic status
-logic / causality / explanation commitments
+claim/evidence status
+logic / causal commitments
 boundary / scale / time
 values / duties / stakeholders
 accepted / conditional / rejected foundations
@@ -178,52 +206,57 @@ Machine-readable contract:
 - [`foundation-charter.schema.json`](open-deep-mind/first-philosophy/foundation-charter.schema.json)
 - [`example-foundation-charter.json`](open-deep-mind/first-philosophy/example-foundation-charter.json)
 
-**Hard separation:** this module does not load or invoke TRIZ.
+**Isolation invariant:** canonical Φ contains no TRIZ procedure.
 
 ---
 
 ## 4. Module P — First Principles / 第一性原理
 
-Canonical file:
-
-[`open-deep-mind/first-principles/METHOD.md`](open-deep-mind/first-principles/METHOD.md)
-
-The P9 protocol is normalized to exactly **P1..P9**:
+The canonical First-Principles protocol is normalized to exactly nine stages:
 
 ```text
-P1 Delete, modify, or justify the requirement
-P2 Define outcome and boundary
-P3 Expose assumptions and proposition types
-P4 Decompose to irreducibles
-P5 Qualify foundations
-P6 Build the model
-P7 Reconstruct alternatives
-P8 Derive, trace, falsify, and stress-test
-P9 Decide, act, monitor, and update
+P1  Delete, modify, or justify the requirement
+P2  Define outcome and boundary
+P3  Expose assumptions and proposition types
+P4  Decompose to irreducibles
+P5  Qualify foundations
+P6  Build the model
+P7  Reconstruct alternatives
+P8  Derive, trace, falsify, and stress-test
+P9  Decide, act, monitor, and update
 ```
 
-Earlier versions used a `P0..P9` numbering while calling the procedure “P9”; v1.2.0 removes that inconsistency.
+\[
+P9 = \{P_1,P_2,\ldots,P_9\}
+\]
 
 ### Typed proposition ledger
 
-All load-bearing claims are typed before inference:
+Every load-bearing claim should be distinguished before inference:
 
 \[
 \mathcal B=\{D,O,L,C,A,E,V,U\}
 \]
 
-| Code | Type |
+| Code | Meaning |
 |---|---|
 | `D` | Definition |
 | `O` | Observation |
 | `L` | Law / invariant |
 | `C` | Constraint |
 | `A` | Assumption |
-| `E` | Empirical closure / estimate |
-| `V` | Value |
+| `E` | Empirical closure / estimate / proxy |
+| `V` | Value / objective / duty |
 | `U` | Unknown |
 
-This prevents a fitted relation from masquerading as a law, a value from masquerading as a fact, or a model output from masquerading as an observation.
+This is intended to block moves such as:
+
+```text
+fitted correlation → “law”
+model output → “observation”
+preference → “hard constraint”
+metric → underlying phenomenon
+```
 
 ### Model contract
 
@@ -233,94 +266,93 @@ Quantitative work exposes the relevant subset of:
 \mathcal M=
 \{\mathbf x,\mathbf u,\boldsymbol\theta,
 \mathbf F,\mathbf h,\mathbf g,
-\mathrm{IC},\mathrm{BC},\mathcal O,\mathcal E\}
+IC,BC,\mathcal O,\mathcal E\}
 \]
 
-including parameter provenance, assumptions/closures, observation/error models, validity domain, and falsifiers.
+with parameter provenance, assumptions/closures, observation/error model, validity domain, and falsifiers.
 
 Machine-readable contracts:
 
 - [`model-contract.schema.json`](open-deep-mind/first-principles/model-contract.schema.json)
 - [`decision-record.schema.json`](open-deep-mind/first-principles/decision-record.schema.json)
 
-**Hard separation:** the canonical P method body contains no TRIZ procedure and never auto-loads TRIZ.
+**Isolation invariant:** P never auto-loads TRIZ.
 
 ---
 
-## 5. Module T — Complete TRIZ Engineering / 完整 TRIZ 工程发明
+## 5. Module T — Complete opt-in TRIZ Engineering
 
-Canonical explicit-only router:
+TRIZ is an engineering invention subsystem, not a foundational philosophy engine.
+
+Canonical router:
 
 [`open-deep-mind/triz/ROUTER.md`](open-deep-mind/triz/ROUTER.md)
 
-Complete subsystem:
+Full subsystem map:
 
 [`open-deep-mind/triz/README.md`](open-deep-mind/triz/README.md)
 
-TRIZ is a **specialist engineering invention subsystem**, not a third foundational engine. It activates only after explicit user request or explicit acceptance of a suggested TRIZ route.
-
-The normalized **T10 = T1..T10** workflow covers:
+### Activation
 
 ```text
-T1 explicit activation / engineering scope
-T2 key-problem identification
-T3 resources / ideality / IFR
-T4 problem model
-T5 route selection
-T6 distinct concept families
-T7 translate abstractions into mechanisms
-T8 hard engineering gates
-T9 discriminating validation
-T10 return to First Principles
+TRIZ / ARIZ / contradiction matrix / inventive principles / Su-Field /
+IFR / explicit engineering-system-evolution request
+        ↓
+TRIZ may run
 ```
 
-### TRIZ coverage
+Ordinary language such as “there is a contradiction” does **not** authorize TRIZ.
 
-The subsystem includes:
+### T10
 
-- function analysis / function-cost analysis;
+```text
+T1   explicit activation / engineering scope
+T2   identify the key problem
+T3   resources / ideality / IFR
+T4   construct the problem model
+T5   select matrix / separation / SIS / ARIZ / FOS / TESE route
+T6   generate distinct concept families
+T7   translate abstractions into concrete mechanisms
+T8   apply physical / safety / manufacturing gates
+T9   define discriminating validation
+T10  return to First Principles
+```
+
+### Included TRIZ knowledge/tools
+
+- function and function-cost analysis;
 - flow analysis;
-- CECA cause-effect chains;
+- CECA;
 - trimming and feature transfer;
 - innovative benchmarking;
-- Nine Windows/System Operator, STC, Smart Little People;
-- ideality, IFR, resource analysis;
+- Nine Windows/System Operator, Size–Time–Cost, Smart Little People;
+- ideality / IFR / resource analysis;
 - engineering and physical contradictions;
-- **39 engineering parameters**;
-- **40 inventive principles**;
-- **full contradiction-matrix transcription with 1190 populated cells**;
+- complete 39 typical engineering parameters;
+- complete 40 inventive principles;
+- 39×39 contradiction-matrix transcription with **1190 populated cells**;
 - separation principles;
 - Su-Field modeling;
-- **76 Standard Inventive Solutions** in the public five-class numbering;
+- **76 Standard Inventive Solutions**;
 - ARIZ-85C;
-- clone-problem transfer;
-- scientific-effects / FOS route;
-- S-curve and TESE/evolution routes;
+- FOS / scientific-effects routing / clone problems;
+- S-curve and TESE/evolution;
 - concept substantiation;
-- worked examples and deterministic lookup/validation scripts.
+- deterministic matrix and SIS lookup utilities.
 
-### Historical-data discipline
+Known historical/transcription anomalies are tracked separately rather than silently edited:
 
-The matrix is a vendored historical transcription with provenance, not an infallible oracle. Known transcription anomalies are tracked separately in:
+[`matrix_anomalies.json`](open-deep-mind/triz/resources/matrix_anomalies.json)
 
-[`open-deep-mind/triz/resources/matrix_anomalies.json`](open-deep-mind/triz/resources/matrix_anomalies.json)
+A TRIZ concept is only a candidate:
 
-The lookup utility returns both raw and normalized values where an anomaly is documented rather than silently changing the vendored source.
+\[
+C_{TRIZ}
+\not\Rightarrow
+\text{validated engineering solution}
+\]
 
-### TRIZ never equals proof
-
-A TRIZ result must return to First Principles:
-
-```text
-inventive concept
-  -> governing physics / equations
-  -> material and manufacturing feasibility
-  -> parameter/data provenance
-  -> uncertainty and sensitivity
-  -> safety / regulatory / lifecycle
-  -> simulation / experiment / prototype
-  -> rival model / falsifier
-```
+It must return to P for governing physics, materials, manufacturing, uncertainty, safety, experiment/simulation, rival models, and falsification.
 
 ---
 
@@ -330,256 +362,286 @@ Benchmark entrypoint:
 
 [`BENCHMARK.md`](BENCHMARK.md)
 
-Detailed eval package:
+Evaluation package:
 
 [`open-deep-mind/evals/README.md`](open-deep-mind/evals/README.md)
 
-Initial authored benchmark:
+### 60 authored cases
 
 ```text
-60 cases
-├── 12 routing / activation
-├── 10 First Philosophy
-├── 12 First Principles
-├──  8 Dual Engine Φ→P
-├── 10 explicit TRIZ
-└──  8 TRIZ near-miss / anti-trigger
+12 routing / activation
+10 First Philosophy
+12 First Principles
+ 8 Dual Engine Φ→P
+10 explicit TRIZ
+ 8 TRIZ near-miss / anti-trigger
+--------------------------------
+60 total
 
 36 train / 12 validation / 12 holdout
 3 repetitions by default
 ```
 
-Comparison configurations:
+### Four experimental configurations
 
 ```text
 no_skill
-vs pinned awesome-skills/first-principles-skill
-vs OpenDeepMind core Φ/P
-vs OpenDeepMind explicit TRIZ on TRIZ-authorized cases
+first_principles_baseline
+opendeepmind_full
+opendeepmind_no_triz_ablation   [TRIZ-positive only]
 ```
 
-OpenDeepMind-specific metrics include:
+The external baseline is commit-pinned. `opendeepmind_full` is production behavior. The no-TRIZ ablation is an experimental intervention that disables T and forces P on the same ten explicit-TRIZ cases.
 
-- routing accuracy;
+Declared paired comparisons:
+
+```text
+OpenDeepMind full  vs  no skill
+OpenDeepMind full  vs  pinned first-principles baseline
+OpenDeepMind full  vs  no-TRIZ ablation  [explicit TRIZ cases]
+```
+
+The last comparison is designed to estimate the marginal contribution of the TRIZ module:
+
+\[
+\Delta Q_{TRIZ}
+=
+Q_{full,T-cases}
+-
+Q_{no\text{-}TRIZ\ ablation,T-cases}
+\]
+
+### Metrics
+
+- case/assertion pass rate;
 - red-blocker rate;
+- routing accuracy;
 - TRIZ false-activation rate;
 - module-leakage rate;
-- rival-model coverage;
-- falsifier coverage;
 - semantic judge score;
-- blind pairwise win rate;
-- tokens and duration.
+- rival-model and falsifier coverage;
+- token/time cost;
+- paired common-case deltas;
+- blind pairwise result when supplied.
 
-**No behavioral score is published yet.** The committed benchmark currently proves that an evaluation protocol/case set exists; it does not prove that OpenDeepMind outperforms a baseline until real model runs and grading artifacts are produced.
+### Experiment completeness
+
+`create_workspace.py` writes all expected run slots into the workspace manifest. `aggregate_benchmark.py` checks every expected slot.
+
+For the validation split:
+
+```text
+12 cases × 3 full-scope configurations × 3 repetitions = 108
+2 validation TRIZ-positive cases × ablation × 3 repetitions = 6
+----------------------------------------------------------------
+114 expected run slots
+```
+
+If any expected `run_record.json` or `grading.json` is absent, `publication_ready=false`.
+
+**No benchmark score is published yet.** This repository currently contains the benchmark definition and machinery, not fabricated performance evidence.
 
 ---
 
-## 7. Shared quality system / 共享质量门
+## 7. Shared quality gate / 共享质量门
 
-All modules use the shared red-blocker-first gate:
+Quality rules:
 
 [`open-deep-mind/references/quality-gates.md`](open-deep-mind/references/quality-gates.md)
 
-A high numerical score cannot compensate for:
+Red blockers dominate any numeric score. Examples:
 
 - undefined load-bearing terms;
-- unsupported key facts;
+- fabricated sources/data/experiments;
+- key facts without suitable support;
 - invalid inference;
-- correlation written as causality;
+- correlation written as causal intervention;
 - model output written as observation;
-- hidden cross-scale jumps;
-- missing parameter provenance/closure/boundary conditions;
-- no serious rival/falsifier;
-- hidden value function;
-- unsafe deletion of safeguards;
-- fabricated sources/data/experiments.
+- cross-scale conclusion without a bridge;
+- hidden objective/value;
+- missing rival/falsifier where decision-relevant;
+- unsafe deletion of verified safety/legal/ethical constraints;
+- TRIZ pattern presented as engineering proof.
 
-The shared quality score remains diagnostic rather than a substitute for evidence or professional judgment.
+A score is a diagnostic; it does not create evidence.
 
 ---
 
 ## 8. Cross-scale discipline / 跨尺度纪律
 
-A chain such as:
+A familiar multiscale chain might be written schematically as:
 
 \[
 \hat H\Psi=E\Psi
 \rightarrow
 m_i\ddot{\mathbf r}_i=-\nabla_iU
 \rightarrow
-\frac{\partial\phi}{\partial t}=-L\frac{\delta\mathcal F}{\delta\phi}
+\frac{\partial\phi}{\partial t}
+=-L\frac{\delta\mathcal F}{\delta\phi}
 \rightarrow
 \frac{\partial u}{\partial t}+\nabla\cdot F=S
 \rightarrow
 x^*=\arg\min J
 \]
 
-is **not** one automatic derivation. Every arrow requires a declared bridge:
+But every arrow needs its own bridge:
 
 ```text
 mapping variables
-closure/coarse-graining
+coarse-graining / closure
 information lost
-parameter/calibration source
+parameter or calibration source
 uncertainty propagation
 validation domain
 failure conditions
 ```
 
----
-
-## 9. Domain routing / 领域路由
-
-Shared domain router:
-
-[`open-deep-mind/references/domain-routing.md`](open-deep-mind/references/domain-routing.md)
-
-Key invariant:
-
-> **No science, engineering, strategy, policy, personal, creative, software, or modeling route activates TRIZ by default.**
-
-Canonical TRIZ exists only as a separate explicit engineering route.
-
-For cross-domain tasks, the strictest active evidence, safety, legal, and ethical standard governs the shared decision.
+OpenDeepMind treats an unbridged scale jump as a reasoning defect rather than an impressive-looking scientific story.
 
 ---
 
-## 10. Deterministic tools and validation / 确定性工具与验证
-
-### Repository architecture
+## 9. Deterministic validation / 确定性验证
 
 ```bash
+# repository architecture + owned validators
 python open-deep-mind/scripts/validate_repository.py .
-```
 
-### Shared proposition ledger
-
-```bash
+# shared reasoning ledger
 python open-deep-mind/scripts/validate_ledger.py \
   open-deep-mind/assets/example-ledger.json
-```
 
-### Behavioral benchmark definitions
-
-```bash
-python open-deep-mind/evals/scripts/validate_evals.py
-```
-
-### First Philosophy
-
-```bash
+# module invariants
 python open-deep-mind/first-philosophy/scripts/validate_module.py
-```
-
-### First Principles
-
-```bash
 python open-deep-mind/first-principles/scripts/validate_module.py
-```
-
-### TRIZ
-
-```bash
 python open-deep-mind/triz/scripts/validate_triz_module.py
-python open-deep-mind/triz/scripts/lookup_matrix.py --improve 10 --worsen 17 --json
-python open-deep-mind/triz/scripts/lookup_standard_solution.py 1.2.1 --json
-```
 
-### Regression suite
+# behavioral benchmark definition
+python open-deep-mind/evals/scripts/validate_evals.py
 
-```bash
+# deterministic TRIZ lookups
+python open-deep-mind/triz/scripts/lookup_matrix.py \
+  --improve 1 --worsen 3 --json
+python open-deep-mind/triz/scripts/lookup_standard_solution.py \
+  1.2.1 --json
+
+# regression / syntax
 python -m unittest discover -s open-deep-mind/tests -p "test_*.py"
 python -m compileall -q open-deep-mind
 ```
 
-GitHub Actions executes module validation, behavioral-eval definition validation, architecture/ledger checks, deterministic TRIZ lookups, regression tests, and compilation on pushes and pull requests.
+GitHub Actions is configured to run these structural checks on push and pull request.
+
+The benchmark model executions themselves remain a separate experiment because they require a chosen model/provider/runtime and matched run settings.
 
 ---
 
-## 11. Installation / 安装
+## 10. Installation / 安装
 
 ```bash
 git clone https://github.com/SUNHAOJUN22/OpenDeepMind_skill.git
 ```
 
-For Agent Skills-compatible clients, point the runtime at:
+Point an Agent-Skills-compatible runtime at:
 
 ```text
 open-deep-mind/SKILL.md
 ```
 
-The router progressively loads only the selected reasoning module and shared resources needed by the task. The `evals/` directory is not part of runtime reasoning context.
+The router progressively loads only the selected reasoning module and necessary shared resources. The `evals/` package is excluded from runtime reasoning context.
 
 ---
 
-## 12. Invocation / 调用示例
+## 11. Invocation examples / 调用示例
 
-### First Philosophy
+### Φ — First Philosophy
 
 ```text
 调用 OpenDeepMind 第一哲学模块。
-先审查这个问题的定义、本体、认识状态、逻辑、因果/解释、边界尺度、价值与实践条件；
+先审查定义、本体、认识状态、逻辑、因果/解释、边界尺度、价值与实践条件；
 输出 Foundation Charter，不要提前优化解决方案。
 ```
 
-### First Principles
+### P — First Principles
 
 ```text
 调用 OpenDeepMind 第一性原理 P9。
-拆解需求和假设，建立 D/O/L/C/A/E/V/U 命题账本与完整模型契约，
-从合格基础重构多个方案，建立强竞争模型、证伪条件、不确定性和决策记录。
+拆解需求与假设，建立 D/O/L/C/A/E/V/U 命题账本与模型契约，
+从合格基础重构多个方案，建立竞争模型、证伪条件、不确定性与决策记录。
 不要调用 TRIZ。
 ```
 
-### Explicit TRIZ
+### T — Explicit TRIZ
 
 ```text
 明确调用 OpenDeepMind TRIZ 工程模块。
-先完成必要的 Φ/P 资格审查，再按 T1..T10 识别关键工程问题、IFR、资源和矛盾，
+先做必要的 Φ/P 资格审查，再按 T1..T10 识别关键问题、IFR、资源和矛盾，
 按需使用矩阵/40原理、分离、Su-Field/76标准解、ARIZ、FOS/效应或 TESE，
-生成具体工程机制概念，最后返回第一性原理做物理、证据、安全和试验验证。
+生成具体工程机制概念，最后返回 P 做物理、证据、安全和试验验证。
 ```
 
 ---
 
-## 13. Completeness boundary / 完备性边界
+## 12. Completeness boundary / 完备性边界
 
-“Repository complete” means the repository has explicit module contracts, manifests, schemas/fixtures, validators, shared quality infrastructure, deterministic TRIZ data tools, CI, version/provenance/license controls, regression tests, and an authored behavioral-evaluation framework.
+Repository completeness means the repository has explicit boundaries and executable checks for its claimed architecture:
+
+```text
+module contracts
+manifests
+schemas / fixtures
+validators
+provenance / license controls
+deterministic utilities
+regression tests
+CI definitions
+behavioral benchmark definitions
+```
 
 It does **not** mean:
 
-- philosophy is exhausted by one file;
-- every scientific discipline shares one evidence model;
-- every TRIZ book/patent/scientific effect is copied into the repository;
-- first-principles computation is assumption-free;
-- a validator can prove a real-world engineering conclusion true;
-- an authored benchmark case set is equivalent to a completed benchmark run.
+- every philosophical dispute has been solved;
+- every domain shares one evidence model;
+- first-principles models are approximation-free;
+- every TRIZ publication/patent/effect database has been copied;
+- green CI proves a real engineering claim;
+- 60 authored benchmark cases prove superiority before the runs happen.
 
-The design principle is instead:
+The repository's operational standard is:
 
 \[
-\boxed{\text{explicit boundary}+\text{traceable reasoning}+\text{testable failure}+\text{revisability}}
+\boxed{
+\text{explicit boundary}
++
+\text{traceable reasoning}
++
+\text{falsifiable failure}
++
+\text{reproducible evaluation}
++
+\text{revision}
+}
 \]
+
+Detailed current audit:
+
+[`open-deep-mind/COMPLETENESS_AUDIT.md`](open-deep-mind/COMPLETENESS_AUDIT.md)
 
 ---
 
-## 14. Provenance and licenses / 来源与许可
+## 13. Provenance and licensing / 来源与许可
 
-OpenDeepMind is an original synthesis informed by philosophical, scientific, systems, engineering, and open Agent Skill traditions.
+Important influences and source families include:
 
-Key implementation influences include:
-
-- `danyuchn/first-principles-skill` — first-principles requirement challenge/reconstruction;
-- `smixs/creative-director-skill` — routing, recursive evaluation, output discipline, visual documentation;
-- `Antropocosmist/triz-engineering-solver` — MIT-licensed TRIZ implementation/data reference;
-- public MATRIZ knowledge-base terminology/routing and Altshuller/TRIZ theoretical lineage;
-- Agent Skills official eval-driven iteration guidance for the behavioral benchmark workflow.
+- first-principles Agent Skill implementations;
+- `smixs/creative-director-skill` for routing/evaluation/documentation patterns;
+- `Antropocosmist/triz-engineering-solver` for MIT-licensed TRIZ implementation/data reference;
+- public MATRIZ terminology/routing and Altshuller/TRIZ theoretical lineage;
+- Agent Skills evaluation guidance for eval-driven iteration.
 
 See:
 
 - [`NOTICE.md`](NOTICE.md)
 - [`LICENSE.md`](LICENSE.md)
-- [`BENCHMARK.md`](BENCHMARK.md)
 - [`open-deep-mind/triz/VENDORED_LICENSE.md`](open-deep-mind/triz/VENDORED_LICENSE.md)
 - [`open-deep-mind/triz/resources/sources.md`](open-deep-mind/triz/resources/sources.md)
 - [`open-deep-mind/references/intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md)
@@ -588,5 +650,5 @@ See:
 
 <p align="center">
   <strong>Foundation → Principle → Model → Test → Action → Revision</strong><br>
-  <sub>模块隔离 / Explicit provenance / Falsifiable reasoning / Eval-driven revision</sub>
+  <sub>Module-isolated · Explicit provenance · Falsifiable reasoning · Eval-driven revision</sub>
 </p>
