@@ -25,6 +25,9 @@ jobs:
       - name: Validate TRIZ module
         run: python open-deep-mind/triz/scripts/validate_triz_module.py
 
+      - name: Validate behavioral benchmark definitions
+        run: python open-deep-mind/evals/scripts/validate_evals.py
+
       - name: Validate repository architecture
         run: python open-deep-mind/scripts/validate_repository.py .
 
