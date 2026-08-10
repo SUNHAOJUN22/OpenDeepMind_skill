@@ -23,6 +23,14 @@ REQUIRED = (
     "open-deep-mind/FIRST_PHILOSOPHY.md",
     "open-deep-mind/FIRST_PRINCIPLES.md",
     "open-deep-mind/TRIZ_ENGINEERING.md",
+    "open-deep-mind/triz/README.md",
+    "open-deep-mind/triz/VENDORED_LICENSE.md",
+    "open-deep-mind/triz/resources/contradiction_matrix.json",
+    "open-deep-mind/triz/resources/76_standard_solutions.md",
+    "open-deep-mind/triz/resources/ariz_85c.md",
+    "open-deep-mind/triz/resources/sources.md",
+    "open-deep-mind/triz/scripts/lookup_matrix.py",
+    "open-deep-mind/triz/scripts/validate_triz_module.py",
     "open-deep-mind/references/method-atlas.md",
     "open-deep-mind/references/domain-routing.md",
     "open-deep-mind/references/quality-gates.md",
@@ -108,17 +116,14 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
     if triz_path.is_file():
         triz_text = triz_path.read_text(encoding="utf-8")
         required_triz_markers = (
-            "optional, opt-in",
-            "Do not load",
-            "Engineering contradiction",
-            "Physical contradiction",
-            "Ideal Final Result",
-            "ARIZ-85C",
+            "optional",
+            "Do not load TRIZ automatically",
+            "triz/README.md",
             "Return to OpenDeepMind",
         )
         for marker in required_triz_markers:
             if marker not in triz_text:
-                errors.append(f"TRIZ module missing routing/theory marker: {marker!r}")
+                errors.append(f"TRIZ router missing marker: {marker!r}")
 
     for path in root.rglob("*"):
         if not path.is_file():
