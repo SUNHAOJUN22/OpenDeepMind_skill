@@ -24,6 +24,7 @@ REQUIRED = (
     "VERSION",
     "README.md",
     "README.zh-CN.md",
+    "BENCHMARK.md",
     "LICENSE.md",
     "NOTICE.md",
     "CITATION.cff",
@@ -63,6 +64,17 @@ REQUIRED = (
     "open-deep-mind/triz/scripts/lookup_matrix.py",
     "open-deep-mind/triz/scripts/lookup_standard_solution.py",
     "open-deep-mind/triz/scripts/validate_triz_module.py",
+    "open-deep-mind/evals/README.md",
+    "open-deep-mind/evals/evals.json",
+    "open-deep-mind/evals/evals.schema.json",
+    "open-deep-mind/evals/benchmark-config.json",
+    "open-deep-mind/evals/run-record.schema.json",
+    "open-deep-mind/evals/grading.schema.json",
+    "open-deep-mind/evals/benchmark.schema.json",
+    "open-deep-mind/evals/rubric.md",
+    "open-deep-mind/evals/scripts/validate_evals.py",
+    "open-deep-mind/evals/scripts/create_workspace.py",
+    "open-deep-mind/evals/scripts/aggregate_benchmark.py",
     "open-deep-mind/references/method-atlas.md",
     "open-deep-mind/references/domain-routing.md",
     "open-deep-mind/references/quality-gates.md",
@@ -83,10 +95,11 @@ MODULE_MANIFESTS = {
     "first-principles": "open-deep-mind/first-principles/module.json",
     "triz": "open-deep-mind/triz/module.json",
 }
-MODULE_VALIDATORS = (
+OWNED_VALIDATORS = (
     "open-deep-mind/first-philosophy/scripts/validate_module.py",
     "open-deep-mind/first-principles/scripts/validate_module.py",
     "open-deep-mind/triz/scripts/validate_triz_module.py",
+    "open-deep-mind/evals/scripts/validate_evals.py",
 )
 ALIASES = {
     "open-deep-mind/FIRST_PHILOSOPHY.md": "first-philosophy/METHOD.md",
@@ -167,7 +180,7 @@ def run_validator(root: Path, rel: str, errors: list[str], warnings: list[str]) 
     )
     if proc.returncode != 0:
         detail = (proc.stderr + "\n" + proc.stdout).strip()
-        errors.append(f"module validator failed: {rel}\n{detail}")
+        errors.append(f"owned validator failed: {rel}\n{detail}")
     elif proc.stderr.strip():
         warnings.append(f"{rel}: {proc.stderr.strip()}")
 
@@ -185,7 +198,6 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         errors.append(f"VERSION must be semantic x.y.z; got {version!r}")
 
-    # Root Agent Skill: syntax, metadata, canonical routing and progressive disclosure.
     skill_path = root / "open-deep-mind" / "SKILL.md"
     if skill_path.is_file():
         text = skill_path.read_text(encoding="utf-8")
@@ -212,16 +224,10 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         line_count = len(text.splitlines())
         if line_count > 500:
             errors.append(f"SKILL.md is {line_count} lines; progressive-disclosure limit is 500")
-        for marker in (
-            "first-philosophy/METHOD.md",
-            "first-principles/METHOD.md",
-            "triz/ROUTER.md",
-            "TRIZ is explicit-only",
-        ):
+        for marker in ("first-philosophy/METHOD.md", "first-principles/METHOD.md", "triz/ROUTER.md", "TRIZ is explicit-only"):
             if marker not in text:
                 errors.append(f"SKILL.md missing canonical routing marker: {marker}")
 
-    # Registry and module manifest consistency.
     registry_path = root / "open-deep-mind" / "MODULES.json"
     try:
         registry = json.loads(registry_path.read_text(encoding="utf-8")) if registry_path.is_file() else {}
@@ -233,6 +239,8 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
     registry_ids = [m.get("id") for m in registry.get("modules", []) if isinstance(m, dict)]
     if registry_ids != ["first-philosophy", "first-principles", "triz"]:
         errors.append(f"MODULES.json module order/IDs invalid: {registry_ids}")
+    if "eval" in " ".join(str(x).lower() for x in registry_ids):
+        errors.append("eval layer must not be registered as a reasoning module")
 
     for module_id, rel in MODULE_MANIFESTS.items():
         path = root / rel
@@ -246,7 +254,6 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         if manifest.get("version") != version:
             errors.append(f"{rel} version {manifest.get('version')!r} != VERSION {version!r}")
 
-    # Compatibility files must stay thin.
     for rel, target in ALIASES.items():
         path = root / rel
         if not path.is_file():
@@ -257,7 +264,6 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         if len(text.splitlines()) > 45:
             errors.append(f"compatibility alias {rel} is too large; canonical method body is not isolated")
 
-    # Repository metadata consistency.
     citation_path = root / "CITATION.cff"
     if citation_path.is_file():
         match = CFF_VERSION_RE.search(citation_path.read_text(encoding="utf-8"))
@@ -275,7 +281,18 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             if marker not in readme:
                 errors.append(f"README.md missing canonical architecture link: {marker}")
 
-    # Shared routing must keep TRIZ opt-in.
+    benchmark_path = root / "open-deep-mind/evals/benchmark-config.json"
+    if benchmark_path.is_file():
+        try:
+            benchmark = json.loads(benchmark_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            errors.append(f"invalid benchmark-config.json: {exc}")
+            benchmark = {}
+        if benchmark.get("skill_version_target") != version:
+            errors.append("benchmark-config skill_version_target != VERSION")
+        if benchmark.get("publication", {}).get("publish_scores_before_real_runs") is not False:
+            errors.append("benchmark publication policy must forbid scores before real runs")
+
     domain_path = root / "open-deep-mind/references/domain-routing.md"
     if domain_path.is_file():
         text = domain_path.read_text(encoding="utf-8")
@@ -286,7 +303,6 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         if "Explicit TRIZ engineering route" not in text:
             errors.append("domain-routing.md missing explicit-only TRIZ route")
 
-    # Text, JSON, SVG, Python and local-link integrity.
     for path in root.rglob("*"):
         if not path.is_file() or ".git" in path.parts:
             continue
@@ -321,14 +337,12 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             except SyntaxError as exc:
                 errors.append(f"invalid Python in {rel}: {exc}")
 
-    # Visual assets are recursive, not root-only.
     diagram_dir = root / "open-deep-mind/assets/diagrams"
     diagram_count = len(list(diagram_dir.rglob("*.svg"))) if diagram_dir.exists() else 0
     if diagram_count < 8:
         errors.append(f"expected at least 8 SVG diagrams recursively, found {diagram_count}")
 
-    # A repository is not complete if any owned module validator fails.
-    for validator in MODULE_VALIDATORS:
+    for validator in OWNED_VALIDATORS:
         if (root / validator).is_file():
             run_validator(root, validator, errors, warnings)
 
@@ -356,6 +370,7 @@ def main() -> int:
         "warnings": len(warnings),
         "architecture_version": (root / "VERSION").read_text(encoding="utf-8").strip(),
         "modules": 3,
+        "behavioral_benchmark": "validated-definition-layer",
         "svg_diagrams": len(list((root / "open-deep-mind/assets/diagrams").rglob("*.svg"))),
     }))
     return 0
