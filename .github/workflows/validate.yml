@@ -15,11 +15,30 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Validate repository
+
+      - name: Validate First Philosophy module
+        run: python open-deep-mind/first-philosophy/scripts/validate_module.py
+
+      - name: Validate First Principles module
+        run: python open-deep-mind/first-principles/scripts/validate_module.py
+
+      - name: Validate TRIZ module
+        run: python open-deep-mind/triz/scripts/validate_triz_module.py
+
+      - name: Validate repository architecture
         run: python open-deep-mind/scripts/validate_repository.py .
+
       - name: Validate example claim ledger
         run: python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-ledger.json
-      - name: Validate complete TRIZ subsystem
-        run: python open-deep-mind/triz/scripts/validate_triz_module.py
+
       - name: Smoke-test TRIZ matrix lookup
         run: python open-deep-mind/triz/scripts/lookup_matrix.py --improve 1 --worsen 3 --json
+
+      - name: Smoke-test TRIZ Standard Inventive Solution lookup
+        run: python open-deep-mind/triz/scripts/lookup_standard_solution.py 1.2.1 --json
+
+      - name: Run regression tests
+        run: python -m unittest discover -s open-deep-mind/tests -p "test_*.py"
+
+      - name: Compile Python sources
+        run: python -m compileall -q open-deep-mind
