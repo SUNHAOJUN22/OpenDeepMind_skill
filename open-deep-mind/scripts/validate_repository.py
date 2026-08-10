@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the OpenDeepMind repository without third-party dependencies."""
+"""Validate OpenDeepMind repository architecture without third-party dependencies."""
 
 from __future__ import annotations
 
@@ -7,30 +7,66 @@ import argparse
 import json
 import re
 import struct
+import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 from xml.etree import ElementTree
 
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+MD_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+HTML_LINK_RE = re.compile(r"\b(?:src|href)=[\"']([^\"']+)[\"']", re.IGNORECASE)
+CFF_VERSION_RE = re.compile(r"^version:\s*[\"']?([^\"'\s]+)", re.MULTILINE)
+README_VERSION_RE = re.compile(r"version-([0-9]+\.[0-9]+\.[0-9]+)")
 FORBIDDEN = ("NEEDS" + "_CHECK", "PLACEHOLDER" + "_CITATION", "INSERT" + "_SOURCE_HERE")
+
 REQUIRED = (
+    "VERSION",
     "README.md",
     "README.zh-CN.md",
     "LICENSE.md",
     "NOTICE.md",
+    "CITATION.cff",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    ".github/workflows/validate.yml",
     "open-deep-mind/SKILL.md",
+    "open-deep-mind/ARCHITECTURE.md",
+    "open-deep-mind/MODULES.json",
+    # compatibility aliases
     "open-deep-mind/FIRST_PHILOSOPHY.md",
     "open-deep-mind/FIRST_PRINCIPLES.md",
     "open-deep-mind/TRIZ_ENGINEERING.md",
+    # First Philosophy canonical module
+    "open-deep-mind/first-philosophy/METHOD.md",
+    "open-deep-mind/first-philosophy/README.md",
+    "open-deep-mind/first-philosophy/module.json",
+    "open-deep-mind/first-philosophy/foundation-charter.schema.json",
+    "open-deep-mind/first-philosophy/example-foundation-charter.json",
+    "open-deep-mind/first-philosophy/scripts/validate_module.py",
+    # First Principles canonical module
+    "open-deep-mind/first-principles/METHOD.md",
+    "open-deep-mind/first-principles/README.md",
+    "open-deep-mind/first-principles/module.json",
+    "open-deep-mind/first-principles/model-contract.schema.json",
+    "open-deep-mind/first-principles/decision-record.schema.json",
+    "open-deep-mind/first-principles/example-model-contract.json",
+    "open-deep-mind/first-principles/example-decision-record.json",
+    "open-deep-mind/first-principles/scripts/validate_module.py",
+    # TRIZ canonical module
+    "open-deep-mind/triz/ROUTER.md",
     "open-deep-mind/triz/README.md",
+    "open-deep-mind/triz/module.json",
     "open-deep-mind/triz/VENDORED_LICENSE.md",
     "open-deep-mind/triz/resources/contradiction_matrix.json",
+    "open-deep-mind/triz/resources/matrix_anomalies.json",
     "open-deep-mind/triz/resources/76_standard_solutions.md",
     "open-deep-mind/triz/resources/ariz_85c.md",
     "open-deep-mind/triz/resources/sources.md",
     "open-deep-mind/triz/scripts/lookup_matrix.py",
+    "open-deep-mind/triz/scripts/lookup_standard_solution.py",
     "open-deep-mind/triz/scripts/validate_triz_module.py",
+    # shared infrastructure
     "open-deep-mind/references/method-atlas.md",
     "open-deep-mind/references/domain-routing.md",
     "open-deep-mind/references/quality-gates.md",
@@ -42,7 +78,26 @@ REQUIRED = (
     "open-deep-mind/assets/claim-ledger-template.md",
     "open-deep-mind/assets/claim-ledger.schema.json",
     "open-deep-mind/assets/example-ledger.json",
+    "open-deep-mind/scripts/validate_ledger.py",
 )
+
+MODULE_MANIFESTS = {
+    "first-philosophy": "open-deep-mind/first-philosophy/module.json",
+    "first-principles": "open-deep-mind/first-principles/module.json",
+    "triz": "open-deep-mind/triz/module.json",
+}
+
+MODULE_VALIDATORS = (
+    "open-deep-mind/first-philosophy/scripts/validate_module.py",
+    "open-deep-mind/first-principles/scripts/validate_module.py",
+    "open-deep-mind/triz/scripts/validate_triz_module.py",
+)
+
+ALIASES = {
+    "open-deep-mind/FIRST_PHILOSOPHY.md": "first-philosophy/METHOD.md",
+    "open-deep-mind/FIRST_PRINCIPLES.md": "first-principles/METHOD.md",
+    "open-deep-mind/TRIZ_ENGINEERING.md": "triz/ROUTER.md",
+}
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
@@ -76,6 +131,43 @@ def png_dimensions(path: Path) -> tuple[int, int]:
     return struct.unpack(">II", header[16:24])
 
 
+def local_targets(text: str) -> set[str]:
+    targets = set(MD_LINK_RE.findall(text)) | set(HTML_LINK_RE.findall(text))
+    return targets
+
+
+def validate_local_target(path: Path, root: Path, target: str, errors: list[str]) -> None:
+    target = target.strip().split()[0].strip("<>")
+    if not target or target.startswith(("http://", "https://", "mailto:", "#", "data:", "javascript:")):
+        return
+    target_path = unquote(target.split("#", 1)[0].split("?", 1)[0])
+    if not target_path:
+        return
+    resolved = (path.parent / target_path).resolve()
+    try:
+        resolved.relative_to(root.resolve())
+    except ValueError:
+        errors.append(f"link escapes repository in {path.relative_to(root)}: {target}")
+        return
+    if not resolved.exists():
+        errors.append(f"broken relative link in {path.relative_to(root)}: {target}")
+
+
+def run_validator(root: Path, rel: str, errors: list[str], warnings: list[str]) -> None:
+    proc = subprocess.run(
+        [sys.executable, str(root / rel)],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        detail = (proc.stderr + "\n" + proc.stdout).strip()
+        errors.append(f"module validator failed: {rel}\n{detail}")
+    elif proc.stderr.strip():
+        warnings.append(f"{rel}: {proc.stderr.strip()}")
+
+
 def validate(root: Path) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -84,14 +176,21 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         if not (root / rel).is_file():
             errors.append(f"missing required file: {rel}")
 
+    # Canonical version.
+    version_path = root / "VERSION"
+    version = version_path.read_text(encoding="utf-8").strip() if version_path.is_file() else ""
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        errors.append(f"VERSION must be semantic x.y.z; got {version!r}")
+
+    # Agent Skill frontmatter and progressive disclosure.
     skill_path = root / "open-deep-mind" / "SKILL.md"
+    fm: dict[str, str] = {}
     if skill_path.is_file():
         text = skill_path.read_text(encoding="utf-8")
         try:
             fm = parse_frontmatter(text)
         except ValueError as exc:
             errors.append(str(exc))
-            fm = {}
         name = fm.get("name", "")
         desc = fm.get("description", "")
         if not name:
@@ -104,32 +203,97 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             errors.append("SKILL.md frontmatter missing description")
         elif len(desc) > 1024:
             errors.append(f"description exceeds 1024 characters: {len(desc)}")
+        if fm.get("version") != version:
+            errors.append(f"SKILL version {fm.get('version')!r} != VERSION {version!r}")
         line_count = len(text.splitlines())
         if line_count > 500:
-            warnings.append(f"SKILL.md is {line_count} lines; progressive-disclosure target is <=500")
-        if "TRIZ is opt-in" not in text:
-            errors.append("SKILL.md must state that TRIZ is opt-in")
-        if "TRIZ_ENGINEERING.md" not in text:
-            errors.append("SKILL.md must route explicit TRIZ requests to TRIZ_ENGINEERING.md")
+            errors.append(f"SKILL.md is {line_count} lines; must remain <=500 for progressive disclosure")
+        for marker in (
+            "first-philosophy/METHOD.md",
+            "first-principles/METHOD.md",
+            "triz/ROUTER.md",
+            "TRIZ is explicit-only",
+        ):
+            if marker not in text:
+                errors.append(f"SKILL.md missing canonical routing marker: {marker}")
 
-    triz_path = root / "open-deep-mind" / "TRIZ_ENGINEERING.md"
-    if triz_path.is_file():
-        triz_text = triz_path.read_text(encoding="utf-8")
-        required_triz_markers = (
-            "optional",
-            "Do not load TRIZ automatically",
-            "triz/README.md",
-            "Return to OpenDeepMind",
-        )
-        for marker in required_triz_markers:
-            if marker not in triz_text:
-                errors.append(f"TRIZ router missing marker: {marker!r}")
+    # Module registry and manifests.
+    registry_path = root / "open-deep-mind" / "MODULES.json"
+    try:
+        registry = json.loads(registry_path.read_text(encoding="utf-8")) if registry_path.is_file() else {}
+    except json.JSONDecodeError as exc:
+        errors.append(f"invalid MODULES.json: {exc}")
+        registry = {}
+    if registry.get("repository_version") != version:
+        errors.append("MODULES.json repository_version != VERSION")
+    registry_ids = [m.get("id") for m in registry.get("modules", []) if isinstance(m, dict)]
+    if registry_ids != ["first-philosophy", "first-principles", "triz"]:
+        errors.append(f"MODULES.json module order/IDs invalid: {registry_ids}")
 
+    for module_id, rel in MODULE_MANIFESTS.items():
+        path = root / rel
+        try:
+            manifest = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+        except json.JSONDecodeError as exc:
+            errors.append(f"invalid {rel}: {exc}")
+            manifest = {}
+        if manifest.get("id") != module_id:
+            errors.append(f"{rel} id mismatch")
+        if manifest.get("version") != version:
+            errors.append(f"{rel} version {manifest.get('version')!r} != VERSION {version!r}")
+
+    # Compatibility aliases must remain thin and point to canonical modules.
+    for rel, target in ALIASES.items():
+        path = root / rel
+        if path.is_file():
+            text = path.read_text(encoding="utf-8")
+            if target not in text:
+                errors.append(f"compatibility alias {rel} does not point to {target}")
+            if len(text.splitlines()) > 45:
+                errors.append(f"compatibility alias {rel} is too large; canonical method body is not isolated")
+
+    # Version metadata consistency.
+    citation_path = root / "CITATION.cff"
+    if citation_path.is_file():
+        cff = citation_path.read_text(encoding="utf-8")
+        match = CFF_VERSION_RE.search(cff)
+        cff_version = match.group(1) if match else None
+        if cff_version != version:
+            errors.append(f"CITATION.cff version {cff_version!r} != VERSION {version!r}")
+
+    readme_path = root / "README.md"
+    if readme_path.is_file():
+        readme = readme_path.read_text(encoding="utf-8")
+        versions = README_VERSION_RE.findall(readme)
+        if versions and version not in versions:
+            errors.append(f"README version badge(s) {versions} do not include VERSION {version}")
+        for marker in (
+            "first-philosophy/METHOD.md",
+            "first-principles/METHOD.md",
+            "triz/ROUTER.md",
+            "MODULES.json",
+        ):
+            if marker not in readme:
+                errors.append(f"README.md missing canonical architecture link: {marker}")
+
+    # Domain routing must not auto-enable TRIZ for creative/business/general work.
+    domain_path = root / "open-deep-mind" / "references" / "domain-routing.md"
+    if domain_path.is_file():
+        text = domain_path.read_text(encoding="utf-8")
+        if "TRIZ isolation rule" not in text:
+            errors.append("domain-routing.md missing TRIZ isolation rule")
+        if "Default methods\n\n- TRIZ" in text or "- TRIZ contradiction" in text:
+            errors.append("domain-routing.md still contains TRIZ in a default method list")
+        if "Explicit TRIZ engineering route" not in text:
+            errors.append("domain-routing.md missing explicit-only TRIZ route")
+
+    # Text syntax, unresolved tokens, local Markdown and HTML links.
     for path in root.rglob("*"):
-        if not path.is_file():
+        if not path.is_file() or ".git" in path.parts:
             continue
         rel = path.relative_to(root).as_posix()
-        if path.suffix.lower() in {".md", ".py", ".json", ".yml", ".yaml", ".svg"}:
+        suffix = path.suffix.lower()
+        if suffix in {".md", ".py", ".json", ".yml", ".yaml", ".svg", ".cff"}:
             try:
                 text = path.read_text(encoding="utf-8")
             except UnicodeDecodeError:
@@ -138,42 +302,26 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             for token in FORBIDDEN:
                 if token in text:
                     errors.append(f"forbidden unresolved token {token!r} in {rel}")
-            if path.suffix.lower() == ".md":
-                for target in LINK_RE.findall(text):
-                    target = target.strip().split()[0].strip("<>")
-                    if (
-                        not target
-                        or target.startswith(("http://", "https://", "mailto:", "#", "data:"))
-                    ):
-                        continue
-                    target_path = target.split("#", 1)[0]
-                    if not target_path:
-                        continue
-                    resolved = (path.parent / target_path).resolve()
-                    try:
-                        resolved.relative_to(root.resolve())
-                    except ValueError:
-                        errors.append(f"link escapes repository in {rel}: {target}")
-                        continue
-                    if not resolved.exists():
-                        errors.append(f"broken relative link in {rel}: {target}")
-            elif path.suffix.lower() == ".json":
+            if suffix == ".md":
+                for target in local_targets(text):
+                    validate_local_target(path, root, target, errors)
+            elif suffix == ".json":
                 try:
                     json.loads(text)
                 except json.JSONDecodeError as exc:
                     errors.append(f"invalid JSON in {rel}: {exc}")
-            elif path.suffix.lower() == ".svg":
+            elif suffix == ".svg":
                 try:
                     ElementTree.fromstring(text)
                 except ElementTree.ParseError as exc:
                     errors.append(f"invalid SVG XML in {rel}: {exc}")
-            elif path.suffix.lower() == ".py":
+            elif suffix == ".py":
                 try:
                     compile(text, rel, "exec")
                 except SyntaxError as exc:
                     errors.append(f"invalid Python in {rel}: {exc}")
 
-        if path.suffix.lower() == ".png":
+        if suffix == ".png":
             try:
                 width, height = png_dimensions(path)
                 if width < 1200 or height < 600:
@@ -181,19 +329,16 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             except ValueError as exc:
                 errors.append(f"{rel}: {exc}")
 
+    # Visual assets are recursive, not root-only.
     diagram_dir = root / "open-deep-mind" / "assets" / "diagrams"
-    diagram_count = len(list(diagram_dir.glob("*.svg"))) if diagram_dir.exists() else 0
+    diagram_count = len(list(diagram_dir.rglob("*.svg"))) if diagram_dir.exists() else 0
     if diagram_count < 8:
-        errors.append(f"expected at least 8 SVG diagrams, found {diagram_count}")
+        errors.append(f"expected at least 8 SVG diagrams recursively, found {diagram_count}")
 
-    core_paths = [
-        root / "open-deep-mind/FIRST_PHILOSOPHY.md",
-        root / "open-deep-mind/FIRST_PRINCIPLES.md",
-        root / "open-deep-mind/TRIZ_ENGINEERING.md",
-    ]
-    resolved = [path.resolve() for path in core_paths]
-    if len(set(resolved)) != len(resolved):
-        errors.append("First Philosophy, First Principles, and TRIZ must be separate files")
+    # Execute module-owned validators; architecture is not complete if one module fails.
+    for validator in MODULE_VALIDATORS:
+        if (root / validator).is_file():
+            run_validator(root, validator, errors, warnings)
 
     return errors, warnings
 
@@ -213,7 +358,13 @@ def main() -> int:
         print(json.dumps({"ok": False, "errors": len(errors), "warnings": len(warnings)}))
         return 1
 
-    print(json.dumps({"ok": True, "errors": 0, "warnings": len(warnings)}))
+    print(json.dumps({
+        "ok": True,
+        "errors": 0,
+        "warnings": len(warnings),
+        "architecture_version": (root / "VERSION").read_text(encoding="utf-8").strip(),
+        "modules": 3,
+    }))
     return 0
 
 
