@@ -12,6 +12,11 @@ EVALS = ROOT / "evals.json"
 CONFIG = ROOT / "benchmark-config.json"
 
 
+def applies_to_case(cfg: dict, case: dict) -> bool:
+    categories = cfg.get("case_categories", ["all"])
+    return "all" in categories or case.get("category") in categories
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--iteration", type=int, required=True)
@@ -32,6 +37,18 @@ def main() -> int:
     iteration = workspace_root / f"iteration-{args.iteration}"
     iteration.mkdir(parents=True, exist_ok=True)
 
+    expected_slots: list[dict] = []
+    for case in cases:
+        for cfg in configs:
+            if not applies_to_case(cfg, case):
+                continue
+            for rep in range(1, repetitions + 1):
+                expected_slots.append({
+                    "case_id": case["id"],
+                    "configuration": cfg["id"],
+                    "repetition": rep,
+                })
+
     manifest = {
         "benchmark_version": config["benchmark_version"],
         "iteration": args.iteration,
@@ -39,6 +56,7 @@ def main() -> int:
         "cases": [c["id"] for c in cases],
         "configurations": [c["id"] for c in configs],
         "repetitions": repetitions,
+        "expected_run_slots": expected_slots,
         "status": "workspace-created-no-model-runs-yet"
     }
     (iteration / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -49,19 +67,26 @@ def main() -> int:
         case_dir.mkdir(exist_ok=True)
         (case_dir / "case.json").write_text(json.dumps(case, ensure_ascii=False, indent=2), encoding="utf-8")
         for cfg in configs:
-            if cfg["id"] == "opendeepmind_explicit_triz" and case["category"] != "triz-positive":
+            if not applies_to_case(cfg, case):
                 continue
             for rep in range(1, repetitions + 1):
                 run_dir = case_dir / cfg["id"] / f"run-{rep}"
                 (run_dir / "outputs").mkdir(parents=True, exist_ok=True)
                 instructions = {
                     "case_id": case["id"],
+                    "category": case["category"],
+                    "split": case["split"],
                     "configuration": cfg["id"],
+                    "configuration_kind": cfg.get("kind"),
                     "repetition": rep,
                     "prompt": case["prompt"],
+                    "expected_route_for_production": case["expected_route"],
+                    "score_routing_accuracy": cfg.get("score_routing_accuracy", True),
                     "skill": cfg.get("skill_path"),
                     "external_repository": cfg.get("repository"),
                     "external_commit": cfg.get("commit"),
+                    "disabled_modules": cfg.get("disabled_modules", []),
+                    "forced_route": cfg.get("forced_route"),
                     "required_artifacts": ["run_record.json", "grading.json"]
                 }
                 (run_dir / "run_instructions.json").write_text(
