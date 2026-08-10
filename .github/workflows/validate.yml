@@ -19,3 +19,7 @@ jobs:
         run: python open-deep-mind/scripts/validate_repository.py .
       - name: Validate example claim ledger
         run: python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-ledger.json
+      - name: Validate complete TRIZ subsystem
+        run: python open-deep-mind/triz/scripts/validate_triz_module.py
+      - name: Smoke-test TRIZ matrix lookup
+        run: python open-deep-mind/triz/scripts/lookup_matrix.py --improve 1 --worsen 3 --json
