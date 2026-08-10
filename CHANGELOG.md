@@ -2,61 +2,75 @@
 
 All notable changes are documented here.
 
-## [Unreleased] — Complete TRIZ subsystem
+## [1.2.0] — 2026-08-10
 
-### Added
+### Architecture
 
-- Modular `open-deep-mind/triz/` subsystem behind the existing opt-in `TRIZ_ENGINEERING.md` router.
-- Modern TRIZ problem-identification layer: function analysis, flow analysis, cause–effect chain analysis (CECA), trimming, feature transfer, innovative benchmarking, multi-screen analysis, and key-problem routing.
-- Complete classical contradiction layer: 39 typical engineering parameters, 40 inventive principles, full 39×39 contradiction-matrix transcription, engineering/physical contradiction modeling, and separation principles.
-- Su-Field modeling plus an explicit 76-item Standard Inventive Solutions index using the public MATRIZ five-class numbering (13 + 23 + 6 + 17 + 17).
-- ARIZ-85C operational map with nine parts and three blocks.
-- Ideality, Ideal Final Result (IFR), resource analysis, clone-problem transfer, Function-Oriented Search (FOS), scientific-effects routing, S-curve analysis, and modern TESE hierarchy.
-- Concept-substantiation layer connecting TRIZ output back to OpenDeepMind First Principles, uncertainty, safety, simulation, experiment, manufacturability, lifecycle, FMEA, and prior-art validation.
-- Four worked examples: brake-disc thermal management, EV battery thermal safety, heat-exchanger fouling, and a refusal/reframe anti-example.
-- Dependency-free matrix lookup and full TRIZ integrity validator.
-- TRIZ source/provenance map and vendored MIT license notice.
+- Refactored OpenDeepMind into three physically isolated canonical modules:
+  - `open-deep-mind/first-philosophy/`
+  - `open-deep-mind/first-principles/`
+  - `open-deep-mind/triz/`
+- Added `open-deep-mind/ARCHITECTURE.md`, `open-deep-mind/MODULES.json`, and root `VERSION`.
+- Converted root `FIRST_PHILOSOPHY.md`, `FIRST_PRINCIPLES.md`, and `TRIZ_ENGINEERING.md` into thin compatibility aliases.
+- Rewrote `SKILL.md` as a progressive-disclosure router rather than a duplicate method body.
 
-### Changed
+### First Philosophy
 
-- Replaced the monolithic TRIZ file with a lightweight opt-in router plus progressive-disclosure resources.
-- Main repository validator now requires the TRIZ module map, critical classical resources, source map, and TRIZ scripts.
-- GitHub Actions now executes complete TRIZ-module validation and a deterministic matrix-lookup smoke test.
+- Added canonical `first-philosophy/METHOD.md`, module manifest, README, Foundation Charter schema, valid fixture, and isolated validator.
+- Enforced **Φ8 = Φ0..Φ7** and prohibited TRIZ dependency from the First Philosophy method body.
+
+### First Principles
+
+- Added canonical `first-principles/METHOD.md`, module manifest, README, model-contract and decision-record schemas, fixtures, and isolated validator.
+- Corrected the historical protocol-numbering inconsistency: **P9 now means exactly P1..P9**. Former derivation and falsification passes are combined into P8A/P8B under the ninth-stage contract.
+- Enforced no embedded/automatic TRIZ procedure in the canonical First-Principles method body.
+
+### TRIZ
+
+- Added canonical `triz/ROUTER.md` and `triz/module.json`; **T10 now means exactly T1..T10**.
+- Preserved explicit-only activation and mandatory return to First-Principles validation.
+- Added deterministic Standard Inventive Solution lookup.
+- Added `matrix_anomalies.json` and normalized documented matrix-transcription duplicate IDs at lookup time while preserving raw vendored data for provenance.
+- Hardened TRIZ validation for activation, protocol numbering, matrix structure/anchors/anomalies, 39 parameters, 40 principles, 76 SIS class distribution, ARIZ parts, deterministic tools, and subsystem map.
+
+### Validation and maintenance
+
+- Upgraded repository validation from file/syntax checks to architecture/version/module/alias/link checks and execution of all module validators.
+- Added HTML `src`/`href` local-link checking in addition to Markdown links.
+- Made SVG asset counting recursive.
+- Upgraded the proposition-ledger validator with forward-reference handling, ID collision checks, and dependency-cycle detection.
+- Added cross-module `unittest` regression coverage, including matrix anchors, known matrix anomaly normalization, SIS lookup, and cyclic-ledger rejection.
+- Expanded CI to run all module validators, repository/ledger validation, deterministic lookups, tests, and Python compilation.
+- Updated README files, AGENTS, CONTRIBUTING, CITATION, version/provenance documentation, and licensing boundaries.
+- Removed TRIZ from all default domain routes; canonical TRIZ is now reachable only through the explicit engineering route.
 
 ## [1.1.0] — 2026-08-09
 
 ### Added
 
-- Separate `open-deep-mind/TRIZ_ENGINEERING.md` optional engineering-invention module.
-- Explicit TRIZ activation gate: the module is not loaded during normal First Philosophy/First Principles routing unless the user asks for or accepts TRIZ.
-- T10 TRIZ workflow covering function and key-problem identification, ideality and IFR, engineering/physical contradictions, 39 typical parameters, 40 inventive principles, separation, Su-Field, standard-solution classes, ARIZ-85C, engineering-system evolution, concept scoring, and validation handoff.
-- Current MATRIZ and Altshuller Institute source links and attribution to the MIT-licensed `Antropocosmist/triz-engineering-solver` design influence.
+- Separate optional TRIZ engineering-invention module with explicit activation gate.
+- Modern TRIZ problem-identification layer: function analysis, flow analysis, CECA, trimming, feature transfer, innovative benchmarking, multi-screen analysis, and key-problem routing.
+- Complete classical contradiction layer: 39 engineering parameters, 40 inventive principles, full 39×39 contradiction-matrix transcription, engineering/physical contradiction modeling, and separation principles.
+- Su-Field modeling and 76-item Standard Inventive Solutions index using the public MATRIZ five-class numbering.
+- ARIZ-85C operational map, ideality/IFR/resources, FOS/effects, S-curve/TESE, concept substantiation, worked examples, deterministic matrix lookup, and TRIZ integrity validation.
+- TRIZ source/provenance map and vendored MIT license notice.
 
 ### Changed
 
-- Updated `SKILL.md` routing, boundaries, output behavior, and version metadata.
-- Updated the main README with an optional TRIZ section, invocation example, and repository structure.
-- Extended repository validation to require a separate TRIZ file and enforce its opt-in routing markers.
-- Updated intellectual-lineage, notice, and citation metadata.
+- Integrated TRIZ as opt-in and returned generated concepts to First-Principles/evidence/safety validation.
+- Updated repository validator, GitHub Actions, README, notices, and citation metadata for TRIZ support.
 
 ## [1.0.0] — 2026-08-08
 
 ### Added
 
 - Agent Skills-compatible `open-deep-mind/SKILL.md`.
-- Separate `FIRST_PHILOSOPHY.md` and `FIRST_PRINCIPLES.md` engines.
+- First Philosophy and First Principles engines.
 - Foundation Charter and Φ8 foundation-qualification protocol.
 - D/O/L/C/A/E/V/U proposition ledger and JSON schema.
-- P9 first-principles decomposition, model, falsification, and decision protocol.
+- First-principles decomposition, model, falsification, and decision protocol.
 - Cross-domain routing for science, engineering, modeling, strategy, policy, personal decisions, and creative/product innovation.
 - More than thirty executable method cards.
 - Red-blocker gate and twelve-dimension 100-point quality rubric.
 - Scale-bridge and uncertainty audit.
-- Failure-mode catalog.
-- Cross-domain worked examples.
-- Output templates.
-- Dependency-free repository and claim-ledger validators.
-- GitHub Actions validation.
-- English and Chinese README files.
-- Eleven editable AI-generated SVG diagrams.
-- Attribution, contribution, licensing, and agent-maintenance documentation.
+- Failure-mode catalog, worked examples, output templates, validators, CI, bilingual README files, visual diagrams, licensing and maintenance documentation.
