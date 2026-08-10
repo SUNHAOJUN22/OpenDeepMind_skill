@@ -26,6 +26,42 @@ class ModuleValidationTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, msg=f"{rel}\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}")
         return proc
 
+    def test_module_registry_and_activation_boundaries(self) -> None:
+        registry = json.loads((REPO / "open-deep-mind/MODULES.json").read_text(encoding="utf-8"))
+        modules = {m["id"]: m for m in registry["modules"]}
+        self.assertEqual(set(modules), {"first-philosophy", "first-principles", "triz"})
+        self.assertEqual(modules["first-philosophy"]["entry"], "first-philosophy/METHOD.md")
+        self.assertEqual(modules["first-principles"]["entry"], "first-principles/METHOD.md")
+        self.assertEqual(modules["triz"]["entry"], "triz/ROUTER.md")
+        self.assertEqual(modules["triz"]["activation"], "explicit-only")
+        self.assertIn("triz", modules["first-philosophy"]["must_not_auto_load"])
+        self.assertIn("triz", modules["first-principles"]["must_not_auto_load"])
+
+    def test_compatibility_aliases_are_thin(self) -> None:
+        aliases = {
+            "open-deep-mind/FIRST_PHILOSOPHY.md": "first-philosophy/METHOD.md",
+            "open-deep-mind/FIRST_PRINCIPLES.md": "first-principles/METHOD.md",
+            "open-deep-mind/TRIZ_ENGINEERING.md": "triz/ROUTER.md",
+        }
+        for rel, target in aliases.items():
+            text = (REPO / rel).read_text(encoding="utf-8")
+            self.assertIn(target, text)
+            self.assertLessEqual(len(text.splitlines()), 45)
+
+    def test_canonical_core_methods_do_not_embed_triz(self) -> None:
+        for rel in (
+            "open-deep-mind/first-philosophy/METHOD.md",
+            "open-deep-mind/first-principles/METHOD.md",
+        ):
+            text = (REPO / rel).read_text(encoding="utf-8").upper()
+            self.assertNotIn("TRIZ", text, msg=f"canonical core method is coupled to TRIZ: {rel}")
+
+    def test_domain_router_has_no_default_triz(self) -> None:
+        text = (REPO / "open-deep-mind/references/domain-routing.md").read_text(encoding="utf-8")
+        self.assertIn("TRIZ isolation rule", text)
+        self.assertIn("Explicit TRIZ engineering route", text)
+        self.assertNotIn("- TRIZ contradiction", text)
+
     def test_first_philosophy_module(self) -> None:
         proc = self.assert_ok("open-deep-mind/first-philosophy/scripts/validate_module.py")
         data = json.loads(proc.stdout.strip().splitlines()[-1])
@@ -71,6 +107,7 @@ class ModuleValidationTests(unittest.TestCase):
         data = json.loads(proc.stdout)
         self.assertTrue(data["ok"])
         self.assertEqual(data["id"], "1.2.1")
+        self.assertTrue(data["title"])
 
     def test_example_ledger(self) -> None:
         self.assert_ok(
