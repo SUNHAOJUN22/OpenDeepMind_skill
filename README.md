@@ -16,7 +16,8 @@
   <a href="open-deep-mind/first-philosophy/METHOD.md">第一哲学 / First Philosophy</a> ·
   <a href="open-deep-mind/first-principles/METHOD.md">第一性原理 / First Principles</a> ·
   <a href="open-deep-mind/triz/ROUTER.md">TRIZ Router</a> ·
-  <a href="open-deep-mind/triz/README.md">完整 TRIZ / Full TRIZ</a>
+  <a href="open-deep-mind/triz/README.md">完整 TRIZ / Full TRIZ</a> ·
+  <a href="BENCHMARK.md">Benchmark</a>
 </p>
 
 <p align="center">
@@ -24,12 +25,15 @@
   <img alt="Version" src="https://img.shields.io/badge/version-1.2.0-2a8cff?style=flat-square">
   <img alt="Core modules" src="https://img.shields.io/badge/core_modules-2-f2a649?style=flat-square">
   <img alt="Optional TRIZ" src="https://img.shields.io/badge/optional_TRIZ-explicit--only-e75f3c?style=flat-square">
+  <img alt="Behavioral evals" src="https://img.shields.io/badge/behavioral_evals-60_cases-2fbf9f?style=flat-square">
+  <img alt="Benchmark scores" src="https://img.shields.io/badge/published_benchmark_scores-none_yet-91a7bd?style=flat-square">
   <img alt="TRIZ matrix" src="https://img.shields.io/badge/TRIZ_matrix-1190_cells-1565c0?style=flat-square">
   <img alt="TRIZ SIS" src="https://img.shields.io/badge/TRIZ_SIS-76-7b61ff?style=flat-square">
-  <img alt="Runtime dependencies" src="https://img.shields.io/badge/runtime_dependencies-0-60758a?style=flat-square">
 </p>
 
 > **Independent project / 独立项目：** OpenDeepMind_skill is not affiliated with, sponsored by, or endorsed by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute, or the maintainers of referenced repositories.
+
+> **Benchmark status / 评测状态：** the behavioral benchmark framework and 60 authored cases are committed, but **no performance score is published yet**. Scores will be published only after reproducible model runs, raw grading/timing artifacts, model/version metadata, and aggregate results exist.
 
 ---
 
@@ -104,6 +108,13 @@ open-deep-mind/
 │   ├── examples/
 │   └── scripts/
 │
+├── evals/                           # behavioral evaluation layer; NOT a reasoning module
+│   ├── evals.json                   # 60 authored cases
+│   ├── benchmark-config.json        # baselines / repetitions / metrics
+│   ├── rubric.md                    # semantic + blind pairwise grading
+│   ├── *.schema.json                # run / grading / aggregate contracts
+│   └── scripts/                     # validation / workspace / aggregation
+│
 ├── references/                      # shared method-neutral references
 ├── assets/                          # shared schemas/templates/visuals
 └── scripts/                         # repository + ledger validators
@@ -117,7 +128,7 @@ FIRST_PRINCIPLES.md  -> first-principles/METHOD.md
 TRIZ_ENGINEERING.md  -> triz/ROUTER.md
 ```
 
-New maintenance targets the canonical module paths, not the aliases.
+The evaluation layer measures the three reasoning modules but never participates in task routing or reasoning.
 
 Full contract: [`open-deep-mind/ARCHITECTURE.md`](open-deep-mind/ARCHITECTURE.md).
 
@@ -313,7 +324,57 @@ inventive concept
 
 ---
 
-## 6. Shared quality system / 共享质量门
+## 6. Behavioral Benchmark / 行为评测
+
+Benchmark entrypoint:
+
+[`BENCHMARK.md`](BENCHMARK.md)
+
+Detailed eval package:
+
+[`open-deep-mind/evals/README.md`](open-deep-mind/evals/README.md)
+
+Initial authored benchmark:
+
+```text
+60 cases
+├── 12 routing / activation
+├── 10 First Philosophy
+├── 12 First Principles
+├──  8 Dual Engine Φ→P
+├── 10 explicit TRIZ
+└──  8 TRIZ near-miss / anti-trigger
+
+36 train / 12 validation / 12 holdout
+3 repetitions by default
+```
+
+Comparison configurations:
+
+```text
+no_skill
+vs pinned awesome-skills/first-principles-skill
+vs OpenDeepMind core Φ/P
+vs OpenDeepMind explicit TRIZ on TRIZ-authorized cases
+```
+
+OpenDeepMind-specific metrics include:
+
+- routing accuracy;
+- red-blocker rate;
+- TRIZ false-activation rate;
+- module-leakage rate;
+- rival-model coverage;
+- falsifier coverage;
+- semantic judge score;
+- blind pairwise win rate;
+- tokens and duration.
+
+**No behavioral score is published yet.** The committed benchmark currently proves that an evaluation protocol/case set exists; it does not prove that OpenDeepMind outperforms a baseline until real model runs and grading artifacts are produced.
+
+---
+
+## 7. Shared quality system / 共享质量门
 
 All modules use the shared red-blocker-first gate:
 
@@ -337,7 +398,7 @@ The shared quality score remains diagnostic rather than a substitute for evidenc
 
 ---
 
-## 7. Cross-scale discipline / 跨尺度纪律
+## 8. Cross-scale discipline / 跨尺度纪律
 
 A chain such as:
 
@@ -367,7 +428,7 @@ failure conditions
 
 ---
 
-## 8. Domain routing / 领域路由
+## 9. Domain routing / 领域路由
 
 Shared domain router:
 
@@ -383,7 +444,7 @@ For cross-domain tasks, the strictest active evidence, safety, legal, and ethica
 
 ---
 
-## 9. Deterministic tools and validation / 确定性工具与验证
+## 10. Deterministic tools and validation / 确定性工具与验证
 
 ### Repository architecture
 
@@ -398,7 +459,11 @@ python open-deep-mind/scripts/validate_ledger.py \
   open-deep-mind/assets/example-ledger.json
 ```
 
-The ledger validator checks IDs, type/status consistency, references, decision traces, and dependency cycles.
+### Behavioral benchmark definitions
+
+```bash
+python open-deep-mind/evals/scripts/validate_evals.py
+```
 
 ### First Philosophy
 
@@ -427,11 +492,11 @@ python -m unittest discover -s open-deep-mind/tests -p "test_*.py"
 python -m compileall -q open-deep-mind
 ```
 
-GitHub Actions executes the same architecture/module/lookup/regression layers on pushes and pull requests.
+GitHub Actions executes module validation, behavioral-eval definition validation, architecture/ledger checks, deterministic TRIZ lookups, regression tests, and compilation on pushes and pull requests.
 
 ---
 
-## 10. Installation / 安装
+## 11. Installation / 安装
 
 ```bash
 git clone https://github.com/SUNHAOJUN22/OpenDeepMind_skill.git
@@ -443,11 +508,11 @@ For Agent Skills-compatible clients, point the runtime at:
 open-deep-mind/SKILL.md
 ```
 
-The router progressively loads only the selected module and shared resources needed by the task.
+The router progressively loads only the selected reasoning module and shared resources needed by the task. The `evals/` directory is not part of runtime reasoning context.
 
 ---
 
-## 11. Invocation / 调用示例
+## 12. Invocation / 调用示例
 
 ### First Philosophy
 
@@ -477,9 +542,9 @@ The router progressively loads only the selected module and shared resources nee
 
 ---
 
-## 12. Completeness boundary / 完备性边界
+## 13. Completeness boundary / 完备性边界
 
-“Repository complete” means the repository has explicit module contracts, manifests, schemas/fixtures, validators, shared quality infrastructure, deterministic TRIZ data tools, CI, version/provenance/license controls, and regression tests.
+“Repository complete” means the repository has explicit module contracts, manifests, schemas/fixtures, validators, shared quality infrastructure, deterministic TRIZ data tools, CI, version/provenance/license controls, regression tests, and an authored behavioral-evaluation framework.
 
 It does **not** mean:
 
@@ -487,7 +552,8 @@ It does **not** mean:
 - every scientific discipline shares one evidence model;
 - every TRIZ book/patent/scientific effect is copied into the repository;
 - first-principles computation is assumption-free;
-- a validator can prove a real-world engineering conclusion true.
+- a validator can prove a real-world engineering conclusion true;
+- an authored benchmark case set is equivalent to a completed benchmark run.
 
 The design principle is instead:
 
@@ -497,7 +563,7 @@ The design principle is instead:
 
 ---
 
-## 13. Provenance and licenses / 来源与许可
+## 14. Provenance and licenses / 来源与许可
 
 OpenDeepMind is an original synthesis informed by philosophical, scientific, systems, engineering, and open Agent Skill traditions.
 
@@ -506,12 +572,14 @@ Key implementation influences include:
 - `danyuchn/first-principles-skill` — first-principles requirement challenge/reconstruction;
 - `smixs/creative-director-skill` — routing, recursive evaluation, output discipline, visual documentation;
 - `Antropocosmist/triz-engineering-solver` — MIT-licensed TRIZ implementation/data reference;
-- public MATRIZ knowledge-base terminology/routing and Altshuller/TRIZ theoretical lineage.
+- public MATRIZ knowledge-base terminology/routing and Altshuller/TRIZ theoretical lineage;
+- Agent Skills official eval-driven iteration guidance for the behavioral benchmark workflow.
 
 See:
 
 - [`NOTICE.md`](NOTICE.md)
 - [`LICENSE.md`](LICENSE.md)
+- [`BENCHMARK.md`](BENCHMARK.md)
 - [`open-deep-mind/triz/VENDORED_LICENSE.md`](open-deep-mind/triz/VENDORED_LICENSE.md)
 - [`open-deep-mind/triz/resources/sources.md`](open-deep-mind/triz/resources/sources.md)
 - [`open-deep-mind/references/intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md)
@@ -520,5 +588,5 @@ See:
 
 <p align="center">
   <strong>Foundation → Principle → Model → Test → Action → Revision</strong><br>
-  <sub>模块隔离 / Explicit provenance / Falsifiable reasoning / Revisable decisions</sub>
+  <sub>模块隔离 / Explicit provenance / Falsifiable reasoning / Eval-driven revision</sub>
 </p>
