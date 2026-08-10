@@ -2,6 +2,24 @@
 
 All notable changes are documented here.
 
+## [Unreleased] — Behavioral benchmark
+
+### Added
+
+- Added `open-deep-mind/evals/` as a separate evaluation layer; it evaluates Φ/P/TRIZ behavior but is not a fourth reasoning module.
+- Added an initial **60-case** benchmark covering routing, First Philosophy, First Principles, Dual Engine, explicit TRIZ, and TRIZ near-miss/anti-trigger behavior.
+- Added fixed benchmark splits: **36 train / 12 validation / 12 holdout**.
+- Added four reproducible comparison configurations: no skill, pinned `awesome-skills/first-principles-skill`, OpenDeepMind core, and explicit-TRIZ OpenDeepMind.
+- Added schemas for eval definitions, run records, grading artifacts, and aggregated benchmark output.
+- Added a semantic/blind-pairwise grading rubric and explicit red-blocker policy.
+- Added dependency-free scripts for benchmark-definition validation, workspace creation, and result aggregation.
+- Added OpenDeepMind-specific metrics including TRIZ false-activation rate, module-leakage rate, routing accuracy, rival-model coverage, falsifier coverage, tokens, and duration.
+- CI now validates the authored benchmark definitions on every push/pull request.
+
+### Publication status
+
+- **No benchmark score is published yet.** The framework and cases are committed, but v1.3.0 will not be declared until real model runs, raw artifacts, graders, and reproducible aggregate results exist.
+
 ## [1.2.0] — 2026-08-10
 
 ### Architecture
