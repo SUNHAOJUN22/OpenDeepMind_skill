@@ -19,30 +19,55 @@
     {
       "id": "no_skill",
       "kind": "no-skill-baseline",
+      "case_categories": ["all"],
       "description": "Same task and tool access with no reasoning skill loaded."
     },
     {
       "id": "first_principles_baseline",
       "kind": "external-skill-baseline",
+      "case_categories": ["all"],
       "repository": "awesome-skills/first-principles-skill",
       "commit": "5623c2fa7c5a6ab47eee0d308431437f52c6ff1e",
       "skill_path": ".",
       "description": "Pinned lightweight first-principles comparison baseline."
     },
     {
-      "id": "opendeepmind_core",
+      "id": "opendeepmind_full",
       "kind": "local-skill",
+      "case_categories": ["all"],
       "skill_path": "open-deep-mind",
       "triz_policy": "explicit-only",
-      "description": "Normal OpenDeepMind routing. TRIZ must not run unless the user prompt explicitly requests or accepts TRIZ."
+      "description": "Production OpenDeepMind behavior: normal Φ/P routing; TRIZ activates only when a case explicitly requests it."
     },
     {
-      "id": "opendeepmind_explicit_triz",
-      "kind": "local-skill",
-      "skill_path": "open-deep-mind",
+      "id": "opendeepmind_no_triz_ablation",
+      "kind": "local-skill-ablation",
       "case_categories": ["triz-positive"],
-      "triz_policy": "explicitly-authorized-by-case",
-      "description": "OpenDeepMind explicit TRIZ route, evaluated only on cases whose prompt explicitly requests TRIZ."
+      "skill_path": "open-deep-mind",
+      "disabled_modules": ["triz"],
+      "forced_route": "p",
+      "score_routing_accuracy": false,
+      "description": "Research ablation on the same explicit-TRIZ cases: disable TRIZ and force the First-Principles route. This intentionally does not represent production behavior; it measures the marginal contribution of the TRIZ module."
+    }
+  ],
+  "comparisons": [
+    {
+      "id": "full_vs_no_skill",
+      "left": "opendeepmind_full",
+      "right": "no_skill",
+      "scope": "all-common-cases"
+    },
+    {
+      "id": "full_vs_first_principles_baseline",
+      "left": "opendeepmind_full",
+      "right": "first_principles_baseline",
+      "scope": "all-common-cases"
+    },
+    {
+      "id": "triz_module_ablation",
+      "left": "opendeepmind_full",
+      "right": "opendeepmind_no_triz_ablation",
+      "scope": "triz-positive"
     }
   ],
   "metrics": [
