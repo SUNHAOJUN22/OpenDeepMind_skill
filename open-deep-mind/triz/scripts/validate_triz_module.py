@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the OpenDeepMind TRIZ module without third-party dependencies."""
+"""Validate the complete OpenDeepMind TRIZ module without third-party dependencies."""
 
 from __future__ import annotations
 
@@ -12,28 +12,38 @@ ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "resources"
 EXAMPLES = ROOT / "examples"
 
+RESOURCE_NAMES = [
+    "modern_problem_identification.md",
+    "innovative_benchmarking.md",
+    "function_analysis.md",
+    "flow_analysis.md",
+    "cause_effect_chain.md",
+    "trimming.md",
+    "feature_transfer.md",
+    "multiscreen_operator.md",
+    "ideality_ifr_resources.md",
+    "contradictions.md",
+    "39_parameters.md",
+    "40_principles.md",
+    "contradiction_matrix.json",
+    "separation_principles.md",
+    "substance_field_modeling.md",
+    "76_standard_solutions.md",
+    "ariz_85c.md",
+    "clone_problems.md",
+    "effects_and_fos.md",
+    "evolution_trends.md",
+    "s_curve_and_tese.md",
+    "concept_substantiation.md",
+    "glossary.md",
+    "output_template.md",
+    "sources.md",
+]
+
 REQUIRED = [
     ROOT / "README.md",
     ROOT / "VENDORED_LICENSE.md",
-    RES / "39_parameters.md",
-    RES / "40_principles.md",
-    RES / "contradiction_matrix.json",
-    RES / "separation_principles.md",
-    RES / "76_standard_solutions.md",
-    RES / "ariz_85c.md",
-    RES / "evolution_trends.md",
-    RES / "modern_problem_identification.md",
-    RES / "function_analysis.md",
-    RES / "flow_analysis.md",
-    RES / "cause_effect_chain.md",
-    RES / "trimming.md",
-    RES / "feature_transfer.md",
-    RES / "s_curve_and_tese.md",
-    RES / "effects_and_fos.md",
-    RES / "concept_substantiation.md",
-    RES / "glossary.md",
-    RES / "output_template.md",
-    RES / "sources.md",
+    *[RES / name for name in RESOURCE_NAMES],
     EXAMPLES / "brake_disc.md",
     EXAMPLES / "battery_pack.md",
     EXAMPLES / "heat_exchanger_fouling.md",
@@ -53,111 +63,147 @@ ANCHORS = {
     "14,1": [1, 8, 40, 15],
 }
 
-
-def fail(errors: list[str], message: str) -> None:
-    errors.append(message)
+EXPECTED_SIS_BY_CLASS = {1: 13, 2: 23, 3: 6, 4: 17, 5: 17}
 
 
 def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
 
+    def fail(message: str) -> None:
+        errors.append(message)
+
     for path in REQUIRED:
         if not path.is_file():
-            fail(errors, f"missing: {path.relative_to(ROOT)}")
+            fail(f"missing: {path.relative_to(ROOT)}")
 
-    # 39 parameters
+    # No unresolved placeholder tokens in text resources.
+    for path in [ROOT / "README.md", *[RES / n for n in RESOURCE_NAMES if n.endswith(".md")]]:
+        if path.is_file():
+            text = path.read_text(encoding="utf-8")
+            for token in ("TODO", "TBD", "PLACEHOLDER_CITATION", "INSERT_SOURCE_HERE"):
+                if token in text:
+                    fail(f"unresolved token {token!r} in {path.relative_to(ROOT)}")
+
+    # 39 parameters.
     p39 = RES / "39_parameters.md"
     if p39.is_file():
         ids = [int(x) for x in PARAM_ROW.findall(p39.read_text(encoding="utf-8"))]
-        ids = [x for x in ids if 1 <= x <= 39]
-        if sorted(set(ids)) != list(range(1, 40)):
-            fail(errors, f"39_parameters.md does not contain exactly IDs 1..39; got {sorted(set(ids))}")
+        ids = sorted(set(x for x in ids if 1 <= x <= 39))
+        if ids != list(range(1, 40)):
+            fail(f"39_parameters.md must contain IDs 1..39 exactly; got {ids}")
 
-    # 40 principles
+    # 40 principles.
     p40 = RES / "40_principles.md"
     if p40.is_file():
         ids = [int(x) for x in PRINCIPLE_ROW.findall(p40.read_text(encoding="utf-8"))]
-        ids = [x for x in ids if 1 <= x <= 40]
-        if sorted(set(ids)) != list(range(1, 41)):
-            fail(errors, f"40_principles.md does not contain exactly IDs 1..40; got {sorted(set(ids))}")
+        ids = sorted(set(x for x in ids if 1 <= x <= 40))
+        if ids != list(range(1, 41)):
+            fail(f"40_principles.md must contain IDs 1..40 exactly; got {ids}")
 
-    # Matrix integrity
+    # Matrix integrity.
     matrix_path = RES / "contradiction_matrix.json"
     if matrix_path.is_file():
         try:
             matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
         except Exception as exc:
-            fail(errors, f"matrix JSON parse failed: {exc}")
+            fail(f"matrix JSON parse failed: {exc}")
             matrix = {}
         cells = matrix.get("cells", {}) if isinstance(matrix, dict) else {}
         if not isinstance(cells, dict):
-            fail(errors, "matrix cells is not a mapping")
+            fail("matrix cells is not a mapping")
             cells = {}
         if len(cells) != 1190:
-            fail(errors, f"expected 1190 populated matrix cells, found {len(cells)}")
+            fail(f"expected 1190 populated matrix cells, found {len(cells)}")
         for key, values in cells.items():
             try:
                 a_s, b_s = key.split(",", 1)
                 a, b = int(a_s), int(b_s)
             except Exception:
-                fail(errors, f"invalid matrix key: {key!r}")
+                fail(f"invalid matrix key: {key!r}")
                 continue
             if not (1 <= a <= 39 and 1 <= b <= 39):
-                fail(errors, f"matrix key out of range: {key}")
+                fail(f"matrix key out of range: {key}")
             if a == b:
-                fail(errors, f"diagonal matrix cell should not be populated: {key}")
+                fail(f"diagonal matrix cell should not be populated: {key}")
             if not isinstance(values, list) or not 1 <= len(values) <= 4:
-                fail(errors, f"matrix cell {key} must contain 1..4 principle IDs")
+                fail(f"matrix cell {key} must contain 1..4 principle IDs")
                 continue
+            if len(values) != len(set(values)):
+                warnings.append(f"matrix cell {key} contains duplicate IDs: {values}")
             if any(not isinstance(v, int) or not 1 <= v <= 40 for v in values):
-                fail(errors, f"matrix cell {key} contains invalid principle ID: {values}")
+                fail(f"matrix cell {key} contains invalid principle ID: {values}")
         for key, expected in ANCHORS.items():
             if cells.get(key) != expected:
-                fail(errors, f"matrix anchor mismatch {key}: expected {expected}, got {cells.get(key)}")
+                fail(f"matrix anchor mismatch {key}: expected {expected}, got {cells.get(key)}")
 
-    # 76 standard solutions count based on official numbered headings.
+    # 76 SIS exact count and class distribution.
     sis_path = RES / "76_standard_solutions.md"
     if sis_path.is_file():
         ids = SIS_ID.findall(sis_path.read_text(encoding="utf-8"))
         if len(ids) != 76:
-            fail(errors, f"expected 76 numbered SIS entries, found {len(ids)}")
+            fail(f"expected 76 numbered SIS entries, found {len(ids)}")
         if len(set(ids)) != len(ids):
-            fail(errors, "duplicate SIS identifiers found")
+            fail("duplicate SIS identifiers found")
+        counts = {i: 0 for i in range(1, 6)}
+        for sis_id in ids:
+            counts[int(sis_id.split(".")[0])] += 1
+        if counts != EXPECTED_SIS_BY_CLASS:
+            fail(f"SIS class distribution mismatch: expected {EXPECTED_SIS_BY_CLASS}, got {counts}")
 
-    # ARIZ architecture
+    # ARIZ must contain all 9 parts.
     ariz_path = RES / "ariz_85c.md"
     if ariz_path.is_file():
         text = ariz_path.read_text(encoding="utf-8")
         for part in range(1, 10):
             if f"# Part {part}" not in text:
-                fail(errors, f"ARIZ missing Part {part}")
+                fail(f"ARIZ missing Part {part}")
 
-    # Router integrity
+    # Router integrity and opt-in guarantee.
     orchestrator = ROOT.parent / "TRIZ_ENGINEERING.md"
     if not orchestrator.is_file():
-        fail(errors, "missing ../TRIZ_ENGINEERING.md orchestrator")
+        fail("missing ../TRIZ_ENGINEERING.md orchestrator")
     else:
         text = orchestrator.read_text(encoding="utf-8")
-        for marker in ("opt-in", "Return to OpenDeepMind", "triz/README.md"):
+        for marker in ("optional", "Do not load TRIZ automatically", "triz/README.md", "Return to OpenDeepMind"):
             if marker not in text:
-                fail(errors, f"TRIZ orchestrator missing marker: {marker!r}")
+                fail(f"TRIZ orchestrator missing marker: {marker!r}")
 
-    # Lookup script syntax
-    lookup = ROOT / "scripts" / "lookup_matrix.py"
-    if lookup.is_file():
+    # Module map should reference all resources.
+    module_readme = ROOT / "README.md"
+    if module_readme.is_file():
+        text = module_readme.read_text(encoding="utf-8")
+        for name in RESOURCE_NAMES:
+            if name not in text:
+                fail(f"triz/README.md does not list resource: {name}")
+
+    # Python syntax.
+    for script in (ROOT / "scripts").glob("*.py"):
         try:
-            compile(lookup.read_text(encoding="utf-8"), str(lookup), "exec")
+            compile(script.read_text(encoding="utf-8"), str(script), "exec")
         except SyntaxError as exc:
-            fail(errors, f"lookup_matrix.py syntax error: {exc}")
+            fail(f"{script.name} syntax error: {exc}")
 
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
+        for warning in warnings:
+            print(f"WARNING: {warning}", file=sys.stderr)
         print(json.dumps({"ok": False, "errors": len(errors), "warnings": len(warnings)}))
         return 1
 
-    print(json.dumps({"ok": True, "errors": 0, "warnings": len(warnings), "matrix_cells": 1190, "sis": 76}))
+    for warning in warnings:
+        print(f"WARNING: {warning}", file=sys.stderr)
+    print(json.dumps({
+        "ok": True,
+        "errors": 0,
+        "warnings": len(warnings),
+        "resources": len(RESOURCE_NAMES),
+        "matrix_cells": 1190,
+        "sis": 76,
+        "ariz_parts": 9,
+        "examples": 4,
+    }))
     return 0
 
 
