@@ -21,6 +21,7 @@ RESOURCE_NAMES = [
     "trimming.md",
     "feature_transfer.md",
     "multiscreen_operator.md",
+    "psychological_inertia_tools.md",
     "ideality_ifr_resources.md",
     "contradictions.md",
     "39_parameters.md",
@@ -159,6 +160,14 @@ def main() -> int:
             if f"# Part {part}" not in text:
                 fail(f"ARIZ missing Part {part}")
 
+    # Psychological-inertia tools should include all classical operators we claim.
+    psych_path = RES / "psychological_inertia_tools.md"
+    if psych_path.is_file():
+        text = psych_path.read_text(encoding="utf-8")
+        for marker in ("Nine Windows", "Size–Time–Cost", "Smart Little People", "Intensification of contradiction"):
+            if marker not in text:
+                fail(f"psychological-inertia resource missing marker: {marker!r}")
+
     # Router integrity and opt-in guarantee.
     orchestrator = ROOT.parent / "TRIZ_ENGINEERING.md"
     if not orchestrator.is_file():
@@ -203,6 +212,7 @@ def main() -> int:
         "sis": 76,
         "ariz_parts": 9,
         "examples": 4,
+        "psychological_inertia_tools": 4,
     }))
     return 0
 
