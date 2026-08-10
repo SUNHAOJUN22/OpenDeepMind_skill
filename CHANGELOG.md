@@ -9,16 +9,24 @@ All notable changes are documented here.
 - Added `open-deep-mind/evals/` as a separate evaluation layer; it evaluates Φ/P/TRIZ behavior but is not a fourth reasoning module.
 - Added an initial **60-case** benchmark covering routing, First Philosophy, First Principles, Dual Engine, explicit TRIZ, and TRIZ near-miss/anti-trigger behavior.
 - Added fixed benchmark splits: **36 train / 12 validation / 12 holdout**.
-- Added four reproducible comparison configurations: no skill, pinned `awesome-skills/first-principles-skill`, OpenDeepMind core, and explicit-TRIZ OpenDeepMind.
+- Added four reproducible configurations:
+  - no skill;
+  - commit-pinned `awesome-skills/first-principles-skill`;
+  - production `opendeepmind_full` with explicit-only TRIZ;
+  - `opendeepmind_no_triz_ablation` on the same explicit-TRIZ cases to measure TRIZ module contribution.
+- Added three declared paired comparisons: full vs no skill, full vs pinned first-principles baseline, and full vs no-TRIZ ablation on `triz-positive` cases.
 - Added schemas for eval definitions, run records, grading artifacts, and aggregated benchmark output.
 - Added a semantic/blind-pairwise grading rubric and explicit red-blocker policy.
 - Added dependency-free scripts for benchmark-definition validation, workspace creation, and result aggregation.
+- Workspace manifests now enumerate every expected run slot; missing run/grading artifacts block `publication_ready`.
 - Added OpenDeepMind-specific metrics including TRIZ false-activation rate, module-leakage rate, routing accuracy, rival-model coverage, falsifier coverage, tokens, and duration.
+- Added paired common-case/repetition deltas for quality, tokens, and duration.
+- Added regression coverage proving an empty validation workspace has 114 expected slots and cannot be publication-ready.
 - CI now validates the authored benchmark definitions on every push/pull request.
 
 ### Publication status
 
-- **No benchmark score is published yet.** The framework and cases are committed, but v1.3.0 will not be declared until real model runs, raw artifacts, graders, and reproducible aggregate results exist.
+- **No benchmark score is published yet.** The framework and cases are committed, but a benchmark-result release will not be declared until real model runs, raw artifacts, graders, and reproducible aggregate results exist.
 
 ## [1.2.0] — 2026-08-10
 
