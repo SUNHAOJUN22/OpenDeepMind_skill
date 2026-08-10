@@ -119,15 +119,13 @@ def main() -> int:
             if route != "triz" or triz_allowed is not True:
                 errors.append(f"{cid}: triz-positive must route triz and allow TRIZ")
             p = prompt.lower() if isinstance(prompt, str) else ""
-            if not any(token in p for token in ("triz", "ariz", "su-field", "if r", "ifr")) and "物场" not in p:
+            if not any(token in p for token in ("triz", "ariz", "su-field", "ifr")) and "物场" not in p:
                 warnings.append(f"{cid}: positive TRIZ case may lack an explicit trigger token")
         else:
             if triz_allowed is not False:
                 errors.append(f"{cid}: non-positive case must not pre-authorize TRIZ")
             if route == "triz":
                 errors.append(f"{cid}: non-positive case must not expect TRIZ route")
-        if category == "triz-negative" and route == "triz":
-            errors.append(f"{cid}: near-miss case cannot expect TRIZ")
 
     if dict(categories) != EXPECTED_CATEGORIES:
         errors.append(f"category distribution mismatch: expected {EXPECTED_CATEGORIES}, got {dict(categories)}")
@@ -135,21 +133,44 @@ def main() -> int:
         errors.append(f"split distribution mismatch: expected {EXPECTED_SPLITS}, got {dict(splits)}")
 
     cfgs = config.get("configurations")
-    if not isinstance(cfgs, list) or len(cfgs) < 4:
-        errors.append("benchmark-config must define at least four configurations")
+    if not isinstance(cfgs, list) or len(cfgs) != 4:
+        errors.append("benchmark-config must define exactly four configurations for benchmark v1.0.0")
         cfgs = []
     cfg_ids = [c.get("id") for c in cfgs if isinstance(c, dict)]
     required_cfgs = {
-        "no_skill", "first_principles_baseline",
-        "opendeepmind_core", "opendeepmind_explicit_triz"
+        "no_skill",
+        "first_principles_baseline",
+        "opendeepmind_full",
+        "opendeepmind_no_triz_ablation",
     }
-    if not required_cfgs.issubset(set(cfg_ids)):
-        errors.append(f"missing benchmark configurations: {sorted(required_cfgs - set(cfg_ids))}")
-    for cfg in cfgs:
-        if isinstance(cfg, dict) and cfg.get("id") == "first_principles_baseline":
-            sha = cfg.get("commit", "")
-            if not isinstance(sha, str) or not SHA_RE.fullmatch(sha):
-                errors.append("external first-principles baseline must be pinned to a 40-hex commit")
+    if set(cfg_ids) != required_cfgs:
+        errors.append(f"configuration set mismatch: expected {sorted(required_cfgs)}, got {sorted(cfg_ids)}")
+
+    cfg_by_id = {c.get("id"): c for c in cfgs if isinstance(c, dict)}
+    baseline = cfg_by_id.get("first_principles_baseline", {})
+    sha = baseline.get("commit", "")
+    if not isinstance(sha, str) or not SHA_RE.fullmatch(sha):
+        errors.append("external first-principles baseline must be pinned to a 40-hex commit")
+
+    full = cfg_by_id.get("opendeepmind_full", {})
+    if full.get("triz_policy") != "explicit-only":
+        errors.append("opendeepmind_full must preserve explicit-only TRIZ policy")
+
+    ablation = cfg_by_id.get("opendeepmind_no_triz_ablation", {})
+    if ablation.get("case_categories") != ["triz-positive"]:
+        errors.append("no-TRIZ ablation must be limited to triz-positive cases")
+    if "triz" not in ablation.get("disabled_modules", []):
+        errors.append("no-TRIZ ablation must explicitly disable the TRIZ module")
+    if ablation.get("forced_route") != "p":
+        errors.append("no-TRIZ ablation must force the P route")
+    if ablation.get("score_routing_accuracy") is not False:
+        errors.append("routing accuracy must be disabled for the intentional no-TRIZ ablation")
+
+    comparisons = config.get("comparisons", [])
+    comparison_ids = {c.get("id") for c in comparisons if isinstance(c, dict)}
+    if comparison_ids != {"full_vs_no_skill", "full_vs_first_principles_baseline", "triz_module_ablation"}:
+        errors.append("benchmark comparisons must include the two baselines and TRIZ ablation")
+
     if config.get("repetitions", 0) < 3:
         errors.append("benchmark repetitions must be at least 3")
     if config.get("publication", {}).get("publish_scores_before_real_runs") is not False:
@@ -172,6 +193,7 @@ def main() -> int:
         "splits": dict(splits),
         "configurations": len(cfgs),
         "repetitions": config.get("repetitions"),
+        "triz_ablation": True,
     }, ensure_ascii=False))
     return 0
 
