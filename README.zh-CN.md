@@ -5,305 +5,313 @@
 <h1 align="center">OpenDeepMind_skill</h1>
 
 <p align="center">
-  <strong>先审查什么有资格成为基础，再从基础向上推导、证伪、决策，并保留修正能力。</strong>
+  <strong>第一哲学审查基础，第一性原理负责重构；TRIZ 仅在明确调用时进入工程发明路线。</strong>
 </p>
 
 <p align="center">
   <a href="README.md">中英双语首页</a> ·
-  <a href="open-deep-mind/SKILL.md">主 Skill</a> ·
-  <a href="open-deep-mind/FIRST_PHILOSOPHY.md">第一哲学</a> ·
-  <a href="open-deep-mind/FIRST_PRINCIPLES.md">第一性原理</a> ·
-  <a href="open-deep-mind/TRIZ_ENGINEERING.md">TRIZ 路由</a> ·
-  <a href="open-deep-mind/triz/README.md">完整 TRIZ 模块</a>
+  <a href="open-deep-mind/SKILL.md">主路由</a> ·
+  <a href="open-deep-mind/ARCHITECTURE.md">模块架构</a> ·
+  <a href="open-deep-mind/first-philosophy/METHOD.md">第一哲学</a> ·
+  <a href="open-deep-mind/first-principles/METHOD.md">第一性原理</a> ·
+  <a href="open-deep-mind/triz/ROUTER.md">TRIZ 路由</a> ·
+  <a href="open-deep-mind/triz/README.md">完整 TRIZ</a>
 </p>
 
 <p align="center">
-  <img alt="版本" src="https://img.shields.io/badge/version-1.1.0-2a8cff?style=flat-square">
-  <img alt="双引擎" src="https://img.shields.io/badge/core_engines-2-f2a649?style=flat-square">
-  <img alt="TRIZ" src="https://img.shields.io/badge/optional_TRIZ-complete-e75f3c?style=flat-square">
+  <img alt="版本" src="https://img.shields.io/badge/version-1.2.0-2a8cff?style=flat-square">
+  <img alt="核心模块" src="https://img.shields.io/badge/core_modules-2-f2a649?style=flat-square">
+  <img alt="TRIZ" src="https://img.shields.io/badge/optional_TRIZ-explicit--only-e75f3c?style=flat-square">
   <img alt="矛盾矩阵" src="https://img.shields.io/badge/TRIZ_matrix-1190_cells-1565c0?style=flat-square">
   <img alt="标准解" src="https://img.shields.io/badge/TRIZ_SIS-76-7b61ff?style=flat-square">
-  <img alt="依赖" src="https://img.shields.io/badge/runtime_dependencies-0-60758a?style=flat-square">
 </p>
 
 ---
 
-## 1. 核心架构
+## 1. 1.2.0 的核心变化：真正隔离三个模块
 
-OpenDeepMind 仍然只有两个基础核心引擎：
+OpenDeepMind 不再把第一哲学、第一性原理、TRIZ 的方法正文混在根目录文件里。
 
 ```text
-第一哲学 Φ
-→ 第一性原理 P
-→ 竞争模型
-→ 证伪与质量门
-→ 行动与修正
+open-deep-mind/
+├── SKILL.md                       # 仅负责路由
+├── ARCHITECTURE.md                # 模块边界与交接协议
+├── MODULES.json                   # 机器可读模块注册表
+│
+├── first-philosophy/
+│   ├── METHOD.md                  # Φ8 正式方法体
+│   ├── module.json
+│   ├── foundation-charter.schema.json
+│   └── scripts/validate_module.py
+│
+├── first-principles/
+│   ├── METHOD.md                  # P9 正式方法体
+│   ├── module.json
+│   ├── model-contract.schema.json
+│   ├── decision-record.schema.json
+│   └── scripts/validate_module.py
+│
+└── triz/
+    ├── ROUTER.md                  # T10，明确调用才进入
+    ├── module.json
+    ├── resources/
+    ├── examples/
+    └── scripts/
 ```
 
-第一哲学负责回答：
+旧的：
 
-> **什么有资格成为当前问题的基础？**
+```text
+FIRST_PHILOSOPHY.md
+FIRST_PRINCIPLES.md
+TRIZ_ENGINEERING.md
+```
 
-第一性原理负责回答：
-
-> **在明确的领域、尺度、目的与条件下，从这些合格基础能够推出什么？**
-
-独立核心文件：
-
-- [`FIRST_PHILOSOPHY.md`](open-deep-mind/FIRST_PHILOSOPHY.md)
-- [`FIRST_PRINCIPLES.md`](open-deep-mind/FIRST_PRINCIPLES.md)
-
-TRIZ 不被提升为第三个基础引擎，而是一个**专业、独立、按需加载的工程发明子系统**。
+现在只作为兼容入口，避免旧链接失效，不再承载正式方法正文。
 
 ---
 
-## 2. TRIZ 默认不调用
+## 2. 第一哲学 Φ：基础资格审查
 
-默认流程不包含 TRIZ：
+正式方法：[`first-philosophy/METHOD.md`](open-deep-mind/first-philosophy/METHOD.md)
 
-```text
-Φ → P → 竞争模型 → 质量门
-```
+第一哲学不是提前给方案，而是先问：
 
-只有用户明确要求或明确接受以下路线时，才进入 TRIZ：
+> **什么必须先被澄清、接受或证明，当前问题才算一个成立的问题，后续结论才有资格成立？**
 
-- TRIZ / ARIZ；
-- 技术矛盾 / 物理矛盾；
-- 39 参数、40 发明原理、矛盾矩阵；
-- Su-Field / 物场、76 标准解；
-- IFR / 理想最终结果；
-- S 曲线、TESE、工程系统进化；
-- 明确要求 TRIZ 工程创新分析。
-
-完整显式路线：
+Φ8 现在严格定义为八阶段：
 
 ```text
-Φ/P 基础资格审查
-→ TRIZ 发明构造 T
-→ 第一性原理物理 / 数理 / 证据验证
-→ OpenDeepMind 质量门
+Φ0 暂停继承的问题框架
+Φ1 语义审计
+Φ2 本体审计
+Φ3 认识论审计
+Φ4 逻辑审计
+Φ5 因果与解释审计
+Φ6 边界、尺度与时间审计
+Φ7 价值、伦理与实践审计
 ```
 
-轻量入口：[`TRIZ_ENGINEERING.md`](open-deep-mind/TRIZ_ENGINEERING.md)  
-完整子系统：[`open-deep-mind/triz/README.md`](open-deep-mind/triz/README.md)
+输出是《Foundation Charter / 基础章程》，包括：
+
+- 中性问题与竞争框架；
+- 定义；
+- 对象、过程和关系；
+- 证据状态；
+- 逻辑、因果与解释承诺；
+- 系统边界、尺度与时间；
+- 价值、义务与利益相关者；
+- 已接受、条件接受、拒绝的基础；
+- 阻断性未知项。
+
+该模块**绝不加载 TRIZ**。
 
 ---
 
-## 3. 完整 TRIZ 模块包含什么
+## 3. 第一性原理 P：拆解、建模、重构、证伪、决策
 
-### 3.1 现代问题识别
+正式方法：[`first-principles/METHOD.md`](open-deep-mind/first-principles/METHOD.md)
 
-不是一上来就查矩阵，而是先确定**真正关键问题**：
-
-- 功能分析 / function-cost analysis；
-- 物质、能量与信息流分析；
-- CECA 因果链；
-- 裁剪与部分裁剪；
-- 特征迁移；
-- 创新标杆分析；
-- 多屏幕系统算子；
-- S 曲线与 TESE；
-- 关键问题路由。
-
-主入口：[`modern_problem_identification.md`](open-deep-mind/triz/resources/modern_problem_identification.md)
-
-### 3.2 经典矛盾体系
-
-完整文件：
-
-- [`39_parameters.md`](open-deep-mind/triz/resources/39_parameters.md) — 39 个典型工程参数；
-- [`40_principles.md`](open-deep-mind/triz/resources/40_principles.md) — 40 个发明原理；
-- [`contradiction_matrix.json`](open-deep-mind/triz/resources/contradiction_matrix.json) — 39×39 完整矩阵转录，1190 个有内容单元；
-- [`contradictions.md`](open-deep-mind/triz/resources/contradictions.md) — 工程矛盾、反向矛盾、物理矛盾、次生矛盾；
-- [`separation_principles.md`](open-deep-mind/triz/resources/separation_principles.md) — 时间、空间、条件、系统层级分离。
-
-### 3.3 Su-Field 与全部 76 标准解
-
-- [`substance_field_modeling.md`](open-deep-mind/triz/resources/substance_field_modeling.md)
-- [`76_standard_solutions.md`](open-deep-mind/triz/resources/76_standard_solutions.md)
-
-标准解按公开 MATRIZ 五类编号组织：
+此前仓库把流程称为 P9，却实际写成 P0–P9 共 10 个步骤；1.2.0 已完成结构纠正。现在真正是：
 
 ```text
-Class 1 = 13
-Class 2 = 23
-Class 3 = 6
-Class 4 = 17
-Class 5 = 17
-Total   = 76
+P1 删除、修改或证明需求合理
+P2 定义真实结果与边界
+P3 暴露假设并给命题分类
+P4 向下拆解至可接受基础
+P5 对基础做资格审查
+P6 建立模型
+P7 从基础向上构造不同方案
+P8 推导、追溯、证伪与压力测试
+P9 决策、行动、监测与更新
 ```
 
-### 3.4 ARIZ-85C
+### 命题账本
 
-[`ariz_85c.md`](open-deep-mind/triz/resources/ariz_85c.md) 按 9 Part / 3 Block 组织，用于普通矩阵、分离、物场路线持续产生妥协或问题仍然模糊的深层工程问题。
+\[
+\mathcal B=\{D,O,L,C,A,E,V,U\}
+\]
 
-### 3.5 理想度、IFR 与资源
+分别对应定义、观测、规律、约束、假设、经验闭合、价值和未知。
 
-[`ideality_ifr_resources.md`](open-deep-mind/triz/resources/ideality_ifr_resources.md) 明确区分：
+### 模型契约
 
-- Ideal System；
-- Ideal Final Result；
-- 相对理想度；
-- 物质、场、空间、时间、信息、功能、超系统、有害因素与空缺资源。
+定量工作至少明确适用的：
 
-不在数据与量纲不成立时伪造精确“理想度”数字。
+\[
+\mathcal M=
+\{\mathbf x,\mathbf u,\boldsymbol\theta,
+\mathbf F,\mathbf h,\mathbf g,
+\mathrm{IC},\mathrm{BC},\mathcal O,\mathcal E\}
+\]
 
-### 3.6 FOS、科学效应与迁移
+并声明参数来源、闭合关系、初边值、观测模型、误差/模型偏差、适用域、敏感性与证伪条件。
 
-- [`effects_and_fos.md`](open-deep-mind/triz/resources/effects_and_fos.md)
-- [`feature_transfer.md`](open-deep-mind/triz/resources/feature_transfer.md)
-- [`clone_problems.md`](open-deep-mind/triz/resources/clone_problems.md)
-- [`innovative_benchmarking.md`](open-deep-mind/triz/resources/innovative_benchmarking.md)
+机器可读契约：
 
-真实任务中的科学效应、专利、论文和产品技术资料需要联网检索；模块不会虚构一个“万能科学效应数据库”。
+- [`model-contract.schema.json`](open-deep-mind/first-principles/model-contract.schema.json)
+- [`decision-record.schema.json`](open-deep-mind/first-principles/decision-record.schema.json)
 
-### 3.7 S 曲线与现代 TESE
-
-- [`s_curve_and_tese.md`](open-deep-mind/triz/resources/s_curve_and_tese.md)
-- [`evolution_trends.md`](open-deep-mind/triz/resources/evolution_trends.md)
-
-覆盖 S 曲线、MPV、价值提升、向超系统转移、裁剪、系统完整性、人参与减少、流强化、协调、可控性、动态化和子系统非均衡发展等现代进化路由。
-
-### 3.8 概念论证
-
-TRIZ 输出首先只能标记为：
-
-```text
-TRIZ-derived concept
-```
-
-随后进入 [`concept_substantiation.md`](open-deep-mind/triz/resources/concept_substantiation.md) 和 OpenDeepMind 第一性原理质量门，检查物理、材料、制造、参数来源、不确定性、安全、可靠性、生命周期、仿真、实验、原型、FMEA 和专利现有技术等。
-
-**TRIZ 原理名称、矩阵单元或标准解编号永远不等于工程验证。**
+该方法体**不包含 TRIZ 流程，也不会自动加载 TRIZ**。
 
 ---
 
-## 4. TRIZ T0–T10
+## 4. TRIZ T：完整、独立、显式调用的工程发明子系统
+
+正式路由：[`triz/ROUTER.md`](open-deep-mind/triz/ROUTER.md)  
+完整地图：[`triz/README.md`](open-deep-mind/triz/README.md)
+
+TRIZ 不是第三个基础哲学引擎，而是专业工程发明模块。只有用户明确要求或明确接受 TRIZ 路线时才运行。
+
+T10 现在统一为真正的十阶段：
 
 ```text
-T0  明确显式调用与工程作用域
-T1  系统 / 子系统 / 超系统 / 主功能 / 约束
-T2  识别真正关键问题
-T3  资源 + baseline ideality + IFR
-T4  工程矛盾 / 物理矛盾 / Su-Field / function problem
-T5  选择 matrix / separation / SIS / ARIZ / FOS-effects / TESE
-T6  生成结构不同的概念族
-T7  把 TRIZ 抽象原理翻译为具体材料 / 几何 / 场 / 时间 / 控制机制
-T8  物理 / 安全 / 制造 / 集成硬门
-T9  最小判别计算 / 仿真 / 实验 / 原型
-T10 返回 First Principles 与 OpenDeepMind Quality Gate
+T1 确认显式调用与工程作用域
+T2 识别关键工程问题
+T3 资源、理想性与 IFR
+T4 建立问题模型
+T5 选择求解路线
+T6 构造结构不同的概念族
+T7 把 TRIZ 抽象规则翻译为具体工程机制
+T8 物理、安全、材料、制造等硬门筛选
+T9 设计最小判别验证
+T10 返回第一性原理验证
 ```
 
----
+完整 TRIZ 子系统包括：
 
-## 5. 矩阵查询与模块验证
+- 功能分析、流分析、CECA、裁剪、特征迁移；
+- 创新标杆；
+- Nine Windows、STC、Smart Little People；
+- Ideality、IFR 与资源；
+- 技术矛盾、物理矛盾；
+- 39 参数、40 发明原理；
+- 完整 39×39 矛盾矩阵转录，1190 个非空单元；
+- 分离原则；
+- Su-Field；
+- 76 个标准发明解；
+- ARIZ-85C；
+- Clone Problems、科学效应与 FOS；
+- S 曲线和 TESE；
+- 概念论证、验证路线与案例；
+- 矩阵与标准解确定性查询脚本。
 
-确定性矩阵查询：
+### 数据完整性
 
-```bash
-python open-deep-mind/triz/scripts/lookup_matrix.py \
-  --improve 10 --worsen 17
-```
+矩阵保留来源转录版本，而不是把历史转录数据悄悄改掉。已知异常独立登记在：
 
-完整 TRIZ 模块校验：
+[`matrix_anomalies.json`](open-deep-mind/triz/resources/matrix_anomalies.json)
 
-```bash
-python open-deep-mind/triz/scripts/validate_triz_module.py
-```
+查询脚本同时返回原始值和规范化后的实际使用值。
 
-校验器检查 25 项 TRIZ 资源、39 参数、40 原理、矩阵单元与锚点、76 标准解类分布、ARIZ 9 Parts、TRIZ opt-in 路由、脚本语法和案例完整性。
+### TRIZ 不能替代工程证明
 
-GitHub Actions 已把 TRIZ 校验和矩阵查询 smoke test 加入主 CI。
-
----
-
-## 6. TRIZ 工程案例
-
-- [`brake_disc.md`](open-deep-mind/triz/examples/brake_disc.md) — 制动盘热管理；
-- [`battery_pack.md`](open-deep-mind/triz/examples/battery_pack.md) — EV 电池热安全；
-- [`heat_exchanger_fouling.md`](open-deep-mind/triz/examples/heat_exchanger_fouling.md) — 石化换热器结垢；
-- [`anti_example_misframed.md`](open-deep-mind/triz/examples/anti_example_misframed.md) — 非工程问题拒绝 / reframe。
-
-输出模板：[`output_template.md`](open-deep-mind/triz/resources/output_template.md)
-
----
-
-## 7. 证据、尺度与质量门
-
-所有 OpenDeepMind 模块共同遵守：
-
-```math
-\text{模型输出}\neq\text{直接观测}
-```
-
-```math
-\text{相关性}\neq\text{干预因果}\neq\text{物理机制}
-```
-
-任何跨尺度结论都必须给出：
+所有 TRIZ 概念必须返回第一性原理：
 
 ```text
-映射变量
-闭合 / 粗粒化假设
-信息损失
-参数来源
-不确定性传播
-验证域
-失效条件
-```
-
-TRIZ 只负责拓展/重构发明空间，不豁免这些要求。
-
----
-
-## 8. 调用示例
-
-### 普通 OpenDeepMind
-
-```text
-调用 open-deep-mind，执行第一哲学 → 第一性原理双引擎分析。
-除非我明确要求 TRIZ，否则不要加载 TRIZ。
-```
-
-### 完整 TRIZ
-
-```text
-显式调用 OpenDeepMind TRIZ 工程模块。
-先用第一哲学/第一性原理核验系统、功能、工况、证据、边界、硬约束与安全条件；
-再读取 TRIZ_ENGINEERING.md 和 triz/README.md，按关键问题类型懒加载所需资源。
-必须完成问题识别 → 发明构造 → 工程验证链，不能把 TRIZ 原理名称当作物理证明。
+TRIZ 概念
+→ 控制方程/基本物理
+→ 材料与制造
+→ 参数与数据来源
+→ 不确定性与敏感性
+→ 安全、法规与寿命
+→ 仿真/实验/原型
+→ 竞争模型与证伪
 ```
 
 ---
 
-## 9. 验证
+## 5. 共享质量门
+
+共享质量体系：[`quality-gates.md`](open-deep-mind/references/quality-gates.md)
+
+任何一个红色阻断项都不能被“高分”覆盖，包括：
+
+- 核心术语漂移；
+- 关键事实无可靠依据；
+- 推导不成立；
+- 相关写成因果；
+- 模型输出写成直接观测；
+- 跨尺度无桥接；
+- 参数/闭合/边界来源不明；
+- 没有强竞争模型或证伪条件；
+- 价值函数隐藏；
+- 未核实就删除安全/法律/伦理保护；
+- 虚构文献、数据或实验。
+
+---
+
+## 6. 自动验证
 
 ```bash
 python open-deep-mind/scripts/validate_repository.py .
-python open-deep-mind/scripts/validate_ledger.py \
-  open-deep-mind/assets/example-ledger.json
+python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-ledger.json
+python open-deep-mind/first-philosophy/scripts/validate_module.py
+python open-deep-mind/first-principles/scripts/validate_module.py
 python open-deep-mind/triz/scripts/validate_triz_module.py
-python open-deep-mind/triz/scripts/lookup_matrix.py \
-  --improve 1 --worsen 3 --json
+python open-deep-mind/triz/scripts/lookup_matrix.py --improve 1 --worsen 3 --json
+python open-deep-mind/triz/scripts/lookup_standard_solution.py 1.2.1 --json
+python -m unittest discover -s open-deep-mind/tests -p "test_*.py"
+python -m compileall -q open-deep-mind
+```
+
+验证对象不仅包括语法，还包括：
+
+- VERSION 与模块版本一致性；
+- Φ8 / P9 / T10 编号不漂移；
+- 模块 manifest 与 canonical entry；
+- TRIZ explicit-only；
+- 兼容入口必须保持薄；
+- Markdown/HTML 本地链接；
+- 命题依赖图无循环；
+- 39 参数、40 原理；
+- 矩阵 1190 单元和锚点；
+- 已知矩阵异常必须登记；
+- 76 标准解数量及五类分布；
+- ARIZ 九部分；
+- 确定性查询工具；
+- 回归测试。
+
+---
+
+## 7. 调用方式
+
+### 第一哲学
+
+```text
+调用 OpenDeepMind 第一哲学 Φ8，只做基础资格审查并输出基础章程；不要调用 TRIZ。
+```
+
+### 第一性原理
+
+```text
+调用 OpenDeepMind 第一性原理 P9，从合格基础建立命题账本、模型契约、竞争方案、证伪条件和决策记录；不要调用 TRIZ。
+```
+
+### TRIZ
+
+```text
+明确调用 OpenDeepMind TRIZ：先完成必要的 Φ/P 资格审查，再按 T1–T10 使用适用的矩阵、40原理、分离、Su-Field/76标准解、ARIZ、FOS/效应或 TESE，最后必须返回 P 做物理和证据验证。
 ```
 
 ---
 
-## 10. 来源与许可
+## 8. 完备性的准确含义
 
-完整来源和证据图谱：
+本仓库所说的“完备”是**工程化方法包完备**：每个模块都有正式入口、清单、输入输出契约、停止条件、实例/fixture、独立验证器、依赖边界、来源/许可与 CI。
 
-- [`open-deep-mind/triz/resources/sources.md`](open-deep-mind/triz/resources/sources.md)
-- [`open-deep-mind/triz/VENDORED_LICENSE.md`](open-deep-mind/triz/VENDORED_LICENSE.md)
-- [`NOTICE.md`](NOTICE.md)
-- [`intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md)
+它不意味着：
 
-TRIZ 经典实现/数据层保留 `Antropocosmist/triz-engineering-solver` 的 MIT 归因及其矩阵转录来源链；现代问题识别、完整 MATRIZ 编号 76 标准解操作索引、OpenDeepMind 交接、渐进加载、概念论证、验证脚本和新案例在本仓库中重新组织和撰写。
+- 一份文件穷尽全部哲学；
+- 所有学科都共享同一证据标准；
+- 所有 TRIZ 书籍、专利和科学效应都静态复制进仓库；
+- 第一性原理计算没有近似；
+- 通过代码校验就等于现实世界的结论已经被实验验证。
 
-OpenDeepMind_skill 与 Google DeepMind、MATRIZ、Altshuller Institute、OpenAI、Anthropic 及引用仓库维护者均无隶属或背书关系。
+仓库追求的是：
 
----
+\[
+\boxed{边界明确+推理可追溯+失败可检验+结论可修正}
+\]
 
-<p align="center">
-<strong>基础资格 → 第一性原理 → 选择性 TRIZ 发明 → 物理验证 → 质量门 → 行动与修正</strong>
-</p>
+来源、归因与许可详见 [`NOTICE.md`](NOTICE.md)、[`LICENSE.md`](LICENSE.md) 和 [`triz/resources/sources.md`](open-deep-mind/triz/resources/sources.md)。
