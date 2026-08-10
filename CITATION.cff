@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use OpenDeepMind_skill, cite this repository and the underlying historical or technical method sources."
+message: "If you use OpenDeepMind_skill, cite this repository and the underlying historical or technical method sources. Third-party exceptions are documented in NOTICE.md."
 title: "OpenDeepMind_skill: Isolated First Philosophy, First Principles, and Explicit-Only TRIZ Reasoning Modules"
 type: software
 authors:
@@ -9,7 +9,7 @@ repository-code: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
 url: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
 version: "1.2.0"
 date-released: "2026-08-10"
-license: "Apache-2.0 AND CC-BY-4.0 with documented MIT exceptions"
+license: "Apache-2.0 AND CC-BY-4.0"
 keywords:
   - first philosophy
   - first principles
