@@ -1,47 +1,50 @@
 ---
 name: open-deep-mind
 description: >-
-  A domain-general dual-engine reasoning skill that first qualifies the foundations
-  of a question, then derives solutions from explicit first principles. Use for
-  first philosophy, 第一哲学, first-principles thinking, 第一性原理, mechanism and
-  root-cause analysis, assumption challenges, from-scratch design, research framing,
-  architecture review, strategy, policy, ethics, and high-impact decisions. It also
-  exposes an optional TRIZ engineering module, but loads TRIZ only when the user
-  explicitly requests TRIZ/ARIZ, contradiction-matrix, inventive-principle, Su-Field,
-  IFR, or engineering-system-evolution analysis.
-license: Apache-2.0 AND CC-BY-4.0; see ../LICENSE.md
-compatibility: Agent Skills-compatible runtimes. No network or external package is required for the core method. Web access is recommended when facts may be current, disputed, high-stakes, or source-sensitive.
+  A domain-general reasoning skill with isolated First Philosophy and First Principles
+  core modules plus an explicit-only TRIZ engineering module. Use First Philosophy
+  for framing, semantics, ontology, evidence, causality, boundaries, values, and
+  foundational disputes; use First Principles for decomposition, mechanism/model
+  construction, from-scratch design, falsification, and decisions. Load TRIZ only
+  when the user explicitly requests or accepts TRIZ/ARIZ, contradiction-matrix,
+  inventive-principle, Su-Field, IFR, Standard Inventive Solutions, or engineering-
+  system-evolution analysis.
+license: Apache-2.0 AND CC-BY-4.0 with documented third-party exceptions; see ../LICENSE.md
+compatibility: Agent Skills-compatible runtimes. Core routing and validation require no third-party Python packages. Current, disputed, high-stakes, or source-sensitive facts should be externally verified.
 metadata:
   author: SUNHAOJUN22
-  version: "1.1.0"
+  version: "1.2.0"
   repository: SUNHAOJUN22/OpenDeepMind_skill
   languages: English, Chinese
 ---
 
-# OpenDeepMind
+# OpenDeepMind Router
 
-OpenDeepMind has **two core engines** and **one optional specialist module**:
+OpenDeepMind is **one Agent Skill with three isolated method modules**:
 
-1. **First Philosophy / 第一哲学** qualifies what may count as a foundation.
-2. **First Principles / 第一性原理** decomposes to accepted foundations and reasons upward.
-3. **TRIZ Engineering / TRIZ 工程发明** is an opt-in invention module for explicit engineering-contradiction work. It is not part of the default route.
+| Module | Role | Canonical entry | Activation |
+|---|---|---|---|
+| **Φ First Philosophy / 第一哲学** | qualify what may count as a foundation | [first-philosophy/METHOD.md](first-philosophy/METHOD.md) | core or explicit |
+| **P First Principles / 第一性原理** | decompose, model, reconstruct, test, decide | [first-principles/METHOD.md](first-principles/METHOD.md) | core or explicit |
+| **T TRIZ Engineering / TRIZ 工程发明** | systematic engineering invention | [triz/ROUTER.md](triz/ROUTER.md) | **explicit-only** |
+
+Machine-readable registry: [MODULES.json](MODULES.json)  
+Architecture contract: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 Default sequence:
 
 \[
 \text{frame}
 \rightarrow
-\text{foundation audit}
+\Phi\text{ foundation qualification}
 \rightarrow
-\text{principle set}
+P\text{ reconstruction}
 \rightarrow
-\text{competing models}
+\text{rival / falsification}
 \rightarrow
-\text{falsification}
+\text{quality gate}
 \rightarrow
-\text{decision}
-\rightarrow
-\text{revision}
+\text{decision / revision}
 \]
 
 Explicit TRIZ sequence:
@@ -56,383 +59,386 @@ P\text{ validation}
 \text{quality gate}
 \]
 
-Do not use “first principles” or “TRIZ” as slogans. Every important conclusion must expose its definitions, evidence, assumptions, inference or mechanism, uncertainty, and falsifier.
+---
+
+## 1. Non-negotiable invariants
+
+1. **Module isolation.** First Philosophy, First Principles, and TRIZ have separate canonical method bodies and validators.
+2. **Foundation before construction when framing is material.** Do not optimize an incoherent frame.
+3. **Relative firstness.** “First” is relative to a stated domain, scale, purpose, theory level, and conditions unless a stronger claim is justified.
+4. **Typed claims.** Keep `D/O/L/C/A/E/V/U` distinct.
+5. **No fabricated certainty.** Label inference, model dependence, uncertainty, disputed evidence, and values.
+6. **No hidden value function.** Facts do not by themselves determine what ought to be optimized.
+7. **No scale teleportation.** Cross-scale claims require an explicit bridge, information-loss statement, uncertainty, and validation.
+8. **No explanation by vocabulary.** A label or named framework is not a mechanism.
+9. **No single-solution theater.** Keep a serious rival, null model, or structurally different option.
+10. **No untestable closure.** State what evidence, intervention, proof, or failure would change the conclusion.
+11. **TRIZ is explicit-only.** Never silently load TRIZ because a problem is hard, creative, or contains a trade-off.
+12. **TRIZ is not validation.** TRIZ concepts return to First Principles for physics/evidence/safety/feasibility checks.
+13. **Language alignment.** Answer in the user's language unless another language is requested.
 
 ---
 
-## 1. Non-negotiable rules
+## 2. Route selection
 
-1. **Foundation before construction.** Do not optimize a frame before checking whether it is coherent and appropriate.
-2. **Relative firstness.** A principle is “first” only relative to a stated domain, scale, purpose, and theory level unless a stronger claim is justified.
-3. **Typed claims.** Keep definitions, observations, laws, constraints, assumptions, empirical closures, values, and unknowns distinct.
-4. **No fabricated certainty.** Label unknown, disputed, inferred, model-dependent, and value-laden statements.
-5. **No hidden value function.** Descriptive facts do not determine what ought to be optimized.
-6. **No scale teleportation.** A conclusion may not cross scales without a bridge model, information-loss statement, and validation.
-7. **No explanation by vocabulary.** Renaming a phenomenon is not explaining its mechanism.
-8. **No single-solution theater.** Construct at least one serious rival, null model, or structurally different option.
-9. **No untestable closure.** State what observation, intervention, proof, or failure would change the conclusion.
-10. **TRIZ is opt-in.** Do not silently load or apply TRIZ because a problem is hard or contains ordinary trade-offs.
-11. **TRIZ output is not validation.** Any inventive concept must return to physical, mathematical, empirical, safety, and quality-gate checks.
-12. **Language alignment.** Answer in the user's language unless another language is requested.
+Choose the lightest route that preserves rigor.
 
----
-
-## 2. Phase router
-
-Select the lightest route that preserves rigor.
-
-| Mode | Trigger | Load |
+| Signature | Route | Load |
 |---|---|---|
-| **Φ — First Philosophy** | “What is X?”, ontology, meaning, evidence standards, ethics, foundations, category disputes | [FIRST_PHILOSOPHY.md](FIRST_PHILOSOPHY.md) |
-| **P — First Principles** | design, diagnosis, mechanism, architecture, cost, optimization, from-scratch reconstruction | [FIRST_PRINCIPLES.md](FIRST_PRINCIPLES.md) |
-| **Φ→P — Dual Engine** | novel, ambiguous, cross-domain, high-impact, high-uncertainty, or explicit request for both | Load both core files |
-| **P→Φ repair** | derivation reveals an undefined term, conflicting ontology, hidden value, or invalid boundary | Return to First Philosophy |
-| **T — TRIZ Engineering, optional** | explicit `TRIZ`, `ARIZ`, contradiction matrix, 40 principles, physical contradiction, Su-Field, IFR, or engineering-evolution request | [TRIZ_ENGINEERING.md](TRIZ_ENGINEERING.md) |
-| **Rapid** | reversible, low-stakes, time-boxed decision | Use the rapid protocol |
-| **Deep** | research, policy, safety, major architecture, expensive or irreversible decision | Full protocol and quality gates |
+| meaning, ontology, evidence standard, ethics, category dispute | `Φ` | [first-philosophy/METHOD.md](first-philosophy/METHOD.md) |
+| design, mechanism, diagnosis, architecture, cost, optimization | `P` | [first-principles/METHOD.md](first-principles/METHOD.md) |
+| novel, ambiguous, cross-domain, high-impact, high-uncertainty | `Φ→P` | both core modules |
+| P reveals unstable definition/ontology/value/boundary | `P→Φ repair` | return to First Philosophy |
+| explicit TRIZ/ARIZ/matrix/40 principles/Su-Field/IFR/SIS/evolution | `T` | [triz/ROUTER.md](triz/ROUTER.md) |
+| reversible low-stakes task | Rapid | use minimal relevant core route |
+| research, safety, policy, expensive/irreversible decision | Deep | core route + full shared quality/evidence checks |
 
-### TRIZ activation policy
+### TRIZ activation gate
 
-- Default to `Φ`, `P`, or `Φ→P`; do not include `T` automatically.
-- Detecting a candidate technical contradiction allows one brief suggestion that TRIZ is available. It does not authorize execution.
-- Load `TRIZ_ENGINEERING.md` only after the user explicitly asks for or accepts the TRIZ route.
-- For business, organization, UX, policy, ethics, and pure software tasks, treat TRIZ as out of canonical scope unless the user explicitly requests an analogical transfer; label such output as analogical.
+A candidate engineering contradiction is permission to **suggest** TRIZ once; it is not permission to execute it.
+
+Load TRIZ only when:
+
+- the user explicitly requests a TRIZ-family method; or
+- after a suggestion, the user explicitly accepts the TRIZ route.
+
+For business, organization, UX, policy, ethics, and pure software problems, canonical TRIZ is out of scope. If the user explicitly asks for analogical use, label it:
+
+```text
+TRIZ status: analogical transfer, not canonical engineering TRIZ
+```
 
 ---
 
-## 3. Intake contract
+## 3. Common intake contract
 
-Normalize the request into:
+Normalize the task into the smallest sufficient record:
 
 ```text
 Question:
 Decision or deliverable:
 Why it matters:
 System boundary:
-Time horizon:
 Scale(s):
+Time horizon:
 Stakeholders:
 Known evidence:
 Constraints:
 Values/objectives:
 Unknowns:
 Required confidence:
-Optional method explicitly requested:
+Explicit optional method requested:
 ```
 
-Ask only when a missing item would materially change the route, evidence standard, safety, or decision.
-
-For explicit TRIZ work, also collect:
-
-```text
-Engineering system and primary function:
-Current mechanism:
-Harmful or insufficient effect:
-Improving parameter:
-Worsening parameter:
-Opposing physical requirements, if any:
-Available substances, fields, space, time, information, and supersystem resources:
-Allowed degree of system change:
-```
+Do not ask for information that can be responsibly inferred or retrieved. Ask only when a missing item materially changes route, evidence standard, safety, or decision.
 
 ---
 
-## 4. The OpenDeepMind cycle
+## 4. Core route
 
-### Phase 0 — Need and stakes
+### Route Φ — First Philosophy
 
-Determine:
+Load [first-philosophy/METHOD.md](first-philosophy/METHOD.md).
 
-- Is there a real problem or an inherited requirement?
-- What happens if no action is taken?
-- Is the decision reversible?
-- What is the cost of error in each direction?
-- Which claims require external verification?
+Required handoff artifact: **Foundation Charter** containing at least:
 
-Attempt deletion only as a test. Never delete a legal, safety, ethical, or physical requirement without verification.
+```text
+neutral + rival frames
+definitions
+ontology
+epistemic status
+logic / causality / explanation commitments
+boundary / scale / time
+values / duties / stakeholders
+accepted / conditional / rejected foundations
+blocking unknowns
+```
 
-### Phase 1 — Foundation qualification
+Machine-readable contract lives inside `first-philosophy/`.
 
-Load [FIRST_PHILOSOPHY.md](FIRST_PHILOSOPHY.md).
+### Route P — First Principles
 
-Produce a **Foundation Charter** containing:
+Load [first-principles/METHOD.md](first-principles/METHOD.md).
 
-- key terms and operational definitions;
-- ontology: entities, processes, relations, properties, absences;
-- epistemic status: observed, inferred, assumed, disputed, model-produced, or unknown;
-- logic, causality, and explanatory commitments;
-- boundary, scale, time, and population assumptions;
-- values, affected parties, and non-negotiable duties;
-- competing frames that remain live.
+The normalized P9 protocol is **P1..P9**, not P0..P9. Required outputs include:
 
-### Phase 2 — Principle derivation and reconstruction
+```text
+requirement verdict
+proposition ledger
+dependency decomposition
+accepted foundations
+model contract
+structurally distinct alternatives
+derivation trace
+rival / falsifiers / stress tests
+decision record
+```
 
-Load [FIRST_PRINCIPLES.md](FIRST_PRINCIPLES.md).
+Machine-readable model/decision contracts live inside `first-principles/`.
 
-Build the proposition ledger:
+### Route T — TRIZ Engineering
+
+Only after explicit activation, load [triz/ROUTER.md](triz/ROUTER.md).
+
+TRIZ uses a true **T1..T10** protocol and progressive-loads only the relevant resources. Its output is a set of inventive concepts/hypotheses, not validated conclusions.
+
+Return every leading TRIZ concept to First Principles for model completeness, physical feasibility, data/evidence, uncertainty, safety, manufacturability, competing-model, and falsification checks.
+
+---
+
+## 5. Shared proposition ledger
+
+All modules may exchange load-bearing claims using:
 
 | Code | Type | Meaning |
 |---|---|---|
-| `D` | Definition | Stipulated, lexical, operational, or theoretical meaning |
-| `O` | Observation | Measured, witnessed, recorded, or directly sourced fact |
-| `L` | Law / invariant | Rule independently supported within the stated domain |
-| `C` | Constraint | Physical, logical, legal, ethical, safety, or resource boundary |
-| `A` | Assumption | Adopted premise not established as fact |
-| `E` | Empirical closure / estimate | Fit, constitutive relation, heuristic, proxy, or learned approximation |
-| `V` | Value | Goal, duty, preference, utility, or risk tolerance |
-| `U` | Unknown | Material unresolved question |
+| `D` | Definition | lexical, stipulated, operational, or theoretical meaning |
+| `O` | Observation | measured, recorded, witnessed, or directly sourced fact |
+| `L` | Law / invariant | independently supported rule within a stated domain |
+| `C` | Constraint | physical, logical, legal, ethical, safety, or resource boundary |
+| `A` | Assumption | adopted premise not established as fact |
+| `E` | Empirical closure / estimate | fit, constitutive relation, heuristic, proxy, learned approximation |
+| `V` | Value | objective, duty, preference, utility, risk tolerance |
+| `U` | Unknown | material unresolved question |
 
-Then:
+Canonical schema: [assets/claim-ledger.schema.json](assets/claim-ledger.schema.json)
 
-1. decompose the problem with explicit stopping reasons;
-2. accept, condition, or reject candidate foundations;
-3. construct causal, mechanism, constraint, dynamic, or argument models;
-4. generate structurally different alternatives;
-5. derive consequences;
-6. stress-test and revise.
-
-### Optional Phase 2T — TRIZ inventive synthesis
-
-Run only after explicit activation.
-
-1. Transfer the qualified engineering brief to [TRIZ_ENGINEERING.md](TRIZ_ENGINEERING.md).
-2. Formulate the function model, IFR, resources, and technical/physical contradiction.
-3. Select contradiction-principle, separation, Su-Field/standard-solution, ARIZ, or evolution route.
-4. Generate traceable inventive concepts.
-5. Return the concepts to First Principles for physical, mathematical, empirical, safety, feasibility, and uncertainty validation.
-
-A TRIZ principle, matrix cell, standard solution, or evolution trend is a search direction—not proof.
-
-### Phase 3 — Counter-model
-
-For the leading conclusion or concept, construct at least one of:
-
-- competing ontology;
-- rival causal mechanism;
-- alternative objective function;
-- design with fewer components;
-- inversion or boundary case;
-- null model;
-- do-nothing baseline;
-- for TRIZ, an alternative contradiction formulation or non-TRIZ solution family.
-
-Steelman the strongest alternative. Do not manufacture a weak opponent.
-
-### Phase 4 — Quality gate
-
-Load [references/quality-gates.md](references/quality-gates.md).
-
-A response may not be labeled “validated,” “final,” or “first-principles complete” while any red blocker remains.
-
-Required checks:
-
-- semantic and category consistency;
-- evidence-to-claim fit;
-- explicit assumption and closure ledger;
-- causal identification or mechanism adequacy;
-- dimensions, boundary conditions, parameters, and convergence where mathematical;
-- scale bridges;
-- alternatives and failure modes;
-- uncertainty and falsifier;
-- value and stakeholder transparency;
-- safety, legality, and ethics;
-- actionability and traceability.
-
-### Phase 5 — Deliver and preserve uncertainty
-
-Choose a template from [assets/output-templates.md](assets/output-templates.md).
-
-Every substantive output ends with:
-
-```text
-Decision / conclusion:
-Why:
-Trace to foundations:
-Key assumptions and closures:
-Uncertainty and validity domain:
-What would change the conclusion:
-Next discriminating action:
-Review trigger:
-```
-
----
-
-## 5. Depth levels
-
-### Rapid protocol — 5 moves
-
-Use only for low-stakes or reversible questions.
-
-1. State the actual outcome.
-2. Delete or challenge the inherited requirement.
-3. List three foundations and three assumptions.
-4. Build two options from the foundations.
-5. Select one, with a falsifier and review date.
-
-TRIZ is excluded unless explicitly requested, even in Rapid mode.
-
-### Standard protocol
-
-Use:
-
-- Foundation Charter;
-- proposition ledger;
-- one counter-model;
-- quality score;
-- structured recommendation.
-
-### Deep protocol
-
-Add:
-
-- source verification;
-- multiple competing models;
-- sensitivity, identifiability, and uncertainty analysis;
-- scale-bridge audit;
-- stakeholder and ethical review;
-- pre-mortem;
-- explicit unresolved research questions;
-- reproducibility record.
+Never let one type borrow the authority of another.
 
 ---
 
 ## 6. Evidence discipline
 
-When facts are externally checkable:
+For externally checkable claims:
 
 1. prefer primary sources, official documentation, original datasets, standards, or peer-reviewed research;
-2. distinguish direct evidence from interpretation and model output;
-3. quote sparingly and preserve context;
-4. record date, version, jurisdiction, and measurement conditions;
-5. search current sources when information may have changed;
-6. do not convert absence of evidence into evidence of absence;
-7. do not elevate a model fit, patent pattern, or TRIZ analogy into a causal mechanism without evidence;
-8. state when evidence is inaccessible or insufficient.
+2. separate observation from interpretation and model output;
+3. record date/version/jurisdiction/measurement conditions where material;
+4. verify current or high-stakes facts;
+5. do not turn absence of evidence into evidence of absence;
+6. do not elevate model fit, analogy, patent pattern, matrix cell, or named method into causal evidence;
+7. expose inaccessible or insufficient evidence.
 
 Evidence labels:
 
-- **Verified** — directly supported by a suitable source or reproducible observation;
-- **Supported** — multiple relevant lines of evidence, but not decisive;
-- **Plausible** — coherent with evidence, still underdetermined;
-- **Contested** — credible alternatives or conflicting evidence;
-- **Unknown** — not responsibly resolvable from available information.
+- **Verified** — suitable direct/reproducible support;
+- **Supported** — multiple relevant lines, not decisive;
+- **Plausible** — coherent but underdetermined;
+- **Contested** — credible conflicting evidence/models;
+- **Unknown** — not responsibly resolved.
 
 ---
 
-## 7. Mathematical and computational discipline
+## 7. Quantitative model contract
 
-For quantitative work, state:
+For quantitative work, expose the relevant subset of:
 
 \[
-\mathcal M =
+\mathcal M=
 \{\mathbf x,\mathbf u,\boldsymbol\theta,
 \mathbf F,\mathbf h,\mathbf g,
-\text{IC},\text{BC},\mathcal O,\mathcal E\}
+\mathrm{IC},\mathrm{BC},\mathcal O,\mathcal E\}
 \]
 
-where:
+with:
 
-- \(\mathbf x\): states;
-- \(\mathbf u\): controls or interventions;
-- \(\boldsymbol\theta\): parameters;
-- \(\mathbf F=0\): governing equations;
-- \(\mathbf h=0\): equality constraints;
-- \(\mathbf g\le 0\): inequality constraints;
-- IC/BC: initial and boundary conditions;
-- \(\mathcal O\): observation model;
-- \(\mathcal E\): error model.
+- states and controls;
+- parameters and provenance;
+- governing relations/equations;
+- equality/inequality constraints;
+- initial/boundary conditions where applicable;
+- assumptions and empirical closures;
+- observation model;
+- error/model-discrepancy model;
+- validity domain.
 
-Required checks:
+Required checks as applicable:
 
-- units and dimensions;
+- units/dimensions;
 - limiting cases;
-- conservation or invariance;
-- parameter provenance;
+- conservation/invariance;
 - identifiability;
-- convergence and numerical error;
-- sensitivity;
+- convergence/numerical error;
+- sensitivity/UQ;
 - model discrepancy;
-- domain of validity.
+- domain shift;
+- scale bridges.
 
-“Computed from first principles” never means “free of approximation.” “Generated by TRIZ” never means “physically validated.”
-
----
-
-## 8. Method routing
-
-Use [references/method-atlas.md](references/method-atlas.md) and [references/domain-routing.md](references/domain-routing.md).
-
-Default bundle for a complex question:
-
-1. **Semantic–ontological:** conceptual analysis + category map.
-2. **Epistemic–causal:** claim ledger + causal graph or mechanism chain.
-3. **Constructive:** morphological alternatives or constraint-based synthesis.
-4. **Adversarial:** inversion + pre-mortem.
-5. **Calibration:** evidence audit + quality gate.
-
-TRIZ is deliberately absent from the default bundle. Load it only under the explicit activation policy above.
-
-Rotate methods when analysis plateaus. Do not repeat the same critique in different words.
+“Computed from first principles” never means “free of approximation.”
 
 ---
 
-## 9. Stop conditions
+## 8. Counter-model and falsification
 
-Stop when one of the following holds:
+Before a substantive recommendation, construct at least one decision-relevant alternative:
 
-1. the recommendation passes the required quality threshold and has no red blocker;
-2. available evidence cannot distinguish the leading alternatives, and the next discriminating test is identified;
-3. the decision is time-bounded and the expected value of more analysis is lower than the cost of delay;
-4. the problem dissolves because a requirement, category error, or false dichotomy was removed;
-5. five substantive revision passes produce less than a two-point quality improvement;
-6. an explicitly activated TRIZ route produces no concept that survives physical, safety, and feasibility gates—report the unresolved contradiction or escalate to ARIZ only within TRIZ mode.
+- rival ontology or frame;
+- rival causal/mechanism model;
+- alternative objective function;
+- minimum sufficient design;
+- null model;
+- do-nothing baseline;
+- boundary/inversion case.
 
-Do not conceal a plateau. Report where and why the reasoning stopped.
+Steelman it. Do not manufacture a weak opponent.
+
+Every major conclusion should expose:
+
+```text
+Falsifier:
+Strongest rival:
+Most likely failure mode:
+Early warning:
+Fallback:
+Review trigger:
+```
 
 ---
 
-## 10. Output behavior
+## 9. Shared quality gate
+
+Load [references/quality-gates.md](references/quality-gates.md).
+
+Red blockers dominate any score. A response cannot be labeled validated/final/complete while a relevant blocker remains.
+
+Shared checks include:
+
+- semantic/category consistency;
+- evidence-to-claim fit;
+- assumptions/closures visible;
+- causal/mechanism adequacy;
+- units, parameters, boundary/closure and convergence where mathematical;
+- scale bridges;
+- serious alternatives;
+- falsifier and uncertainty;
+- values/stakeholders;
+- safety/legal/ethical constraints;
+- actionability and traceability.
+
+---
+
+## 10. Depth levels
+
+### Rapid
+
+For low-stakes/reversible decisions, keep only:
+
+- actual outcome;
+- one requirement challenge;
+- key foundations/assumptions;
+- two options;
+- recommendation;
+- falsifier/review trigger.
+
+TRIZ remains excluded unless explicitly activated.
+
+### Standard
+
+Require:
+
+- appropriate foundation qualification;
+- proposition ledger;
+- one serious rival;
+- quality gate;
+- structured recommendation.
+
+### Deep
+
+Add as relevant:
+
+- source verification;
+- multiple competing models;
+- sensitivity/identifiability/UQ;
+- scale-bridge audit;
+- stakeholder/ethical review;
+- pre-mortem;
+- reproducibility record;
+- explicit unresolved research questions.
+
+---
+
+## 11. Stop conditions
+
+Stop when one of these holds:
+
+1. required quality threshold passes with no red blocker;
+2. evidence cannot distinguish leading models and the next discriminating test is identified;
+3. value of more analysis is lower than cost of delay;
+4. the problem dissolves after a requirement/category/frame correction;
+5. repeated revisions plateau and the reason is reported;
+6. in explicit TRIZ mode, no concept survives hard physics/safety/feasibility gates—report the unresolved contradiction rather than invent certainty.
+
+---
+
+## 12. Output behavior
 
 Prefer:
 
 - explicit tables over vague prose;
 - mechanism chains over labels;
 - ranges over false precision;
-- decision-relevant detail over encyclopedic digression;
+- traceability over decorative complexity;
 - one clear recommendation over an undifferentiated menu;
-- traceable uncertainty over rhetorical confidence.
+- explicit uncertainty over rhetorical confidence.
 
-Do not expose private chain-of-thought. Provide a concise **reasoning audit**: premises, evidence, assumptions, inference structure, model checks, and conclusion.
+Do not expose private chain-of-thought. Provide a concise reasoning audit: premises, evidence, assumptions, model/inference structure, checks, and conclusion.
+
+Every substantive output ends with the relevant subset of:
+
+```text
+Decision / conclusion:
+Why:
+Trace to foundations:
+Key assumptions / closures:
+Uncertainty / validity domain:
+What would change the conclusion:
+Next discriminating action:
+Review trigger:
+```
+
+Templates: [assets/output-templates.md](assets/output-templates.md)
 
 ---
 
-## 11. Boundaries
+## 13. Boundaries
 
-This skill can structure medical, legal, financial, safety, or policy reasoning, but it does not replace qualified professional judgment, jurisdiction-specific verification, or empirical testing.
+This skill may structure medical, legal, financial, safety, or policy reasoning, but it does not replace qualified professional judgment, jurisdiction-specific verification, empirical testing, or certification.
 
 It will not:
 
-- declare metaphysical certainty where only a working foundation is available;
+- declare metaphysical certainty where only a working foundation exists;
 - fabricate sources, experiments, measurements, patents, or consensus;
-- recommend unsafe deletion of safeguards;
-- treat ethical disagreement as a mere optimization error;
-- use “first principles” to justify a predetermined conclusion;
-- silently force TRIZ onto non-engineering or non-inventive problems;
-- treat TRIZ patterns as performance evidence.
+- remove safeguards without verification;
+- turn ethical disagreement into a mere optimization error;
+- use first-principles language to justify a predetermined result;
+- silently force TRIZ onto a task;
+- treat a TRIZ pattern as performance evidence.
 
 ---
 
-## 12. Supporting resources
+## 14. Supporting resources
 
-- [FIRST_PHILOSOPHY.md](FIRST_PHILOSOPHY.md) — foundation-qualification engine.
-- [FIRST_PRINCIPLES.md](FIRST_PRINCIPLES.md) — decomposition and reconstruction engine.
-- [TRIZ_ENGINEERING.md](TRIZ_ENGINEERING.md) — optional, explicitly invoked engineering-invention module.
-- [references/method-atlas.md](references/method-atlas.md) — executable method cards and routing.
-- [references/domain-routing.md](references/domain-routing.md) — domain-specific defaults.
-- [references/quality-gates.md](references/quality-gates.md) — blockers, rubric, and stop rules.
-- [references/failure-modes.md](references/failure-modes.md) — diagnostic anti-patterns.
-- [references/intellectual-lineage.md](references/intellectual-lineage.md) — sources and conceptual lineage.
-- [references/glossary.md](references/glossary.md) — bilingual terminology.
-- [references/worked-examples.md](references/worked-examples.md) — cross-domain examples.
-- [assets/output-templates.md](assets/output-templates.md) — deliverable templates.
-- [assets/claim-ledger-template.md](assets/claim-ledger-template.md) — auditable claim records.
+### Canonical modules
+
+- [first-philosophy/README.md](first-philosophy/README.md)
+- [first-philosophy/METHOD.md](first-philosophy/METHOD.md)
+- [first-principles/README.md](first-principles/README.md)
+- [first-principles/METHOD.md](first-principles/METHOD.md)
+- [triz/README.md](triz/README.md)
+- [triz/ROUTER.md](triz/ROUTER.md)
+
+### Shared infrastructure
+
+- [ARCHITECTURE.md](ARCHITECTURE.md)
+- [MODULES.json](MODULES.json)
+- [references/method-atlas.md](references/method-atlas.md)
+- [references/domain-routing.md](references/domain-routing.md)
+- [references/quality-gates.md](references/quality-gates.md)
+- [references/failure-modes.md](references/failure-modes.md)
+- [references/intellectual-lineage.md](references/intellectual-lineage.md)
+- [references/glossary.md](references/glossary.md)
+- [references/worked-examples.md](references/worked-examples.md)
+- [assets/output-templates.md](assets/output-templates.md)
+- [assets/claim-ledger-template.md](assets/claim-ledger-template.md)
+
+Compatibility aliases `FIRST_PHILOSOPHY.md`, `FIRST_PRINCIPLES.md`, and `TRIZ_ENGINEERING.md` are retained only for old links; new maintenance must target canonical module paths.
