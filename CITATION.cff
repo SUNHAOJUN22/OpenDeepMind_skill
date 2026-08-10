@@ -1,15 +1,15 @@
 cff-version: 1.2.0
 message: "If you use OpenDeepMind_skill, cite this repository and the underlying historical or technical method sources."
-title: "OpenDeepMind_skill: A Dual-Engine First Philosophy and First-Principles Reasoning Skill with an Optional TRIZ Engineering Module"
+title: "OpenDeepMind_skill: Isolated First Philosophy, First Principles, and Explicit-Only TRIZ Reasoning Modules"
 type: software
 authors:
   - family-names: "Sun"
     given-names: "Haojun"
 repository-code: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
 url: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
-version: "1.1.0"
-date-released: "2026-08-09"
-license: "Apache-2.0 AND CC-BY-4.0"
+version: "1.2.0"
+date-released: "2026-08-10"
+license: "Apache-2.0 AND CC-BY-4.0 with documented MIT exceptions"
 keywords:
   - first philosophy
   - first principles
@@ -21,3 +21,4 @@ keywords:
   - causal inference
   - systems thinking
   - scientific method
+  - module isolation
