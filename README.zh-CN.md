@@ -1,556 +1,309 @@
 <p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/hero.svg?v=20260808-overview2" alt="OpenDeepMind 中文 AI 设计总览" width="100%">
+  <img src="open-deep-mind/assets/diagrams/zh/hero.svg" alt="OpenDeepMind 中文方法总览" width="100%">
 </p>
-<p align="center"><sub>中文 AI 设计总览：第一哲学 × 第一性原理 × 竞争模型 × 跨尺度建模 × 质量门 × 行动迭代。</sub></p>
 
 <h1 align="center">OpenDeepMind_skill</h1>
 
-<p align="center"><b>不要急于优化继承而来的问题框架。<br>先审查什么有资格成为基础，再从基础向上推导、证伪、决策，并保留修正能力。</b></p>
+<p align="center">
+  <strong>先审查什么有资格成为基础，再从基础向上推导、证伪、决策，并保留修正能力。</strong>
+</p>
 
 <p align="center">
-  <a href="README.md">English</a> ·
+  <a href="README.md">中英双语首页</a> ·
   <a href="open-deep-mind/SKILL.md">主 Skill</a> ·
   <a href="open-deep-mind/FIRST_PHILOSOPHY.md">第一哲学</a> ·
-  <a href="open-deep-mind/FIRST_PRINCIPLES.md">第一性原理</a>
+  <a href="open-deep-mind/FIRST_PRINCIPLES.md">第一性原理</a> ·
+  <a href="open-deep-mind/TRIZ_ENGINEERING.md">TRIZ 路由</a> ·
+  <a href="open-deep-mind/triz/README.md">完整 TRIZ 模块</a>
 </p>
 
 <p align="center">
-  <img alt="Agent Skills" src="https://img.shields.io/badge/Agent_Skills-compatible-6f5cff?style=flat-square">
-  <img alt="版本" src="https://img.shields.io/badge/version-1.0.0-2aa8ff?style=flat-square">
+  <img alt="版本" src="https://img.shields.io/badge/version-1.1.0-2a8cff?style=flat-square">
   <img alt="双引擎" src="https://img.shields.io/badge/core_engines-2-f2a649?style=flat-square">
-  <img alt="方法卡" src="https://img.shields.io/badge/method_cards-30%2B-3bc9a7?style=flat-square">
-  <img alt="质量维度" src="https://img.shields.io/badge/quality_dimensions-12-d277ff?style=flat-square">
-  <img alt="运行依赖" src="https://img.shields.io/badge/runtime_dependencies-0-91a7bd?style=flat-square">
+  <img alt="TRIZ" src="https://img.shields.io/badge/optional_TRIZ-complete-e75f3c?style=flat-square">
+  <img alt="矛盾矩阵" src="https://img.shields.io/badge/TRIZ_matrix-1190_cells-1565c0?style=flat-square">
+  <img alt="标准解" src="https://img.shields.io/badge/TRIZ_SIS-76-7b61ff?style=flat-square">
+  <img alt="依赖" src="https://img.shields.io/badge/runtime_dependencies-0-60758a?style=flat-square">
 </p>
-
-> **独立项目声明：**OpenDeepMind_skill 与 Google DeepMind 无隶属、合作或背书关系。仓库名称表达的是一种开放、深度、可审计的思维方法。
-
-> **视觉语言约定：**本中文 README 使用八张纯中文 AI 设计 SVG，数理公式采用确定性排版；英文 README 使用另一套纯英文图，单张图内不混用中英文标签。
 
 ---
 
-## 为什么需要这个仓库
+## 1. 核心架构
 
-很多所谓“第一性原理分析”开始得太晚：它们直接拆解问题，却没有先检查：
-
-- 问题是否被正确提出；
-- 核心概念是否在前后保持同一含义；
-- 所谓“事实”是否其实是假设、经验闭合关系或价值判断；
-- 所谓“因果”是否只是相关性或叙述性标签；
-- 结论是否在没有尺度桥的情况下从微观跳到宏观；
-- 所谓“最优”究竟替谁优化、牺牲了谁、隐含什么权重。
-
-OpenDeepMind 在第一性原理之前增加一道基础资格审查：
-
-\[
-\boxed{
-\text{第一哲学}
-\rightarrow
-\text{第一性原理}
-\rightarrow
-\text{竞争模型}
-\rightarrow
-\text{质量门}
-\rightarrow
-\text{行动与修正}
-}
-\]
-
-它不是哲学知识百科，也不是任意发散的头脑风暴工具，而是一套把复杂问题转化为以下成果的通用程序：
-
-- 类型明确的命题；
-- 可说明的基础；
-- 可比较的模型；
-- 可证伪的推导；
-- 可执行、可监测、可复审的决策。
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/concept-map.svg" alt="OpenDeepMind AI 概念示意图" width="100%">
-</p>
-
-<p align="center"><sub>中文本地化 AI 设计图。图中的中文标签与数理公式采用确定性排版，保证可读与准确；构图表达方法体系，而不是正式文件树。</sub></p>
-
----
-
-## 双引擎架构
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/dual-engine.svg" alt="OpenDeepMind 双引擎架构" width="100%">
-</p>
-
-### Φ 引擎：第一哲学
-
-第一哲学首先追问：
-
-> **在这个问题中，什么有资格成为基础？**
-
-它从八个方向审查基础：
-
-\[
-\mathcal F_{\Phi}
-=
-\{\text{语义},\text{本体},\text{认识},\text{逻辑},
-\text{因果},\text{边界},\text{价值},\text{实践}\}
-\]
-
-输出不是抽象议论，而是一份可交接给第一性原理引擎的 **《基础章程》**，其中包括：
-
-- 关键概念及操作性定义；
-- 对象、过程、关系、属性和缺失项的本体图；
-- 观测、推断、模型输出、证言、价值判断的认识状态；
-- 逻辑结构与因果/解释承诺；
-- 系统边界、尺度、时间和适用范围；
-- 目标、义务、利益相关者与分配问题；
-- 仍然成立的竞争框架与阻断项。
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/philosophy-lenses.svg" alt="第一哲学八重透镜" width="100%">
-</p>
-
-独立文件：
-
-[`open-deep-mind/FIRST_PHILOSOPHY.md`](open-deep-mind/FIRST_PHILOSOPHY.md)
-
-其中把概念分析、亚里士多德式解释、笛卡尔方法怀疑、康德式可能性条件、现象学还原、解释学循环、伦理优先审查和自然化/实用主义审查封装为可执行步骤。
-
-### P 引擎：第一性原理
-
-第一性原理进一步追问：
-
-> **在明确的领域、尺度、目的和条件下，从已经通过审查的基础能够推出什么？**
-
-P9 流程包括：
-
-1. 删除或证明需求合理；
-2. 定义真正结果与系统边界；
-3. 暴露并分类所有假设；
-4. 沿依赖关系向下拆解；
-5. 审查候选基底命题；
-6. 建立约束、因果、动态或数理模型；
-7. 从基础向上构造不同方案；
-8. 推导、计算、竞争模型和证伪；
-9. 决策、监测、触发复审与更新。
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/principles-loop.svg" alt="第一性原理拆解与重构" width="100%">
-</p>
-
-独立文件：
-
-[`open-deep-mind/FIRST_PRINCIPLES.md`](open-deep-mind/FIRST_PRINCIPLES.md)
-
-第一哲学与第一性原理必须分开，是为了同时避免两种错误：
-
-- 把某一层级的物理理论当成所有哲学、社会与价值问题的答案；
-- 无限讨论基础，却不形成可检验模型和可执行结论。
-
----
-
-## 命题账本
-
-OpenDeepMind 不允许不同类型的命题互相借用权威。
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/proposition-ledger.svg" alt="OpenDeepMind 命题账本" width="100%">
-</p>
-
-| 编码 | 类型 | 含义 |
-|---|---|---|
-| `D` | 定义 | 约定、词汇、操作性或理论定义 |
-| `O` | 观测 | 测量、记录、直接来源 |
-| `L` | 规律/不变量 | 在指定领域得到独立支持的规律 |
-| `C` | 约束 | 物理、逻辑、法律、伦理或经核验的资源边界 |
-| `A` | 假设 | 尚未作为事实确立、需要检验或敏感性审查的前提 |
-| `E` | 经验闭合/估计 | 拟合、代理、启发式、本构关系或学习型近似 |
-| `V` | 价值 | 目标、义务、偏好、效用与风险容忍度 |
-| `U` | 未知 | 足以改变决策的未解决问题 |
-
-每项关键命题还要记录：
+OpenDeepMind 仍然只有两个基础核心引擎：
 
 ```text
-状态 · 适用范围 · 来源 · 依赖 · 置信度 · 证伪条件 · 责任人 · 复审日期
+第一哲学 Φ
+→ 第一性原理 P
+→ 竞争模型
+→ 证伪与质量门
+→ 行动与修正
 ```
 
-模板：
+第一哲学负责回答：
 
-- [`claim-ledger-template.md`](open-deep-mind/assets/claim-ledger-template.md)
-- [`claim-ledger.schema.json`](open-deep-mind/assets/claim-ledger.schema.json)
-- [`example-ledger.json`](open-deep-mind/assets/example-ledger.json)
+> **什么有资格成为当前问题的基础？**
 
----
+第一性原理负责回答：
 
-## “第一”必须说明相对于哪个层级
+> **在明确的领域、尺度、目的与条件下，从这些合格基础能够推出什么？**
 
-某个原理可以是一个模型的基础，同时又是另一套更低层理论的推导结果。
+独立核心文件：
 
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/scale-ladder.svg" alt="从基础到行动的尺度阶梯" width="100%">
-</p>
+- [`FIRST_PHILOSOPHY.md`](open-deep-mind/FIRST_PHILOSOPHY.md)
+- [`FIRST_PRINCIPLES.md`](open-deep-mind/FIRST_PRINCIPLES.md)
 
-跨尺度箭头必须付出方法学成本：
-
-\[
-\text{低尺度状态}
-\xrightarrow[\text{不确定性}]{\text{映射 + 闭合}}
-\text{有效变量}
-\xrightarrow[\text{验证}]{\text{高尺度模型}}
-\text{可观测结果}
-\]
-
-每个尺度桥都必须说明：
-
-- 映射变量；
-- 闭合、粗粒化或同质化假设；
-- 丢失的信息；
-- 参数与标定来源；
-- 不确定性如何传播；
-- 在什么范围内验证；
-- 在何种条件下失效。
-
-因此，这一 Skill 可以同时服务于概念研究、形式证明、因果推断、科学计算、工程设计、战略和政策，却不会假装它们拥有完全相同的证据标准。
+TRIZ 不被提升为第三个基础引擎，而是一个**专业、独立、按需加载的工程发明子系统**。
 
 ---
 
-## 领域路由
+## 2. TRIZ 默认不调用
 
-| 领域 | 默认重点 |
-|---|---|
-| 科学与科研 | 测量、机制、竞争模型、前瞻预测与判别实验 |
-| 工程与软件 | 功能、硬约束、故障、运维、可逆性 |
-| 数理与计算 | 控制方程、闭合关系、参数、初边值、收敛与不确定性 |
-| 商业与战略 | 价值机制、经济性、竞争者响应、实物期权 |
-| 政策、法律与伦理 | 权限、权利、证据、分配、申诉与退出机制 |
-| 个人决策 | 价值、真实行为、可逆试验、复审触发器 |
-| 创意与产品创新 | 张力、矛盾、结构性新颖、效用与价值验证 |
-
-完整路由表：
-
-[`domain-routing.md`](open-deep-mind/references/domain-routing.md)
-
-跨领域总规则：
-
-> **同时涉及多个领域时，采用其中最严格的证据、安全和伦理标准。**
-
----
-
-## 选择方法，而不是堆砌方法
-
-[`method-atlas.md`](open-deep-mind/references/method-atlas.md) 包含三十余张可执行方法卡，分为：
-
-- 基础审查方法；
-- 结构拆解方法；
-- 构造与创新方法；
-- 对抗与反证方法；
-- 校准与验证方法。
-
-复杂问题的默认组合为：
-
-\[
-\text{概念/本体审查}
-+
-\text{因果或机制图}
-+
-\text{形态学构造}
-+
-\text{逆向攻击}
-+
-\text{证据校准}
-\]
-
-只有明确指出“当前最弱环节是什么”之后，才能切换方法。用不同措辞重复同一观点，不属于递归优化。
-
----
-
-## 质量门
-
-<p align="center">
-  <img src="open-deep-mind/assets/diagrams/zh/quality-gates.svg" alt="OpenDeepMind 质量门" width="100%">
-</p>
-
-### 第一层：红色阻断项
-
-包括但不限于：
-
-- 核心术语未定义或前后变义；
-- 关键事实无可靠来源；
-- 结论在逻辑上并不由前提推出；
-- 把相关性写成因果性；
-- 隐藏目标函数和利益相关者；
-- 未建立尺度桥就跨尺度下结论；
-- 没有证伪条件或严肃竞争模型；
-- 未核验就删除法律、安全或伦理保护；
-- 虚构文献、数据、实验、引文或共识。
-
-存在任何红色阻断项时，不得用高分掩盖，也不得把结果称为“最终验证完成”。
-
-### 第二层：100 分推理质量
-
-十二个加权维度：
-
-- 基础清晰度；
-- 命题分类；
-- 证据质量；
-- 拆解完整性；
-- 因果/解释充分性；
-- 模型完整性；
-- 可追溯性；
-- 替代方案；
-- 可证伪性；
-- 不确定性与鲁棒性；
-- 价值与伦理；
-- 可执行性。
-
-| 模式 | 最低分 | 附加条件 |
-|---|---:|---|
-| 快速 | 70 | 可逆决策且无红色阻断 |
-| 标准 | 80 | 无红色阻断且有一个强竞争模型 |
-| 深度 | 88 | 完成来源和不确定性审计 |
-| 科研/高风险 | 90 | 按情形增加可复现或专业核验 |
-
-完整标准：
-
-[`quality-gates.md`](open-deep-mind/references/quality-gates.md)
-
----
-
-## 错误雷达
-
-系统主动检测：
-
-- 范畴错误与实体化；
-- 偷换概念、虚假二分和循环论证；
-- 引文表演与来源洗白；
-- 相关性—因果性错误；
-- 用“协同、涌现、AI”等词替代机制；
-- 把模型输出写成直接观测；
-- 微观结果直接跳到宏观结论；
-- 方程装饰与伪精确；
-- 代理指标优化；
-- 隐藏价值；
-- 删除崇拜；
-- 忽略不可逆风险与责任主体。
-
-完整诊断表：
-
-[`failure-modes.md`](open-deep-mind/references/failure-modes.md)
-
----
-
-## 输出体系
-
-内置输出模板包括：
-
-- 《基础章程》；
-- 《第一性原理决策备忘录》；
-- 《双引擎完整分析》；
-- 《科学机制审计》；
-- 《工程架构评审》；
-- 《战略/政策备忘录》；
-- 快速分析；
-- 质量与收敛附录。
-
-模板文件：
-
-[`output-templates.md`](open-deep-mind/assets/output-templates.md)
-
-任何重要输出最终都必须给出：
+默认流程不包含 TRIZ：
 
 ```text
-结论或决策：
-为什么：
-基础追溯：
-关键假设：
-不确定性：
-什么结果会改变结论：
-下一项最有判别力的行动：
-何时触发复审：
+Φ → P → 竞争模型 → 质量门
+```
+
+只有用户明确要求或明确接受以下路线时，才进入 TRIZ：
+
+- TRIZ / ARIZ；
+- 技术矛盾 / 物理矛盾；
+- 39 参数、40 发明原理、矛盾矩阵；
+- Su-Field / 物场、76 标准解；
+- IFR / 理想最终结果；
+- S 曲线、TESE、工程系统进化；
+- 明确要求 TRIZ 工程创新分析。
+
+完整显式路线：
+
+```text
+Φ/P 基础资格审查
+→ TRIZ 发明构造 T
+→ 第一性原理物理 / 数理 / 证据验证
+→ OpenDeepMind 质量门
+```
+
+轻量入口：[`TRIZ_ENGINEERING.md`](open-deep-mind/TRIZ_ENGINEERING.md)  
+完整子系统：[`open-deep-mind/triz/README.md`](open-deep-mind/triz/README.md)
+
+---
+
+## 3. 完整 TRIZ 模块包含什么
+
+### 3.1 现代问题识别
+
+不是一上来就查矩阵，而是先确定**真正关键问题**：
+
+- 功能分析 / function-cost analysis；
+- 物质、能量与信息流分析；
+- CECA 因果链；
+- 裁剪与部分裁剪；
+- 特征迁移；
+- 创新标杆分析；
+- 多屏幕系统算子；
+- S 曲线与 TESE；
+- 关键问题路由。
+
+主入口：[`modern_problem_identification.md`](open-deep-mind/triz/resources/modern_problem_identification.md)
+
+### 3.2 经典矛盾体系
+
+完整文件：
+
+- [`39_parameters.md`](open-deep-mind/triz/resources/39_parameters.md) — 39 个典型工程参数；
+- [`40_principles.md`](open-deep-mind/triz/resources/40_principles.md) — 40 个发明原理；
+- [`contradiction_matrix.json`](open-deep-mind/triz/resources/contradiction_matrix.json) — 39×39 完整矩阵转录，1190 个有内容单元；
+- [`contradictions.md`](open-deep-mind/triz/resources/contradictions.md) — 工程矛盾、反向矛盾、物理矛盾、次生矛盾；
+- [`separation_principles.md`](open-deep-mind/triz/resources/separation_principles.md) — 时间、空间、条件、系统层级分离。
+
+### 3.3 Su-Field 与全部 76 标准解
+
+- [`substance_field_modeling.md`](open-deep-mind/triz/resources/substance_field_modeling.md)
+- [`76_standard_solutions.md`](open-deep-mind/triz/resources/76_standard_solutions.md)
+
+标准解按公开 MATRIZ 五类编号组织：
+
+```text
+Class 1 = 13
+Class 2 = 23
+Class 3 = 6
+Class 4 = 17
+Class 5 = 17
+Total   = 76
+```
+
+### 3.4 ARIZ-85C
+
+[`ariz_85c.md`](open-deep-mind/triz/resources/ariz_85c.md) 按 9 Part / 3 Block 组织，用于普通矩阵、分离、物场路线持续产生妥协或问题仍然模糊的深层工程问题。
+
+### 3.5 理想度、IFR 与资源
+
+[`ideality_ifr_resources.md`](open-deep-mind/triz/resources/ideality_ifr_resources.md) 明确区分：
+
+- Ideal System；
+- Ideal Final Result；
+- 相对理想度；
+- 物质、场、空间、时间、信息、功能、超系统、有害因素与空缺资源。
+
+不在数据与量纲不成立时伪造精确“理想度”数字。
+
+### 3.6 FOS、科学效应与迁移
+
+- [`effects_and_fos.md`](open-deep-mind/triz/resources/effects_and_fos.md)
+- [`feature_transfer.md`](open-deep-mind/triz/resources/feature_transfer.md)
+- [`clone_problems.md`](open-deep-mind/triz/resources/clone_problems.md)
+- [`innovative_benchmarking.md`](open-deep-mind/triz/resources/innovative_benchmarking.md)
+
+真实任务中的科学效应、专利、论文和产品技术资料需要联网检索；模块不会虚构一个“万能科学效应数据库”。
+
+### 3.7 S 曲线与现代 TESE
+
+- [`s_curve_and_tese.md`](open-deep-mind/triz/resources/s_curve_and_tese.md)
+- [`evolution_trends.md`](open-deep-mind/triz/resources/evolution_trends.md)
+
+覆盖 S 曲线、MPV、价值提升、向超系统转移、裁剪、系统完整性、人参与减少、流强化、协调、可控性、动态化和子系统非均衡发展等现代进化路由。
+
+### 3.8 概念论证
+
+TRIZ 输出首先只能标记为：
+
+```text
+TRIZ-derived concept
+```
+
+随后进入 [`concept_substantiation.md`](open-deep-mind/triz/resources/concept_substantiation.md) 和 OpenDeepMind 第一性原理质量门，检查物理、材料、制造、参数来源、不确定性、安全、可靠性、生命周期、仿真、实验、原型、FMEA 和专利现有技术等。
+
+**TRIZ 原理名称、矩阵单元或标准解编号永远不等于工程验证。**
+
+---
+
+## 4. TRIZ T0–T10
+
+```text
+T0  明确显式调用与工程作用域
+T1  系统 / 子系统 / 超系统 / 主功能 / 约束
+T2  识别真正关键问题
+T3  资源 + baseline ideality + IFR
+T4  工程矛盾 / 物理矛盾 / Su-Field / function problem
+T5  选择 matrix / separation / SIS / ARIZ / FOS-effects / TESE
+T6  生成结构不同的概念族
+T7  把 TRIZ 抽象原理翻译为具体材料 / 几何 / 场 / 时间 / 控制机制
+T8  物理 / 安全 / 制造 / 集成硬门
+T9  最小判别计算 / 仿真 / 实验 / 原型
+T10 返回 First Principles 与 OpenDeepMind Quality Gate
 ```
 
 ---
 
-## 仓库结构
+## 5. 矩阵查询与模块验证
 
-```text
-OpenDeepMind_skill/
-├── README.md
-├── README.zh-CN.md
-├── AGENTS.md
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-├── LICENSE.md
-├── NOTICE.md
-├── .github/workflows/validate.yml
-└── open-deep-mind/
-    ├── SKILL.md
-    ├── FIRST_PHILOSOPHY.md
-    ├── FIRST_PRINCIPLES.md
-    ├── references/
-    │   ├── method-atlas.md
-    │   ├── domain-routing.md
-    │   ├── quality-gates.md
-    │   ├── failure-modes.md
-    │   ├── intellectual-lineage.md
-    │   ├── glossary.md
-    │   └── worked-examples.md
-    ├── assets/
-    │   ├── output-templates.md
-    │   ├── claim-ledger-template.md
-    │   ├── claim-ledger.schema.json
-    │   ├── example-ledger.json
-    │   └── diagrams/
-    │       ├── zh/                 # 8 张中文 AI 设计、公式化 SVG 示意图
-    │       └── en/                 # 8 张英文 AI 设计、公式化 SVG 示意图
-    └── scripts/
-        ├── validate_repository.py
-        └── validate_ledger.py
-```
-
-主 `SKILL.md` 只负责触发、路由、总流程和强制规则；详细内容按需加载，以减少上下文浪费。
-
----
-
-## 安装
-
-### Skills CLI
+确定性矩阵查询：
 
 ```bash
-npx skills add SUNHAOJUN22/OpenDeepMind_skill --skill open-deep-mind
+python open-deep-mind/triz/scripts/lookup_matrix.py \
+  --improve 10 --worsen 17
 ```
 
-### 手动安装
+完整 TRIZ 模块校验：
 
 ```bash
-git clone https://github.com/SUNHAOJUN22/OpenDeepMind_skill.git
+python open-deep-mind/triz/scripts/validate_triz_module.py
 ```
 
-将 `open-deep-mind/` 复制到目标智能体支持的 Skills 目录。常见项目级目录包括：
+校验器检查 25 项 TRIZ 资源、39 参数、40 原理、矩阵单元与锚点、76 标准解类分布、ARIZ 9 Parts、TRIZ opt-in 路由、脚本语法和案例完整性。
 
-```text
-.codex/skills/
-.claude/skills/
-.cursor/skills/
-.github/skills/
-.gemini/skills/
-.agent/skills/
+GitHub Actions 已把 TRIZ 校验和矩阵查询 smoke test 加入主 CI。
+
+---
+
+## 6. TRIZ 工程案例
+
+- [`brake_disc.md`](open-deep-mind/triz/examples/brake_disc.md) — 制动盘热管理；
+- [`battery_pack.md`](open-deep-mind/triz/examples/battery_pack.md) — EV 电池热安全；
+- [`heat_exchanger_fouling.md`](open-deep-mind/triz/examples/heat_exchanger_fouling.md) — 石化换热器结垢；
+- [`anti_example_misframed.md`](open-deep-mind/triz/examples/anti_example_misframed.md) — 非工程问题拒绝 / reframe。
+
+输出模板：[`output_template.md`](open-deep-mind/triz/resources/output_template.md)
+
+---
+
+## 7. 证据、尺度与质量门
+
+所有 OpenDeepMind 模块共同遵守：
+
+```math
+\text{模型输出}\neq\text{直接观测}
 ```
 
-不同客户端的目录约定可能更新，应以目标客户端当前文档为准。
+```math
+\text{相关性}\neq\text{干预因果}\neq\text{物理机制}
+```
 
-### 直接调用
+任何跨尺度结论都必须给出：
 
 ```text
-读取 open-deep-mind/SKILL.md。
-使用“第一哲学 → 第一性原理”双引擎深度模式分析本问题。
-先生成基础章程，再建立命题账本、竞争模型和质量门。
-最后给出结论、基础追溯、不确定性、证伪条件、下一判别行动和复审触发器。
+映射变量
+闭合 / 粗粒化假设
+信息损失
+参数来源
+不确定性传播
+验证域
+失效条件
+```
+
+TRIZ 只负责拓展/重构发明空间，不豁免这些要求。
+
+---
+
+## 8. 调用示例
+
+### 普通 OpenDeepMind
+
+```text
+调用 open-deep-mind，执行第一哲学 → 第一性原理双引擎分析。
+除非我明确要求 TRIZ，否则不要加载 TRIZ。
+```
+
+### 完整 TRIZ
+
+```text
+显式调用 OpenDeepMind TRIZ 工程模块。
+先用第一哲学/第一性原理核验系统、功能、工况、证据、边界、硬约束与安全条件；
+再读取 TRIZ_ENGINEERING.md 和 triz/README.md，按关键问题类型懒加载所需资源。
+必须完成问题识别 → 发明构造 → 工程验证链，不能把 TRIZ 原理名称当作物理证明。
 ```
 
 ---
 
-## 示例 Prompt
-
-```text
-调用 OpenDeepMind 第一哲学模式。
-审查“智能”“理解”“机制”在本文中的定义、本体地位和证据标准，
-并给出至少两个竞争框架。
-```
-
-```text
-调用 OpenDeepMind 第一性原理模式。
-不要直接接受现有需求；先做删除测试，再把所有命题分成 D/O/L/C/A/E/V/U，
-从通过审查的基础向上重建三个结构不同的方案。
-```
-
-```text
-调用 OpenDeepMind 双引擎审查这项科研机制结论。
-区分直接证据、间接证据、模型输出、经验闭合、假设与未知；
-列出全部尺度桥、竞争机制、判别实验和质量分数。
-```
-
-```text
-从第一哲学和第一性原理重新设计这项战略。
-包含零行动基线、竞争者响应、价值分配、阶段性承诺、退出条件和证伪触发器。
-```
-
-跨领域示例：
-
-[`worked-examples.md`](open-deep-mind/references/worked-examples.md)
-
----
-
-## 自动验证
-
-核心验证不依赖第三方 Python 包。
+## 9. 验证
 
 ```bash
 python open-deep-mind/scripts/validate_repository.py .
 python open-deep-mind/scripts/validate_ledger.py \
   open-deep-mind/assets/example-ledger.json
+python open-deep-mind/triz/scripts/validate_triz_module.py
+python open-deep-mind/triz/scripts/lookup_matrix.py \
+  --improve 1 --worsen 3 --json
 ```
 
-自动检查：
+---
 
-- Agent Skills frontmatter；
-- 第一哲学与第一性原理是否保持为两个独立核心文件；
-- Markdown 相对链接；
-- JSON 合法性；
-- SVG XML 合法性；
-- Python 语法；
-- 未解决占位词；
-- README 视觉资产是否完整。
+## 10. 来源与许可
 
-GitHub Actions 会在 push 与 pull request 上运行同样检查。
+完整来源和证据图谱：
+
+- [`open-deep-mind/triz/resources/sources.md`](open-deep-mind/triz/resources/sources.md)
+- [`open-deep-mind/triz/VENDORED_LICENSE.md`](open-deep-mind/triz/VENDORED_LICENSE.md)
+- [`NOTICE.md`](NOTICE.md)
+- [`intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md)
+
+TRIZ 经典实现/数据层保留 `Antropocosmist/triz-engineering-solver` 的 MIT 归因及其矩阵转录来源链；现代问题识别、完整 MATRIZ 编号 76 标准解操作索引、OpenDeepMind 交接、渐进加载、概念论证、验证脚本和新案例在本仓库中重新组织和撰写。
+
+OpenDeepMind_skill 与 Google DeepMind、MATRIZ、Altshuller Institute、OpenAI、Anthropic 及引用仓库维护者均无隶属或背书关系。
 
 ---
 
-## 十条设计原则
-
-1. 基础先于方案。
-2. “第一”必须说明相对领域、尺度与目的。
-3. 先给命题分类，再允许推理。
-4. 机制和约束优先于概念标签。
-5. 推荐之前必须有结构不同的替代方案。
-6. 置信度之前必须有证伪条件。
-7. 优化之前必须显式给出价值与责任。
-8. 跨尺度结论之前必须建立尺度桥。
-9. 行动必须包含监测和复审触发器。
-10. 采用渐进式披露，不用信息堆砌制造深度假象。
-
----
-
-## 思想来源与致谢
-
-思想谱系和技术来源见：
-
-[`intellectual-lineage.md`](open-deep-mind/references/intellectual-lineage.md)
-
-仓库结构设计受到以下项目启发：
-
-- MIT 许可的 `danyuchn/first-principles-skill`：尤其是显式的需求删除阶段；
-- CC BY 4.0 许可的 `smixs/creative-director-skill`：尤其是阶段路由、方法选择、递归评价、输出纪律与强视觉 README；
-- 开放的 Agent Skills 规范。
-
-OpenDeepMind 的双引擎架构、基础章程、命题账本、严格度阶梯、尺度桥审计、质量体系、图形、脚本、案例和正文均为重新创作。详细署名见 [`NOTICE.md`](NOTICE.md)。
-
----
-
-## 许可
-
-- 代码、脚本、Schema 与工作流：Apache-2.0；
-- 方法论、文档与视觉资产：CC BY 4.0。
-
-详见 [`LICENSE.md`](LICENSE.md)。
-
----
-
-## 当前状态
-
-**Version 1.0.0 — 通用思想方法初始完整版本。**
-
-未来版本只有在明确记录以下内容后，才应改变核心规则：
-
-- 哪项假设失效；
-- 哪项证据或案例暴露了问题；
-- 修改了什么方法；
-- 预期改善什么；
-- 对兼容性有什么影响。
+<p align="center">
+<strong>基础资格 → 第一性原理 → 选择性 TRIZ 发明 → 物理验证 → 质量门 → 行动与修正</strong>
+</p>
