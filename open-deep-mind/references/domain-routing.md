@@ -1,6 +1,8 @@
 # Domain Routing
 
-The core method is domain-general; the evidence standard, model class, and stopping rule are not. Route by task.
+The core method is domain-general; evidence standards, model classes, and stopping rules are not. Route by task.
+
+> **TRIZ isolation rule:** no domain route below activates TRIZ by default. Canonical TRIZ is available only through explicit user activation and the isolated [`../triz/ROUTER.md`](../triz/ROUTER.md).
 
 ---
 
@@ -63,7 +65,7 @@ The core method is domain-general; the evidence standard, model class, and stopp
 
 ### Default methods
 
-- requirement deletion test;
+- requirement deletion/justification test;
 - functional decomposition;
 - constraint map;
 - minimum sufficient system;
@@ -71,13 +73,17 @@ The core method is domain-general; the evidence standard, model class, and stopp
 - FMEA/pre-mortem;
 - load, boundary, and recovery tests.
 
+### Optional explicit TRIZ route
+
+If and only if the user explicitly requests/accepts TRIZ for a physical or technical engineering contradiction, load [`../triz/ROUTER.md`](../triz/ROUTER.md). TRIZ is **not** a default engineering step.
+
 ### Required outputs
 
 - outcome and service-level contract;
-- architecture options;
+- architecture/design options;
 - trace from component to requirement;
 - failure and recovery model;
-- build/buy/reuse decision;
+- build/buy/reuse decision where applicable;
 - test plan.
 
 ### Red blockers
@@ -94,7 +100,7 @@ The core method is domain-general; the evidence standard, model class, and stopp
 
 ### Foundation questions
 
-- What customer or stakeholder outcome creates value?
+- What stakeholder outcome creates value?
 - What is scarce, substitutable, defensible, or regulated?
 - What assumptions drive unit economics?
 - Which advantages persist under competitor response?
@@ -129,6 +135,8 @@ The core method is domain-general; the evidence standard, model class, and stopp
 - average customer treated as a real person;
 - sunk cost as justification;
 - “optimal” without explicit objective and downside.
+
+**TRIZ policy:** do not use canonical TRIZ. Only an explicitly requested analogical transfer is allowed, and it must be labeled non-canonical.
 
 ---
 
@@ -172,6 +180,8 @@ The core method is domain-general; the evidence standard, model class, and stopp
 - aggregate benefit used to erase concentrated harm;
 - no implementation or enforcement model.
 
+**TRIZ policy:** never auto-route policy, law, or ethics through TRIZ.
+
 ---
 
 ## 5. Personal decisions and learning
@@ -213,6 +223,8 @@ The core method is domain-general; the evidence standard, model class, and stopp
 - advice beyond available personal context;
 - no consideration of health, safety, or dependent parties.
 
+**TRIZ policy:** never auto-route personal decisions through TRIZ.
+
 ---
 
 ## 6. Creative and product innovation
@@ -232,17 +244,20 @@ The core method is domain-general; the evidence standard, model class, and stopp
 ### Default methods
 
 - semantic reframing;
-- first-principles outcome;
-- TRIZ contradiction;
+- first-principles outcome reconstruction;
 - morphological analysis;
-- bisociation;
+- bisociation/structural analogy;
 - inversion/worst idea;
 - feasibility and usefulness calibration.
+
+### Optional explicit TRIZ route
+
+Only when the user explicitly requests/accepts TRIZ **and** the task contains a canonical physical/technical engineering system should [`../triz/ROUTER.md`](../triz/ROUTER.md) be loaded. Otherwise use the default creative methods above.
 
 ### Required outputs
 
 - insight or tension;
-- principle set;
+- explicit principle/constraint set;
 - multiple structurally distinct concepts;
 - one recommended concept;
 - proof-of-value experiment;
@@ -282,7 +297,7 @@ The core method is domain-general; the evidence standard, model class, and stopp
 
 \[
 \{\mathbf x,\mathbf u,\boldsymbol\theta,
-\mathbf F,\mathbf h,\mathbf g,\text{IC},\text{BC},
+\mathbf F,\mathbf h,\mathbf g,\mathrm{IC},\mathrm{BC},
 \mathcal O,\mathcal E\}
 \]
 
@@ -294,13 +309,38 @@ plus solver settings, provenance, validation, and validity range.
 - unknown parameter source;
 - no convergence check;
 - fitted closure called a law;
-- extrapolation beyond training/calibration domain without warning.
+- extrapolation beyond calibration domain without warning.
+
+TRIZ does not replace a model contract.
 
 ---
 
-## 8. Cross-domain routing
+## 8. Explicit TRIZ engineering route
 
-Use Dual Engine and multiple domain sections when:
+This is the **only shared-domain route that may activate canonical TRIZ**, and it still requires explicit user authorization.
+
+### Required preconditions
+
+- explicit TRIZ-family request/acceptance;
+- a physical or technical engineering system;
+- primary function and system boundary;
+- measured or otherwise justified harmful/insufficient effect;
+- hard constraints and safety conditions;
+- enough information to formulate a real problem model.
+
+### Route
+
+Load [`../triz/ROUTER.md`](../triz/ROUTER.md) and progressive-load only the resources reached by T1..T10.
+
+### Required return
+
+TRIZ concepts must return to [`../first-principles/METHOD.md`](../first-principles/METHOD.md) for physical/evidence/uncertainty/falsification validation.
+
+---
+
+## 9. Cross-domain routing
+
+Use `Φ→P` and multiple domain sections when:
 
 - a scientific model drives a policy decision;
 - a technical architecture encodes ethical trade-offs;
@@ -310,4 +350,6 @@ Use Dual Engine and multiple domain sections when:
 
 Cross-domain rule:
 
-> The strictest evidence, safety, and ethical standard among the active domains governs the shared decision.
+> **The strictest evidence, safety, legal, and ethical standard among the active domains governs the shared decision.**
+
+TRIZ activation does not override this rule.
