@@ -2,7 +2,7 @@
 
 > **Opt-in only.** This directory is loaded only after an explicit TRIZ/ARIZ request or explicit user acceptance of a suggested TRIZ route. The default OpenDeepMind route remains `First Philosophy → First Principles`.
 
-This is the complete TRIZ specialist subsystem for OpenDeepMind: **problem identification → problem modeling → inventive synthesis → evolution/roadmapping → concept substantiation**. It is intentionally separated from `FIRST_PRINCIPLES.md` so ordinary OpenDeepMind tasks do not pay the context cost of TRIZ.
+This is the complete TRIZ specialist subsystem for OpenDeepMind: **problem identification → problem modeling → inventive synthesis → psychological-inertia breaking → evolution/roadmapping → concept substantiation**. It is intentionally separated from `FIRST_PRINCIPLES.md` so ordinary OpenDeepMind tasks do not pay the context cost of TRIZ.
 
 ## Architecture
 
@@ -21,6 +21,7 @@ open-deep-mind/
     │   ├── trimming.md
     │   ├── feature_transfer.md
     │   ├── multiscreen_operator.md
+    │   ├── psychological_inertia_tools.md
     │   ├── ideality_ifr_resources.md
     │   ├── contradictions.md
     │   ├── 39_parameters.md
@@ -28,7 +29,7 @@ open-deep-mind/
     │   ├── contradiction_matrix.json   # full 39×39 matrix transcription
     │   ├── separation_principles.md
     │   ├── substance_field_modeling.md
-    │   ├── 76_standard_solutions.md    # all 76, official 5-class numbering
+    │   ├── 76_standard_solutions.md    # all 76, public MATRIZ 5-class numbering
     │   ├── ariz_85c.md
     │   ├── clone_problems.md
     │   ├── effects_and_fos.md
@@ -56,12 +57,13 @@ open-deep-mind/
 | **Problem models** | engineering contradiction, physical contradiction, Su-Field, generalized function, trimming/feature-transfer problems, ARIZ mini-problem |
 | **Classical solution knowledge** | 39 typical parameters, full contradiction matrix, 40 inventive principles, physical-contradiction separation, full 76 SIS, ARIZ-85C |
 | **Resource/ideality** | IFR vs ideal system, substance/field/space/time/information/supersystem resources, relative ideality |
-| **Knowledge transfer** | FOS, scientific-effects route, clone-problem transfer, multi-screen operator |
+| **Psychological inertia** | Nine Windows/System Operator, Size–Time–Cost, Smart Little People, contradiction intensification, inversion |
+| **Knowledge transfer** | FOS, scientific-effects route, clone-problem transfer, feature transfer, multi-screen operator |
 | **Evolution** | S-curve, MPV, modern TESE hierarchy, supersystem, trimming, completeness, flow, coordination, controllability, dynamization |
 | **Substantiation** | hard feasibility gates, First-Principles modeling, uncertainty, simulation/experiment/prototype, FMEA, prior art/patent search |
 | **Execution** | deterministic matrix lookup, module integrity validator, output template, worked examples |
 
-## Three-layer logic
+## Three-layer engineering logic
 
 ### Layer A — Problem identification
 
@@ -97,6 +99,8 @@ Feature-transfer problem             → contradictions / effects / ARIZ
 Roadmap question                     → S-curve + TESE
 ```
 
+When the problem frame is stuck rather than the engineering model being incomplete, load `psychological_inertia_tools.md` to deliberately change scale, time, cost assumptions, system screen, or micro-level representation. These operators generate reframings; they do not replace evidence.
+
 ### Layer C — Concept substantiation
 
 TRIZ generates **inventive concepts**, not proof. Every leading concept returns to OpenDeepMind First Principles for:
@@ -113,21 +117,22 @@ TRIZ generates **inventive concepts**, not proof. Every leading concept returns 
 
 ## Progressive loading
 
-The router loads only what the current problem needs. Examples:
+The router loads only what the current problem needs.
 
 ```text
-Explicit EC only
+Explicit engineering contradiction
 → contradictions.md + 39_parameters.md + matrix + 40_principles.md
 
 Physical contradiction
 → contradictions.md + separation_principles.md
-  (+ effects/FOS if required)
+  (+ effects/FOS or clone problems if required)
 
 Fouling / harmful interaction
 → function/flow/CECA → substance_field_modeling.md → 76_standard_solutions.md
 
 Deep stuck problem
 → ariz_85c.md + only the knowledge resources reached by ARIZ
+  (+ psychological_inertia_tools.md if framing inertia persists)
 
 Technology roadmap
 → s_curve_and_tese.md + evolution_trends.md
@@ -147,10 +152,24 @@ Complete module validation:
 python open-deep-mind/triz/scripts/validate_triz_module.py
 ```
 
+## Completeness boundary
+
+“Complete module” here means that the repository contains the **classical core TRIZ problem/solution structures plus the current public MATRIZ problem-identification, evolution, and concept-substantiation routes needed to execute a full engineering TRIZ workflow**.
+
+It deliberately does **not** pretend to contain:
+
+- every copyrighted TRIZ book or training text verbatim;
+- a proprietary commercial TRIZ knowledge base;
+- every known scientific effect as a static database;
+- an exhaustive patent corpus;
+- all variants created by every TRIZ school.
+
+For FOS, scientific effects, patents, current technical data, or publication-critical historical wording, the agent must retrieve and cite current/primary sources rather than fabricate missing knowledge.
+
 ## Provenance
 
-The classical implementation/data layer is adapted from the MIT-licensed [`Antropocosmist/triz-engineering-solver`](https://github.com/Antropocosmist/triz-engineering-solver), which documents matrix provenance through the MIT-licensed `kamil-szczepanik/TRIZ-Agents` transcription chain. The extended problem-identification, modern MATRIZ routing, First Philosophy/First Principles handoff, concept-substantiation layer, validators, and most explanatory text are newly authored for OpenDeepMind.
+The classical implementation/data layer is adapted from the MIT-licensed [`Antropocosmist/triz-engineering-solver`](https://github.com/Antropocosmist/triz-engineering-solver), which documents matrix provenance through the MIT-licensed `kamil-szczepanik/TRIZ-Agents` transcription chain. The extended problem-identification, modern MATRIZ routing, First Philosophy/First Principles handoff, psychological-inertia layer, concept-substantiation layer, validators, and most explanatory text are newly authored for OpenDeepMind.
 
-The 76 Standard Inventive Solutions file was cross-checked against the **official public MATRIZ 5-class / 76-item numbering**, rather than relying only on the reference repository's condensed working summary.
+The 76 Standard Inventive Solutions file was cross-checked against the **public MATRIZ 5-class / 76-item numbering**, rather than relying only on the reference repository's condensed working summary.
 
 See [`resources/sources.md`](resources/sources.md), [`VENDORED_LICENSE.md`](VENDORED_LICENSE.md), and the root [`NOTICE.md`](../../NOTICE.md).
