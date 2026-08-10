@@ -1,59 +1,63 @@
-# OpenDeepMind v1.2.0 — Completeness and Module-Isolation Audit
+# OpenDeepMind v1.2.0 — Completeness, Isolation, and Benchmark Audit
 
 ## Executive conclusion
 
-The repository is organized as **one Agent Skill with three isolated reasoning modules**:
+OpenDeepMind is one Agent Skill with:
 
 ```text
-SKILL.md router
-├── first-philosophy/    core
-├── first-principles/    core
-└── triz/                explicit-only specialist module
+three isolated reasoning modules
+├── first-philosophy/    Φ core
+├── first-principles/    P core
+└── triz/                T specialist, explicit-only
+
+one non-runtime evaluation plane
+└── evals/               cases, baselines, graders, metrics, aggregation
 ```
 
-The architecture deliberately separates:
+The architecture separates:
 
-- **foundation qualification** from **derivation/modeling**;
-- **derivation/modeling** from **inventive-search heuristics**;
-- **inventive concepts** from **physical/evidential validation**.
+- foundation qualification from derivation/modeling;
+- derivation/modeling from inventive-search heuristics;
+- inventive concepts from engineering/scientific validation;
+- live reasoning instructions from benchmark prompts and grader expectations.
 
-Repository completeness is enforced structurally with manifests, contracts, fixtures, validators, deterministic utilities, regression tests, CI, version metadata, provenance, and license boundaries.
+The repository now contains module manifests, contracts, fixtures, validators, deterministic TRIZ utilities, regression tests, CI, version/provenance/license controls, and a 60-case behavioral benchmark framework.
 
-This does **not** imply that philosophy has been exhausted, that a method is empirically superior on every task, or that green software tests scientifically validate a real-world conclusion.
-
----
-
-## 1. Defects found during the v1.2.0 audit
-
-| Finding | Severity | Why it mattered | Resolution |
-|---|---|---|---|
-| TRIZ had a full subdirectory but Φ/P remained monolithic root files | High | asymmetric architecture and method-body coupling risk | created isolated `first-philosophy/` and `first-principles/` modules |
-| “P9” was implemented as `P0..P9` | High | name/protocol mismatch; validators/docs could disagree | normalized to exactly `P1..P9`; derive+falsify combined in P8 |
-| “T10” had earlier `T0..T10` semantics | High | same protocol numbering ambiguity | normalized canonical TRIZ router to `T1..T10` |
-| shared creative route could list TRIZ as a default construction method | High | violated explicit-only TRIZ requirement | removed TRIZ from all default domain routes; added one explicit engineering route |
-| First Philosophy and First Principles lacked manifests/schemas/fixtures/validators | High | no machine-auditable module contract | added complete module contracts and validators |
-| root `SKILL.md` duplicated too much method behavior | Medium | increased context cost and weakened isolation | rewritten as thin router; detailed methods moved to canonical modules |
-| root validator checked files/syntax but not module contracts | High | “present” could be mistaken for “complete” | validator now checks modules, aliases, versions, links and executes module validators |
-| root validator did not validate HTML image/link paths | Medium | README images could fail while validator stayed green | added relative `src`/`href` validation |
-| SVG count was root-only | Low | nested bilingual diagram sets could be miscounted | recursive SVG inventory |
-| proposition ledger had no dependency-cycle detection | High | circular reasoning graph could pass validation | added graph cycle detection, forward-reference and ID collision checks |
-| historical contradiction-matrix transcription contains a duplicate principle at cell `19,9` | Medium | silent use would misrepresent a historical lookup | preserve raw vendored value; document anomaly; normalize at lookup time; regression-test it |
-| deterministic lookup existed for matrix but not 76 SIS | Medium | agent could rely on memory for standard-solution IDs | added `lookup_standard_solution.py` |
-| maintenance docs referenced old two-file architecture | Medium | future changes could reintroduce coupling | rewrote AGENTS/CONTRIBUTING/README/CHANGELOG/CITATION paths and rules |
+**Important status distinction:** the benchmark framework is implemented, but no real behavioral score has been published. Authored cases are measurement definitions, not evidence that OpenDeepMind outperforms a baseline.
 
 ---
 
-## 2. Canonical architecture
+## 1. Major defects found and repaired
+
+| Finding | Severity | Resolution |
+|---|---:|---|
+| TRIZ had a full subdirectory while Φ/P remained monolithic root files | High | created isolated `first-philosophy/` and `first-principles/` modules |
+| P9 was implemented as `P0..P9` | High | normalized to exactly `P1..P9` |
+| T10 had earlier `T0..T10` semantics | High | normalized to exactly `T1..T10` |
+| shared creative route could treat TRIZ as a default method | High | removed TRIZ from all default domain routes |
+| Φ/P lacked manifests/schemas/fixtures/validators | High | added module contracts and independent validators |
+| root `SKILL.md` duplicated method behavior | Medium | converted to thin progressive-disclosure router |
+| root validator checked presence/syntax but not module contracts | High | upgraded to architecture/version/module/link validator and executes owned validators |
+| HTML image/link paths were not checked | Medium | added local `src`/`href` validation |
+| proposition ledger allowed dependency cycles | High | added ID/reference/forward-reference/cycle checks |
+| contradiction-matrix transcription contains known duplicate principle IDs | Medium | raw vendored data preserved; anomalies registered; lookup normalization is explicit |
+| no deterministic lookup existed for 76 SIS | Medium | added `lookup_standard_solution.py` |
+| maintenance docs described old architecture | Medium | synchronized README/AGENTS/CONTRIBUTING/CHANGELOG/CITATION/license paths |
+| methodology quality had no behavioral evaluation layer | High | added 60-case benchmark framework with baselines, split discipline, schemas, rubric and aggregation |
+| initial benchmark design could duplicate full OpenDeepMind and explicit-TRIZ behavior | Medium | replaced with a no-TRIZ ablation on the same explicit-TRIZ cases |
+| initial benchmark aggregator only discovered existing runs | High | manifest now enumerates expected run slots; missing runs block publication readiness |
+
+---
+
+## 2. Canonical runtime architecture
 
 ### Root router
 
 `SKILL.md` owns only:
 
-- activation;
-- route selection;
+- activation and route selection;
 - common intake;
-- shared proposition types;
-- evidence discipline;
+- shared claim/evidence discipline;
 - shared quality/falsification expectations;
 - module handoffs.
 
@@ -79,9 +83,9 @@ Invariant:
 
 Isolation:
 
-- no TRIZ routing/import in canonical method;
-- outputs Foundation Charter;
-- may hand qualified foundations to P.
+- canonical method contains no TRIZ procedure;
+- output is a Foundation Charter;
+- qualified foundations may hand off to P.
 
 ### Module P — First Principles
 
@@ -105,10 +109,10 @@ P9 = P1..P9
 
 Isolation:
 
-- no TRIZ procedure in canonical method;
-- TRIZ cannot be auto-loaded from P;
-- receives Foundation Charter when needed;
-- validates concepts returned by TRIZ.
+- canonical method contains no TRIZ procedure;
+- TRIZ cannot auto-load;
+- may receive a Foundation Charter;
+- validates concepts returned by T.
 
 ### Module T — TRIZ Engineering
 
@@ -133,53 +137,52 @@ activation = explicit-only
 Isolation:
 
 - not part of default Φ/P route;
-- no authority to declare generated concepts validated;
-- mandatory return to P for physics/evidence/safety/uncertainty/falsification.
+- no authority to call a generated concept validated;
+- mandatory return to P for physical/evidential/safety/uncertainty/falsification checks.
+
+### Compatibility aliases
+
+```text
+FIRST_PHILOSOPHY.md -> first-philosophy/METHOD.md
+FIRST_PRINCIPLES.md -> first-principles/METHOD.md
+TRIZ_ENGINEERING.md -> triz/ROUTER.md
+```
+
+They are compatibility entrypoints only and must remain thin.
 
 ---
 
-## 3. Handoff contracts
+## 3. Runtime handoff contracts
 
 ```text
 Φ -> P
 artifact: Foundation Charter
 ```
 
-Transferred information:
-
-- definitions;
-- ontology;
-- epistemic status;
-- logic/causal commitments;
-- boundary/scale/time;
-- values/duties;
-- accepted/conditional foundations;
-- unresolved unknowns.
+Transfers definitions, ontology, evidence status, logic/causal commitments, boundary/scale/time, values/duties, qualified foundations and unresolved unknowns.
 
 ```text
 P -> Φ
-trigger: undefined terms, unstable ontology, hidden value, invalid boundary/foundation
+trigger: unstable definition, ontology, value or boundary/foundation
 ```
 
 ```text
 P -> T
-trigger: explicit user TRIZ activation only
+trigger: explicit user TRIZ request/acceptance only
 ```
 
 ```text
 T -> P
-artifact: inventive concepts + mechanism/resource/problem-resolution + secondary contradictions + validation requirements
+artifact: inventive concepts + mechanism/resource/problem resolution + secondary contradictions + validation requirements
 ```
 
-A handoff transfers an artifact/status. It does not merge method bodies.
+A handoff transfers artifacts/status. It does not merge method bodies.
 
 ---
 
 ## 4. Shared reasoning/data infrastructure
 
 ### Proposition ledger
-
-Canonical shared types:
 
 ```text
 D Definition
@@ -196,24 +199,25 @@ The ledger validator checks:
 
 - ID format/type prefix;
 - duplicate claim/inference IDs;
-- status and confidence ranges;
-- known dependency/premise IDs;
+- status/confidence ranges;
+- dependency and premise references;
 - decision-trace references;
 - dependency cycles.
 
 ### Shared quality gate
 
-Red blockers remain stronger than numeric quality scores. Software validators do not convert an uncertain empirical claim into a verified one.
+Red blockers dominate numeric quality scores. A valid data structure does not make an empirical claim verified.
 
 ### Version authority
 
-Root `VERSION` is canonical. The repository validator checks it against:
+Root `VERSION` remains canonical and is checked against:
 
 - `SKILL.md` metadata;
 - `MODULES.json`;
 - three module manifests;
 - `CITATION.cff`;
-- README version badge.
+- README version badge;
+- benchmark `skill_version_target`.
 
 ---
 
@@ -221,153 +225,206 @@ Root `VERSION` is canonical. The repository validator checks it against:
 
 The isolated TRIZ subsystem includes:
 
-- problem-identification layer;
+- modern problem-identification layer;
+- function/flow/CECA/trimming/feature transfer;
 - 39 parameters;
 - 40 inventive principles;
 - 39×39 contradiction-matrix transcription with 1190 populated cells;
 - physical-contradiction separation;
 - Su-Field modeling;
-- 76 Standard Inventive Solutions with five-class count checks;
+- 76 Standard Inventive Solutions with five-class checks;
 - ARIZ-85C nine-part structure;
 - psychological-inertia tools;
-- FOS/scientific effects/clone-problem routes;
+- FOS/scientific-effects/clone-problem routes;
 - S-curve and TESE/evolution routes;
 - concept substantiation;
-- examples;
+- worked examples;
 - deterministic matrix/SIS lookup;
-- data anomaly/provenance registry.
+- anomaly/provenance registry.
 
-### Matrix policy
-
-Historical/transcribed data are not silently rewritten. If a known transcription anomaly exists:
-
-1. raw vendored value remains visible;
-2. anomaly is documented with status/provenance;
-3. deterministic lookup may normalize the value for use;
-4. output reports normalization;
-5. publication-critical historical claims require independent source verification.
+Historical/transcribed data are not silently rewritten. Known anomalies are registered separately, raw values remain visible, deterministic normalization is reported, and publication-critical historical claims require source verification.
 
 ---
 
-## 6. Automated verification coverage
+## 6. Behavioral benchmark framework
 
-### Module validators
+The evaluation plane is deliberately outside runtime:
+
+```text
+evals/
+├── README.md
+├── evals.json
+├── evals.schema.json
+├── benchmark-config.json
+├── run-record.schema.json
+├── grading.schema.json
+├── benchmark.schema.json
+├── rubric.md
+└── scripts/
+    ├── validate_evals.py
+    ├── create_workspace.py
+    └── aggregate_benchmark.py
+```
+
+It is **not listed in `MODULES.json`** and must never be loaded to answer a live task.
+
+### Initial case set
+
+```text
+60 cases
+├── 12 routing / activation
+├── 10 First Philosophy
+├── 12 First Principles
+├──  8 Dual Engine Φ→P
+├── 10 explicit TRIZ
+└──  8 TRIZ near-miss / anti-trigger
+
+36 train / 12 validation / 12 holdout
+3 repetitions by default
+```
+
+### Four configurations
+
+```text
+no_skill
+first_principles_baseline
+opendeepmind_full
+opendeepmind_no_triz_ablation   [TRIZ-positive only]
+```
+
+The external first-principles baseline is commit-pinned. `opendeepmind_full` represents production behavior. The no-TRIZ ablation disables T and forces P on the same explicit-TRIZ cases solely to estimate the marginal contribution of T; routing accuracy is not scored for this intentional intervention.
+
+### Declared comparisons
+
+```text
+OpenDeepMind full vs no skill
+OpenDeepMind full vs pinned first-principles baseline
+OpenDeepMind full vs no-TRIZ ablation [TRIZ-positive]
+```
+
+### Key benchmark metrics
+
+- case/assertion pass rate;
+- red-blocker rate;
+- routing accuracy;
+- TRIZ false-activation rate;
+- module-leakage rate;
+- semantic judge score;
+- rival-model coverage;
+- falsifier coverage;
+- token/time cost;
+- paired common-case deltas;
+- optional blind pairwise result.
+
+### Anti-gaming rules
+
+- holdout cases cannot be converted into case-specific Skill instructions;
+- comparable configurations use the same model/settings/tools;
+- external baselines are commit-pinned;
+- authored cases are not scores;
+- no synthetic benchmark score may be published;
+- public scores require raw run/grading/timing/model metadata.
+
+### Completeness of an experiment
+
+`create_workspace.py` writes every expected run slot to `manifest.json`.
+
+`aggregate_benchmark.py` uses those expected slots as the denominator. A run is incomplete when either `run_record.json` or `grading.json` is missing or metadata is inconsistent.
+
+Therefore a partially populated workspace cannot be labeled `publication_ready=true` merely because some run files exist.
+
+---
+
+## 7. Automated verification coverage
 
 ```bash
 python open-deep-mind/first-philosophy/scripts/validate_module.py
 python open-deep-mind/first-principles/scripts/validate_module.py
 python open-deep-mind/triz/scripts/validate_triz_module.py
-```
-
-### Repository and ledger
-
-```bash
+python open-deep-mind/evals/scripts/validate_evals.py
 python open-deep-mind/scripts/validate_repository.py .
 python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-ledger.json
-```
-
-### Deterministic TRIZ smoke tests
-
-```bash
 python open-deep-mind/triz/scripts/lookup_matrix.py --improve 1 --worsen 3 --json
 python open-deep-mind/triz/scripts/lookup_standard_solution.py 1.2.1 --json
-```
-
-### Regression and syntax
-
-```bash
 python -m unittest discover -s open-deep-mind/tests -p "test_*.py"
 python -m compileall -q open-deep-mind
 ```
 
-The regression suite tests:
+Regression coverage includes:
 
-- module registry and activation boundaries;
+- module registry and isolation;
 - thin compatibility aliases;
-- no TRIZ token in canonical Φ/P method bodies;
-- domain router does not default to TRIZ;
-- Φ8, P9, T10 validator outputs;
-- matrix anchor lookup;
-- known matrix anomaly normalization;
-- SIS lookup;
-- valid example ledger;
-- rejection of a cyclic claim dependency graph.
+- no TRIZ in canonical Φ/P method bodies;
+- no default TRIZ domain route;
+- Φ8/P9/T10 invariants;
+- TRIZ matrix anchors/anomaly normalization/SIS lookup;
+- ledger validity and cyclic-dependency rejection;
+- 60-case benchmark distribution;
+- 36/12/12 split;
+- baseline commit pin;
+- production explicit-only TRIZ policy;
+- no-TRIZ ablation definition;
+- eval layer excluded from runtime modules.
 
-GitHub Actions executes these layers on push and pull request.
+GitHub Actions is configured to execute these structural checks on pushes and pull requests.
 
-**Status semantics:** a configured validator is not the same as a successful run, and a successful run is not scientific acceptance. Check the current commit's CI result before release/tagging.
-
----
-
-## 7. Completeness criteria by module
-
-| Criterion | Φ | P | TRIZ |
-|---|---:|---:|---:|
-| canonical entry | yes | yes | yes |
-| machine manifest | yes | yes | yes |
-| explicit activation | yes | yes | explicit-only |
-| input contract | yes | yes | yes |
-| output contract | Foundation Charter | model/decision | concept/validation handoff |
-| protocol invariant | Φ0..Φ7 | P1..P9 | T1..T10 |
-| schema/structured contract | yes | yes | structured resources/output |
-| fixture/examples | yes | yes | four worked examples |
-| isolated validator | yes | yes | yes |
-| CI coverage | yes | yes | yes |
-| prohibited dependency rules | TRIZ forbidden | TRIZ auto-load forbidden | must return to P |
-| provenance/license | original lineage | original lineage | explicit MIT/source map |
+**Status semantics:** CI configuration is not the same as an observed successful run. A successful software run is also not scientific acceptance of a real-world conclusion.
 
 ---
 
 ## 8. Remaining non-blocking limitations
 
-These are boundaries rather than hidden defects:
+### 8.1 Real behavioral runs are not yet published
 
-### 8.1 No software test can prove a methodology is universally superior
-
-The repository has structural/unit/regression validation. It does not yet constitute a large blinded human/agent benchmark proving that OpenDeepMind improves outcomes in every domain.
-
-A future evaluation package should compare:
+The benchmark framework now exists, replacing the previous “future benchmark” gap. What is still missing is the actual controlled experiment:
 
 ```text
-no skill
-vs lightweight first-principles skill
-vs OpenDeepMind Φ/P
-vs explicit TRIZ where appropriate
+chosen model/provider/version
+same run settings across comparable configurations
+raw responses
+raw grading artifacts
+3 repetitions
+aggregate benchmark.json
+blind/human pairwise review where used
 ```
 
-on measurable errors such as unsupported claims, causal overreach, scale jumps, missing rivals, and decision traceability.
+Until these artifacts exist, the repository must say **“benchmark framework ready; no published behavioral score yet.”**
 
-### 8.2 Full JSON-Schema conformance is represented but core validation is dependency-free
+### 8.2 No finite benchmark proves universal superiority
 
-The repository ships JSON Schema files, while core Python validators perform explicit structural/semantic checks without requiring the external `jsonschema` package. External standards validation may be added in release CI without turning it into a runtime dependency.
+Even after real runs, results apply to the disclosed task distribution, models, settings and graders. They do not prove universal dominance over every method/domain/model.
 
-### 8.3 Dynamic knowledge should not be frozen into the repository
+### 8.3 Full JSON-Schema conformance and dependency-free runtime
 
-Current laws, standards, product data, scientific effects, patents, software versions, and publication claims must be retrieved and verified when used. A static skill cannot make time-sensitive facts permanently current.
+The repository ships JSON Schema contracts while core validators remain dependency-free. Optional standards-conformance validation can be added to release CI without making it a runtime dependency.
 
-### 8.4 “Complete TRIZ” has a defined scope
+### 8.4 Dynamic knowledge remains dynamic
 
-It means a complete executable **core engineering TRIZ workflow** using classical core structures plus public modern MATRIZ-style problem identification/evolution/substantiation routes. It does not mean copying every copyrighted book, proprietary training system, patent database, or every school-specific variant.
+Current laws, standards, scientific results, patents, software versions, product data and technical effects must be retrieved and verified when used. Static Skill files cannot make such facts permanently current.
 
-### 8.5 Validation is conditional on inputs
+### 8.5 “Complete TRIZ” has a defined scope
 
-A mathematically valid or structurally valid output can still be wrong when input evidence, boundary assumptions, material data, measurement conditions, or objectives are wrong. This is why falsifiers, provenance, uncertainty, and review triggers are mandatory.
+It means an executable core engineering TRIZ workflow with classical structures plus public modern problem-identification/evolution/substantiation routes. It does not mean copying all copyrighted books, proprietary training systems, patent databases or school-specific variants.
+
+### 8.6 Input quality still matters
+
+A structurally valid output can be wrong when evidence, boundary conditions, measurements, data or objectives are wrong. This is why provenance, uncertainty, rivals, falsifiers and review triggers remain mandatory.
 
 ---
 
 ## 9. Release decision rule
 
-A v1.2.x release is structurally releasable when:
+A v1.2.x repository state is structurally releasable only when the owned structural validators/tests pass.
+
+A future benchmark-result release additionally requires:
 
 ```text
-all required files present
-AND three module validators return 0
-AND repository validator returns 0
-AND ledger fixture returns 0
-AND matrix/SIS smoke tests return 0
-AND unittest returns 0
-AND compileall returns 0
-AND current CI reports success
+all expected benchmark run slots complete
+AND run/grading metadata consistent
+AND aggregate benchmark generated
+AND model/settings/repository commit recorded
+AND no synthetic scores
+AND current CI observed successful
 ```
 
-Scientific/engineering acceptance of a concrete result remains a separate state requiring domain evidence.
+The benchmark framework is now implemented; actual behavioral evidence remains a separate experiment to execute before claiming performance gains.
