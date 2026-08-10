@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenDeepMind Aggregated Benchmark",
+  "type": "object",
+  "required": ["benchmark_version", "generated_from", "configurations"],
+  "properties": {
+    "benchmark_version": {"type": "string"},
+    "generated_from": {"type": "string"},
+    "configurations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "runs": {"type": "integer", "minimum": 0},
+          "assertion_pass_rate": {"type": ["number", "null"]},
+          "red_blocker_rate": {"type": ["number", "null"]},
+          "routing_accuracy": {"type": ["number", "null"]},
+          "triz_false_activation_rate": {"type": ["number", "null"]},
+          "module_leakage_rate": {"type": ["number", "null"]},
+          "judge_score_mean": {"type": ["number", "null"]},
+          "rival_model_coverage": {"type": ["number", "null"]},
+          "falsifier_coverage": {"type": ["number", "null"]},
+          "mean_tokens": {"type": ["number", "null"]},
+          "mean_duration_ms": {"type": ["number", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "deltas_vs_no_skill": {"type": "object"}
+  },
+  "additionalProperties": true
+}
