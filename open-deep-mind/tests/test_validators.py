@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -30,6 +31,7 @@ class ModuleValidationTests(unittest.TestCase):
         registry = json.loads((REPO / "open-deep-mind/MODULES.json").read_text(encoding="utf-8"))
         modules = {m["id"]: m for m in registry["modules"]}
         self.assertEqual(set(modules), {"first-philosophy", "first-principles", "triz"})
+        self.assertNotIn("evals", modules)
         self.assertEqual(modules["first-philosophy"]["entry"], "first-philosophy/METHOD.md")
         self.assertEqual(modules["first-principles"]["entry"], "first-principles/METHOD.md")
         self.assertEqual(modules["triz"]["entry"], "triz/ROUTER.md")
@@ -61,6 +63,38 @@ class ModuleValidationTests(unittest.TestCase):
         self.assertIn("TRIZ isolation rule", text)
         self.assertIn("Explicit TRIZ engineering route", text)
         self.assertNotIn("- TRIZ contradiction", text)
+
+    def test_behavioral_eval_definitions(self) -> None:
+        proc = self.assert_ok("open-deep-mind/evals/scripts/validate_evals.py")
+        data = json.loads(proc.stdout.strip().splitlines()[-1])
+        self.assertEqual(data["cases"], 60)
+        self.assertEqual(data["splits"], {"train": 36, "validation": 12, "holdout": 12})
+        self.assertEqual(data["categories"], {
+            "routing": 12,
+            "first-philosophy": 10,
+            "first-principles": 12,
+            "dual-engine": 8,
+            "triz-positive": 10,
+            "triz-negative": 8,
+        })
+        self.assertGreaterEqual(data["repetitions"], 3)
+
+    def test_behavioral_eval_is_measurement_not_runtime_module(self) -> None:
+        config = json.loads((REPO / "open-deep-mind/evals/benchmark-config.json").read_text(encoding="utf-8"))
+        self.assertFalse(config["publication"]["publish_scores_before_real_runs"])
+        self.assertEqual(config["splits"], {"train": 36, "validation": 12, "holdout": 12})
+        cfgs = {c["id"]: c for c in config["configurations"]}
+        self.assertEqual(
+            cfgs["first_principles_baseline"]["commit"],
+            "5623c2fa7c5a6ab47eee0d308431437f52c6ff1e",
+        )
+        self.assertEqual(cfgs["opendeepmind_core"]["triz_policy"], "explicit-only")
+
+        eval_data = json.loads((REPO / "open-deep-mind/evals/evals.json").read_text(encoding="utf-8"))
+        splits = Counter(case["split"] for case in eval_data["evals"])
+        self.assertEqual(splits, Counter({"train": 36, "validation": 12, "holdout": 12}))
+        self.assertTrue(all(case["triz_allowed"] is False for case in eval_data["evals"] if case["category"] != "triz-positive"))
+        self.assertTrue(all(case["triz_allowed"] is True for case in eval_data["evals"] if case["category"] == "triz-positive"))
 
     def test_first_philosophy_module(self) -> None:
         proc = self.assert_ok("open-deep-mind/first-philosophy/scripts/validate_module.py")
