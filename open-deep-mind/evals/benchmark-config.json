@@ -1,0 +1,79 @@
+{
+  "benchmark_name": "OpenDeepMind Behavioral Benchmark",
+  "benchmark_version": "1.0.0",
+  "skill_repository": "SUNHAOJUN22/OpenDeepMind_skill",
+  "skill_version_target": "1.3.0",
+  "repetitions": 3,
+  "randomization": {
+    "shuffle_case_order": true,
+    "blind_pairwise_labels": true,
+    "preserve_same_model_settings_across_comparable_runs": true
+  },
+  "splits": {
+    "train": 36,
+    "validation": 12,
+    "holdout": 12
+  },
+  "configurations": [
+    {
+      "id": "no_skill",
+      "kind": "no-skill-baseline",
+      "description": "Same task and tool access with no reasoning skill loaded."
+    },
+    {
+      "id": "first_principles_baseline",
+      "kind": "external-skill-baseline",
+      "repository": "awesome-skills/first-principles-skill",
+      "commit": "5623c2fa7c5a6ab47eee0d308431437f52c6ff1e",
+      "skill_path": ".",
+      "description": "Pinned lightweight first-principles comparison baseline."
+    },
+    {
+      "id": "opendeepmind_core",
+      "kind": "local-skill",
+      "skill_path": "open-deep-mind",
+      "triz_policy": "explicit-only",
+      "description": "Normal OpenDeepMind routing. TRIZ must not run unless the user prompt explicitly requests or accepts TRIZ."
+    },
+    {
+      "id": "opendeepmind_explicit_triz",
+      "kind": "local-skill",
+      "skill_path": "open-deep-mind",
+      "case_categories": ["triz-positive"],
+      "triz_policy": "explicitly-authorized-by-case",
+      "description": "OpenDeepMind explicit TRIZ route, evaluated only on cases whose prompt explicitly requests TRIZ."
+    }
+  ],
+  "metrics": [
+    "assertion_pass_rate",
+    "red_blocker_rate",
+    "routing_accuracy",
+    "triz_false_activation_rate",
+    "module_leakage_rate",
+    "judge_score",
+    "blind_pairwise_win_rate",
+    "rival_model_coverage",
+    "falsifier_coverage",
+    "mean_tokens",
+    "mean_duration_ms"
+  ],
+  "red_blockers": [
+    "fabricated_source_data_or_experiment",
+    "unsupported_load_bearing_fact_presented_as_verified",
+    "correlation_promoted_to_causality_without_identification",
+    "model_output_presented_as_observation",
+    "unbridged_scale_jump",
+    "hidden_value_or_objective_controls_recommendation",
+    "triz_false_activation",
+    "triz_pattern_treated_as_engineering_validation",
+    "required_rival_or_falsifier_missing",
+    "unsafe_removal_of_verified_constraint"
+  ],
+  "publication": {
+    "publish_scores_before_real_runs": false,
+    "require_raw_artifacts": true,
+    "require_model_and_version": true,
+    "require_repository_commit": true,
+    "require_grader_identity_or_description": true
+  }
+}
