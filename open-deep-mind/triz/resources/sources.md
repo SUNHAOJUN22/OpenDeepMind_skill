@@ -1,6 +1,6 @@
 # TRIZ Sources and Provenance / TRIZ 来源与证据图谱
 
-This file is the source map for the OpenDeepMind TRIZ module. It distinguishes historical/classical lineage, current MATRIZ terminology, and software/data provenance.
+This file is the source map for the OpenDeepMind TRIZ module. It distinguishes historical/classical lineage, current MATRIZ terminology, software/data provenance, and modern implementations.
 
 ## 1. Historical TRIZ lineage
 
@@ -8,9 +8,13 @@ Primary/classical books commonly used for TRIZ theory:
 
 - Genrich Altshuller, *Creativity as an Exact Science*.
 - Genrich Altshuller, *The Innovation Algorithm*.
-- Classical works on contradictions, inventive principles, ARIZ, substance–field resources, standard inventive solutions, ideality/IFR, and engineering-system evolution.
+- Classical works on contradictions, inventive principles, ARIZ, substance–field resources, standard inventive solutions, ideality/IFR, engineering-system evolution, system operator, and psychological-inertia tools.
 
 For exact historical wording, dates, translations, and standard/ARIZ numbering, use the selected primary edition rather than relying on secondary paraphrases.
+
+Official Altshuller Foundation English portal:
+
+- https://www.altshuller.ru/world/eng/index.asp
 
 ## 2. MATRIZ public knowledge base — current operational terminology
 
@@ -41,15 +45,29 @@ Primary current web reference:
 
 ### ARIZ-85C source/template
 
-MATRIZ provides public ARIZ-85C material and an editable template from its ARIZ knowledge-base pages. For exact algorithm text, consult that source directly.
+MATRIZ provides public ARIZ-85C material and an editable template from its ARIZ knowledge-base pages. For exact algorithm text, consult that source directly. The MATRIZ ARIZ pages also explicitly frame ARIZ as a tool for overcoming psychological inertia and revealing system/supersystem resources.
 
-## 3. Altshuller Institute
+## 3. Altshuller Institute / TRIZ Innovation Center
 
-- Altshuller Institute: https://triz.org/
-- 40 Inventive Principles: https://triz.org/principles/
-- Contradictions / separation: https://triz.org/contradictions/
+- Altshuller Institute: https://www.aitriz.org/
+- Altshuller Institute TRIZ Body of Knowledge: https://www.aitriz.org/triz/triz-body-of-knowledge
+- TRIZ Innovation Center / 40 Principles: https://triz.org/principles/
+- TRIZ contradictions / separation: https://triz.org/contradictions/
+- TRIZ ARIZ overview: https://triz.org/ariz/
+- Altshuller Institute Nine Windows article: https://w.aitriz.org/blog/altshuller-institute-blog/nine-windows-technique-framework-for-the-future
 
-These pages are useful cross-checks for classical 40-principle and contradiction/separation terminology.
+These sources are useful cross-checks for classical TRIZ terminology, ARIZ, contradiction/separation, Nine Windows/System Operator, and psychological-inertia practices.
+
+### Psychological-inertia operators
+
+Classical TRIZ literature and Altshuller Institute materials describe deliberate tools for breaking psychological inertia, including:
+
+- Nine Windows / System Operator;
+- Size–Time–Cost (STC) operator;
+- Smart Little People / little-men modeling;
+- contradiction intensification inside ARIZ.
+
+OpenDeepMind consolidates these as auxiliary thinking tools in `psychological_inertia_tools.md`. They generate reframings and mechanism hypotheses; they do not substitute for engineering evidence.
 
 ## 4. Software/data provenance
 
@@ -73,7 +91,7 @@ OpenDeepMind used this repository as an implementation reference for:
 - evolution trends;
 - worked-example structure.
 
-OpenDeepMind did **not** simply nest that repository. It adds a separate modern problem-identification layer, explicit First Philosophy/First Principles handoff, evidence/uncertainty discipline, concept substantiation, validation scripts, and stricter provenance labels.
+OpenDeepMind did **not** simply nest that repository. It adds a separate modern problem-identification layer, explicit First Philosophy/First Principles handoff, evidence/uncertainty discipline, concept substantiation, progressive loading, validation scripts, and stricter provenance labels.
 
 ### Contradiction matrix transcription chain
 
@@ -81,20 +99,26 @@ The reference repository documents that its matrix data were imported from the M
 
 When a project requires publication-grade historical matrix fidelity, independently compare anchor cells with a primary/reference edition before citing individual cell ordering as canonical.
 
-## 5. Academic/modern implementation references
+## 5. Academic and modern AI-assisted implementations
 
-Useful research directions include multi-agent TRIZ systems, LLM-assisted contradiction formulation, function-oriented search, and hybrid TRIZ–engineering simulation workflows. Treat recent papers as implementations/experiments, not authorities replacing TRIZ primary sources.
+Recent work is useful for evaluating how TRIZ can be operationalized with AI, while not replacing primary TRIZ theory. Examples include:
+
+- Jiang & Luo, **AutoTRIZ: Artificial Ideation with TRIZ and Large Language Models** (2024), arXiv:2403.13002 — LLM-assisted contradiction detection and TRIZ report generation.
+- Szczepanik et al., **TRIZ Agents: A Multi-Agent LLM Approach for TRIZ-Based Innovation** (2025), arXiv:2506.18783 — multi-agent TRIZ implementation and matrix-data lineage used by the referenced GitHub ecosystem.
+
+Use these as implementation/evaluation references, not authorities for changing the historical TRIZ definitions.
 
 ## 6. Evidence policy inside OpenDeepMind
 
 Every TRIZ output must distinguish:
 
 ```text
-historical theory
+historical TRIZ theory
 current MATRIZ operational convention
+Altshuller Institute / other TRIZ-school convention
 matrix-derived lookup
 source-repository implementation detail
-agent inference
+agent inference / psychological-inertia reframe
 current engineering evidence
 ```
 
