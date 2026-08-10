@@ -10,9 +10,12 @@ OpenDeepMind_skill is one portable Agent Skill with **three isolated reasoning m
 
 The root `open-deep-mind/SKILL.md` is a thin router. Shared evidence, quality, templates, and ledgers live in `references/`, `assets/`, and `scripts/`.
 
+`open-deep-mind/evals/` is a **behavioral evaluation layer**, not a fourth reasoning module. It must never be loaded as a problem-solving method.
+
 Architecture contract: `open-deep-mind/ARCHITECTURE.md`  
 Machine-readable registry: `open-deep-mind/MODULES.json`  
-Canonical version: root `VERSION`
+Canonical version: root `VERSION`  
+Benchmark entrypoint: `BENCHMARK.md`
 
 ## Required reading order
 
@@ -30,6 +33,13 @@ For TRIZ changes also read:
 - `open-deep-mind/triz/resources/sources.md`
 - `open-deep-mind/triz/VENDORED_LICENSE.md`
 - `NOTICE.md`
+
+For benchmark/eval changes also read:
+
+- `BENCHMARK.md`
+- `open-deep-mind/evals/README.md`
+- `open-deep-mind/evals/benchmark-config.json`
+- `open-deep-mind/evals/rubric.md`
 
 ## Module invariants
 
@@ -69,6 +79,20 @@ The following root files are aliases only and must stay thin:
 
 Do not put canonical method text back into them.
 
+## Benchmark invariants
+
+The behavioral benchmark is intended to measure the reasoning modules, not teach them answers.
+
+- `open-deep-mind/evals/evals.json` is the canonical authored case set.
+- Initial benchmark size is 60 cases with distribution `12/10/12/8/10/8` across routing, Φ, P, Φ→P, explicit TRIZ, and TRIZ near-miss categories.
+- Split is fixed at `36 train / 12 validation / 12 holdout` for benchmark v1.0.0.
+- Holdout prompts must not be converted into case-specific Skill instructions.
+- Keep the pinned external baseline commit in `benchmark-config.json` unless a benchmark-version change records the migration.
+- Never publish synthetic or placeholder benchmark scores.
+- A public result requires raw run/grading/timing artifacts, model/version/settings, repository commit, repetitions, and grader description.
+- TRIZ false-activation and module leakage are first-class failure metrics, not optional commentary.
+- Evals are not a reasoning module and must not be registered in `MODULES.json`.
+
 ## Shared invariants
 
 - Keep `open-deep-mind/SKILL.md` below 500 lines and route to canonical module entries.
@@ -89,6 +113,8 @@ Do not put canonical method text back into them.
 - New method cards state: use case, non-use case, procedure, output, failure risk, evidence/source.
 - New schemas need a valid fixture and validator coverage.
 - New module functionality requires manifest + validator + CI coverage.
+- New benchmark cases must be realistic, non-duplicative, and target a defined failure mode.
+- Do not make benchmark assertions brittle by requiring exact prose when semantic equivalence is acceptable.
 - New diagrams should be editable SVG where practical, readable, and accessible with `title`/`desc`.
 - Do not copy third-party text/data without license and provenance review.
 
@@ -102,6 +128,7 @@ python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-l
 python open-deep-mind/first-philosophy/scripts/validate_module.py
 python open-deep-mind/first-principles/scripts/validate_module.py
 python open-deep-mind/triz/scripts/validate_triz_module.py
+python open-deep-mind/evals/scripts/validate_evals.py
 python open-deep-mind/triz/scripts/lookup_matrix.py --improve 1 --worsen 3 --json
 python open-deep-mind/triz/scripts/lookup_standard_solution.py 1.2.1 --json
 python -m unittest discover -s open-deep-mind/tests -p "test_*.py"
@@ -114,25 +141,25 @@ Also inspect:
 git diff --check
 ```
 
-A file being present is not proof of module completeness; its module validator and repository validator must pass.
+A file being present is not proof of module or benchmark completeness; the relevant validator must pass.
 
 ## Change protocol
 
-A core-method or architecture change records:
+A core-method, architecture, or benchmark change records:
 
 ```text
 Problem:
 Failed assumption/invariant:
 Evidence/use case:
-Affected module:
-Changed rule/API/schema:
+Affected module/eval layer:
+Changed rule/API/schema/case distribution:
 Expected improvement:
 New failure risk:
 Compatibility/migration:
 Validation:
 ```
 
-Update `CHANGELOG.md` and `VERSION` for user-visible architecture/protocol changes.
+Update `CHANGELOG.md` and `VERSION` for released user-visible architecture/protocol changes. Benchmark-only framework changes may remain Unreleased until real results justify a release.
 
 ## Prohibited shortcuts
 
@@ -143,4 +170,6 @@ Update `CHANGELOG.md` and `VERSION` for user-visible architecture/protocol chang
 - Do not add a scoring dimension without an anchor.
 - Do not remove legal, ethical, safety, or provenance warnings as verbosity.
 - Do not expand `SKILL.md` into a duplicate of module method files.
-- Do not silently “repair” historical/vendored datasets without a documented provenance decision.
+- Do not silently repair historical/vendored datasets without a documented provenance decision.
+- Do not tune the Skill to individual holdout prompts.
+- Do not publish benchmark scores before real run artifacts exist.
