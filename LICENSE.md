@@ -9,10 +9,13 @@ OpenDeepMind_skill uses Apache-2.0 and CC BY 4.0 for its original material, with
 Unless a file or directory states otherwise, the following original OpenDeepMind code is licensed under the **Apache License 2.0**:
 
 - files in `open-deep-mind/scripts/`;
+- OpenDeepMind-authored files in `open-deep-mind/first-philosophy/scripts/`;
+- OpenDeepMind-authored files in `open-deep-mind/first-principles/scripts/`;
 - OpenDeepMind-authored files in `open-deep-mind/triz/scripts/`;
+- files in `open-deep-mind/tests/`;
 - files in `.github/workflows/`;
-- JSON schemas and machine-readable OpenDeepMind examples;
-- other original source code.
+- JSON schemas and machine-readable OpenDeepMind examples/manifests;
+- other original source code unless a file states otherwise.
 
 SPDX identifier: `Apache-2.0`
 
@@ -23,9 +26,10 @@ License text: <https://www.apache.org/licenses/LICENSE-2.0>
 Unless a file or directory states otherwise, the following **original OpenDeepMind material** is licensed under **Creative Commons Attribution 4.0 International**:
 
 - `open-deep-mind/SKILL.md`;
-- `FIRST_PHILOSOPHY.md`;
-- `FIRST_PRINCIPLES.md`;
-- OpenDeepMind-authored Markdown references and templates;
+- original content under `open-deep-mind/first-philosophy/`;
+- original content under `open-deep-mind/first-principles/`;
+- `open-deep-mind/ARCHITECTURE.md` and shared references/templates;
+- root compatibility entry files;
 - README files;
 - SVG and other original visual assets;
 - OpenDeepMind-authored TRIZ integration, routing, modern problem-identification, evidence, validation, concept-substantiation, and example text to the extent it is newly authored rather than adapted from third-party material.
@@ -42,13 +46,13 @@ The complete TRIZ subsystem contains material adapted from the MIT-licensed:
 
 <https://github.com/Antropocosmist/triz-engineering-solver>
 
-The repository's source MIT notice is preserved in:
+The source MIT notice is preserved in:
 
 [`open-deep-mind/triz/VENDORED_LICENSE.md`](open-deep-mind/triz/VENDORED_LICENSE.md)
 
-This exception applies to adapted/vendored source-derived TRIZ reference material, including the classical parameter/principle/matrix resource layer and any portions explicitly identified as adapted from that implementation. Those portions remain available under the preserved MIT terms; the OpenDeepMind project license does not revoke or replace those rights.
+This exception applies to adapted/vendored source-derived TRIZ reference material, including the classical parameter/principle/matrix resource layer and portions explicitly identified as adapted from that implementation. Those portions remain available under the preserved MIT terms; the OpenDeepMind project license does not revoke or replace those rights.
 
-The contradiction-matrix metadata and [`NOTICE.md`](NOTICE.md) preserve the documented source/provenance chain.
+The contradiction-matrix metadata, anomaly registry, TRIZ source map, and [`NOTICE.md`](NOTICE.md) preserve the documented source/provenance chain.
 
 Historical TRIZ concepts themselves remain attributable to Genrich Altshuller and the broader TRIZ tradition; copyright in specific books, training materials, translations, databases, or webpages remains with their respective owners.
 
