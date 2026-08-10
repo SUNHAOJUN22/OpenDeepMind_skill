@@ -2,7 +2,8 @@
   "benchmark_name": "OpenDeepMind Behavioral Benchmark",
   "benchmark_version": "1.0.0",
   "skill_repository": "SUNHAOJUN22/OpenDeepMind_skill",
-  "skill_version_target": "1.3.0",
+  "skill_version_target": "1.2.0",
+  "release_status": "unreleased-benchmark-framework-no-published-scores",
   "repetitions": 3,
   "randomization": {
     "shuffle_case_order": true,
