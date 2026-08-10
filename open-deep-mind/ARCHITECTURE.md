@@ -169,9 +169,30 @@ Initial benchmark v1.0.0:
 3 repetitions by default
 ```
 
-Comparison configurations are defined in `evals/benchmark-config.json` and include no-skill, a commit-pinned external first-principles baseline, OpenDeepMind core, and explicit-TRIZ OpenDeepMind on authorized cases.
+Four configurations are defined in `evals/benchmark-config.json`:
 
-Evaluation metrics explicitly include routing accuracy, red-blocker rate, TRIZ false-activation, module leakage, semantic quality, rival/falsifier coverage, tokens and time.
+```text
+no_skill
+first_principles_baseline
+opendeepmind_full
+opendeepmind_no_triz_ablation   [triz-positive only]
+```
+
+`opendeepmind_full` is production behavior: normal Φ/P routing with TRIZ explicit-only. The no-TRIZ ablation intentionally disables T and forces P on the same explicit-TRIZ cases; it is not production behavior and its routing accuracy is not scored.
+
+Declared paired comparisons:
+
+```text
+opendeepmind_full vs no_skill
+opendeepmind_full vs first_principles_baseline
+opendeepmind_full vs opendeepmind_no_triz_ablation [triz-positive]
+```
+
+The third comparison estimates the marginal contribution of the TRIZ module on tasks that explicitly request it.
+
+Evaluation metrics include case/assertion pass rate, routing accuracy, red-blocker rate, TRIZ false-activation, module leakage, semantic quality, rival/falsifier coverage, tokens, time, and common-case paired deltas.
+
+The workspace manifest enumerates every expected run slot. For the validation split the current design yields 114 expected slots: 108 from the three full-scope configurations plus 6 no-TRIZ ablation slots on the two validation TRIZ-positive cases. Missing run/grading artifacts therefore remain visible and block publication readiness.
 
 **Authored cases are not performance results.** No behavioral score may be published until real model runs, raw outputs, grading artifacts, model/settings metadata and aggregate results exist.
 
@@ -210,13 +231,13 @@ The evaluation layer is considered structurally complete when it has:
 
 1. realistic authored cases;
 2. explicit train/validation/holdout discipline;
-3. comparable baseline configurations;
+3. comparable baseline and ablation configurations;
 4. run/grading/aggregate contracts;
 5. deterministic definition validation;
 6. semantic grading anchors;
 7. anti-gaming/holdout rules;
 8. reproducibility metadata requirements;
-9. aggregation tooling;
+9. manifest-complete aggregation tooling;
 10. a publication rule that forbids synthetic scores.
 
 This is a repository completeness criterion, not a claim that any methodology is philosophically/scientifically exhaustive or empirically superior before the behavioral runs are executed.
