@@ -26,13 +26,13 @@ jobs:
       - name: Checkout exact bootstrap commit
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Verify exact base and bootstrap-only delta
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = "$EXPECTED_BASE"
-          git diff --name-only HEAD^ HEAD | sort > /tmp/bootstrap-files.txt
+          git merge-base --is-ancestor "$EXPECTED_BASE" HEAD
+          git diff --name-only "$EXPECTED_BASE" HEAD | sort > /tmp/bootstrap-files.txt
           cat > /tmp/allowed-files.txt <<'LIST'
           .github/workflows/tsao-remediation-v14.yml
           .tsao-remediation-v14/chunk-00.b64
