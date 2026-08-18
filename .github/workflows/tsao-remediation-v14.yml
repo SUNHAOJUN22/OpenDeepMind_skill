@@ -1,0 +1,91 @@
+name: TSAO V14 Remediation Bootstrap
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.tsao-remediation-v14/**'
+      - '.github/workflows/tsao-remediation-v14.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tsao-v14-remediation-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      EXPECTED_BASE: '06f62e87bde357554653e9c189036a191e364e63'
+      PAYLOAD_SHA256: 'b695a7b5ae2c5a417df0e13fa4f9342e10569b2fb01f46f39e19c0abe90ea910'
+    steps:
+      - name: Checkout exact bootstrap commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify exact base and bootstrap-only delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_BASE"
+          git diff --name-only HEAD^ HEAD | sort > /tmp/bootstrap-files.txt
+          cat > /tmp/allowed-files.txt <<'LIST'
+          .github/workflows/tsao-remediation-v14.yml
+          .tsao-remediation-v14/chunk-00.b64
+          .tsao-remediation-v14/chunk-01.b64
+          .tsao-remediation-v14/chunk-02.b64
+          .tsao-remediation-v14/chunk-03.b64
+          .tsao-remediation-v14/chunk-04.b64
+          .tsao-remediation-v14/chunk-05.b64
+          .tsao-remediation-v14/payload.sha256
+          LIST
+          sort -o /tmp/allowed-files.txt /tmp/allowed-files.txt
+          diff -u /tmp/allowed-files.txt /tmp/bootstrap-files.txt
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install focused test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pytest jsonschema pyyaml
+      - name: Reconstruct and verify payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .tsao-remediation-v14/chunk-*.b64 | base64 --decode > /tmp/payload.tar.xz
+          printf '%s  %s\n' "$PAYLOAD_SHA256" /tmp/payload.tar.xz | sha256sum --check --strict
+          mkdir -p /tmp/tsao-payload
+          tar -xJf /tmp/payload.tar.xz -C /tmp/tsao-payload
+      - name: Apply exact remediation payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python /tmp/tsao-payload/apply_payload.py \
+            --repo-root . \
+            --payload-root /tmp/tsao-payload \
+            --receipt /tmp/tsao-application-receipt.json
+          python -m json.tool /tmp/tsao-application-receipt.json >/dev/null
+      - name: Run focused regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash /tmp/tsao-payload/targeted-tests.sh
+      - name: Commit verified remediation to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .tsao-remediation-v14
+          git add -A
+          git diff --cached --check
+          test -n "$(git diff --cached --name-only)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat: apply verified V14 scientific remediation'
+          git push origin HEAD:main
