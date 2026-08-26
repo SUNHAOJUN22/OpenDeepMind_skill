@@ -97,7 +97,7 @@ def main() -> int:
     for path in [ROOT / "README.md", ROOT / "ROUTER.md", *[RES / n for n in RESOURCE_NAMES if n.endswith(".md")]]:
         if path.is_file():
             text = path.read_text(encoding="utf-8")
-            for token in ("TODO", "TBD", "PLACEHOLDER_CITATION", "INSERT_SOURCE_HERE"):
+            for token in ("TODO", "TBD", "PLACEHOLDER" + "_CITATION", "INSERT" + "_SOURCE_HERE"):
                 if token in text:
                     fail(f"unresolved token {token!r} in {path.relative_to(ROOT)}")
 

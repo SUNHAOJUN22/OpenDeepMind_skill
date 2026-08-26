@@ -217,6 +217,6 @@ aggregated benchmark.json
 human/model-judge rubric and identity when applicable
 ```
 
-`publication_ready=true` is possible only when every expected run slot in the manifest has both run and grading artifacts with consistent metadata.
+`artifact_set_complete=true` means only that every expected run slot has consistent run and grading artifacts. The dependency-free aggregator deliberately keeps `publication_ready=false` until a separate, independently verified publication attestation binds the exact repository revision, model/provider settings, raw artifacts, holdout seal, grader identity and release authority.
 
-Do not claim that a benchmark result proves universal superiority. It establishes performance only on the disclosed task distribution, models, settings and graders.
+Authored cases, complete slots, or aggregated scores are not themselves a published model result. Do not claim that a benchmark result proves universal superiority. It establishes performance only on the disclosed task distribution, models, settings and graders.

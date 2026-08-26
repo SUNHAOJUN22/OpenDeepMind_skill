@@ -115,17 +115,17 @@ def main() -> int:
         triz_allowed = case.get("triz_allowed")
         if not isinstance(triz_allowed, bool):
             errors.append(f"{prefix}.triz_allowed must be boolean")
-        if category == "triz-positive":
-            if route != "triz" or triz_allowed is not True:
-                errors.append(f"{cid}: triz-positive must route triz and allow TRIZ")
+        triz_expected = route == "triz"
+        if triz_expected:
+            if triz_allowed is not True:
+                errors.append(f"{cid}: TRIZ-routed case must explicitly allow TRIZ")
             p = prompt.lower() if isinstance(prompt, str) else ""
             if not any(token in p for token in ("triz", "ariz", "su-field", "ifr")) and "物场" not in p:
-                warnings.append(f"{cid}: positive TRIZ case may lack an explicit trigger token")
-        else:
-            if triz_allowed is not False:
-                errors.append(f"{cid}: non-positive case must not pre-authorize TRIZ")
-            if route == "triz":
-                errors.append(f"{cid}: non-positive case must not expect TRIZ route")
+                errors.append(f"{cid}: TRIZ-routed case lacks an explicit trigger token")
+        elif triz_allowed is not False:
+            errors.append(f"{cid}: non-TRIZ route must not pre-authorize TRIZ")
+        if category == "triz-positive" and not triz_expected:
+            errors.append(f"{cid}: triz-positive must route triz")
 
     if dict(categories) != EXPECTED_CATEGORIES:
         errors.append(f"category distribution mismatch: expected {EXPECTED_CATEGORIES}, got {dict(categories)}")
