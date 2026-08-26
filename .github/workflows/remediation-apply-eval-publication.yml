@@ -1,0 +1,100 @@
+name: One-shot OpenDeepMind eval and publication convergence
+
+on:
+  push:
+    branches:
+      - remediation/eval-publication-convergence
+
+permissions:
+  contents: write
+
+concurrency:
+  group: opendeepmind-eval-publication-convergence
+  cancel-in-progress: false
+
+jobs:
+  converge:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact remediation branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: remediation/eval-publication-convergence
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.12'
+
+      - name: Reassemble and apply hash-bound patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/remediation/opendeepmind.patch.b64.* | tr -d '\r\n' > /tmp/opendeepmind.patch.gz.b64
+          printf '%s  %s\n' '940009abd9832fb89d8e0b9f9828f86276dbf56aaada6a907f58a0985fee4d76' /tmp/opendeepmind.patch.gz.b64 | sha256sum --check
+          base64 --decode /tmp/opendeepmind.patch.gz.b64 | gzip --decompress > /tmp/opendeepmind.patch
+          printf '%s  %s\n' 'fb3493fa0fbe3b976a7a516e0f3cdec248527e0d82f4aefc62e273c641d2cd8c' /tmp/opendeepmind.patch | sha256sum --check
+          git apply --check /tmp/opendeepmind.patch
+          git apply /tmp/opendeepmind.patch
+          rm -f .github/remediation/opendeepmind.patch.b64.*
+          rmdir .github/remediation
+          rm .github/workflows/remediation-apply-eval-publication.yml
+
+      - name: Validate modules, evidence definitions, and architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python open-deep-mind/first-philosophy/scripts/validate_module.py
+          python open-deep-mind/first-principles/scripts/validate_module.py
+          python open-deep-mind/triz/scripts/validate_triz_module.py
+          python open-deep-mind/evals/scripts/validate_evals.py
+          python open-deep-mind/scripts/validate_repository.py .
+          python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-ledger.json
+          python open-deep-mind/triz/scripts/lookup_matrix.py --improve 1 --worsen 3 --json
+          python open-deep-mind/triz/scripts/lookup_standard_solution.py 1.2.1 --json
+          python -m unittest discover -s open-deep-mind/tests -p 'test_*.py' -v
+          python -m compileall -q open-deep-mind
+          find open-deep-mind -type d -name __pycache__ -prune -exec rm -rf {} +
+          find open-deep-mind -type f -name '*.pyc' -delete
+          git diff --check
+
+      - name: Verify exact bounded diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import subprocess
+
+          expected = {
+              '.github/remediation/opendeepmind.patch.b64.00',
+              '.github/remediation/opendeepmind.patch.b64.01',
+              '.github/workflows/contracts-v17.yml',
+              '.github/workflows/exact-tree-export.yml',
+              '.github/workflows/remediation-apply-eval-publication.yml',
+              '.github/workflows/v19-skill-contract.yml',
+              'open-deep-mind/evals/README.md',
+              'open-deep-mind/evals/benchmark.schema.json',
+              'open-deep-mind/evals/evals.json',
+              'open-deep-mind/evals/scripts/aggregate_benchmark.py',
+              'open-deep-mind/evals/scripts/validate_evals.py',
+              'open-deep-mind/tests/test_benchmark_workspace.py',
+              'open-deep-mind/tests/test_validators.py',
+              'open-deep-mind/triz/scripts/validate_triz_module.py',
+          }
+          actual = set(subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], text=True).splitlines())
+          if actual != expected:
+              raise SystemExit(f'unexpected final diff: expected={sorted(expected)!r} actual={sorted(actual)!r}')
+          PY
+
+      - name: Commit validated convergence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(evals): keep publication gated by independent attestation"
+          git push origin HEAD:remediation/eval-publication-convergence
