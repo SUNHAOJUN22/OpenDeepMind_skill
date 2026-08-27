@@ -11,6 +11,9 @@
     "comparisons",
     "incomplete_run_directories",
     "metadata_errors",
+    "artifact_set_complete",
+    "publication_status",
+    "publication_blockers",
     "publication_ready"
   ],
   "properties": {
@@ -64,7 +67,20 @@
     },
     "incomplete_run_directories": {"type": "array", "items": {"type": "string"}},
     "metadata_errors": {"type": "array", "items": {"type": "string"}},
-    "publication_ready": {"type": "boolean"}
+    "artifact_set_complete": {"type": "boolean"},
+    "publication_status": {
+      "enum": [
+        "INCOMPLETE_ARTIFACT_SET",
+        "EVIDENCE_COMPLETE_AWAITING_INDEPENDENT_ATTESTATION"
+      ]
+    },
+    "publication_blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "publication_ready": {"const": false}
   },
   "additionalProperties": false
 }

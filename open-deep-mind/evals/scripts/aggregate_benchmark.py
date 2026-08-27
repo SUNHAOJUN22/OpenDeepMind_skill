@@ -233,6 +233,21 @@ def main() -> int:
     observed_cfg_ids = set(configurations)
     all_expected_configs_present = observed_cfg_ids == expected_cfg_ids
 
+    artifact_set_complete = (
+        expected_run_count > 0
+        and complete_run_count == expected_run_count
+        and not incomplete
+        and not metadata_errors
+        and all_expected_configs_present
+    )
+    publication_blockers: list[str] = []
+    if not artifact_set_complete:
+        publication_blockers.append("ARTIFACT_SET_INCOMPLETE_OR_INCONSISTENT")
+    # This dependency-free aggregator validates artifact completeness only. It cannot
+    # independently verify provider identity, grader independence, holdout sealing,
+    # or an authorized release signature, so it must never self-authorize publication.
+    publication_blockers.append("INDEPENDENT_PUBLICATION_ATTESTATION_NOT_VERIFIED")
+
     result = {
         "benchmark_version": CONFIG["benchmark_version"],
         "generated_from": str(workspace),
@@ -243,13 +258,14 @@ def main() -> int:
         "comparisons": comparison_results,
         "incomplete_run_directories": sorted(set(incomplete)),
         "metadata_errors": metadata_errors,
-        "publication_ready": (
-            expected_run_count > 0
-            and complete_run_count == expected_run_count
-            and not incomplete
-            and not metadata_errors
-            and all_expected_configs_present
+        "artifact_set_complete": artifact_set_complete,
+        "publication_status": (
+            "EVIDENCE_COMPLETE_AWAITING_INDEPENDENT_ATTESTATION"
+            if artifact_set_complete
+            else "INCOMPLETE_ARTIFACT_SET"
         ),
+        "publication_blockers": publication_blockers,
+        "publication_ready": False,
     }
 
     output = Path(args.output).resolve() if args.output else workspace / "benchmark.json"
@@ -262,6 +278,8 @@ def main() -> int:
         "incomplete": len(set(incomplete)),
         "metadata_errors": len(metadata_errors),
         "configurations": sorted(configurations),
+        "artifact_set_complete": result["artifact_set_complete"],
+        "publication_status": result["publication_status"],
         "publication_ready": result["publication_ready"],
     }, ensure_ascii=False))
     return 0

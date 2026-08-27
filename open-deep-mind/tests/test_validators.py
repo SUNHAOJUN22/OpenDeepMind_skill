@@ -114,8 +114,19 @@ class ModuleValidationTests(unittest.TestCase):
         eval_data = json.loads((REPO / "open-deep-mind/evals/evals.json").read_text(encoding="utf-8"))
         splits = Counter(case["split"] for case in eval_data["evals"])
         self.assertEqual(splits, Counter({"train": 36, "validation": 12, "holdout": 12}))
-        self.assertTrue(all(case["triz_allowed"] is False for case in eval_data["evals"] if case["category"] != "triz-positive"))
-        self.assertTrue(all(case["triz_allowed"] is True for case in eval_data["evals"] if case["category"] == "triz-positive"))
+        self.assertTrue(
+            all(
+                case["triz_allowed"] is (case["expected_route"] == "triz")
+                for case in eval_data["evals"]
+            )
+        )
+        self.assertTrue(
+            all(
+                case["expected_route"] == "triz"
+                for case in eval_data["evals"]
+                if case["category"] == "triz-positive"
+            )
+        )
 
     def test_first_philosophy_module(self) -> None:
         proc = self.assert_ok("open-deep-mind/first-philosophy/scripts/validate_module.py")

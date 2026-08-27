@@ -57,6 +57,75 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
             self.assertEqual(len(benchmark["incomplete_run_directories"]), 114)
             self.assertFalse(benchmark["publication_ready"])
 
+    def test_complete_synthetic_slot_still_requires_independent_attestation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            iteration = Path(tmp) / "iteration-1"
+            run_dir = iteration / "eval-R01" / "no_skill" / "run-1"
+            run_dir.mkdir(parents=True)
+            (iteration / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "benchmark_version": "1.0.0",
+                        "split": "validation",
+                        "expected_run_slots": [
+                            {"case_id": "R01", "configuration": "no_skill", "repetition": 1}
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "run_record.json").write_text(
+                json.dumps(
+                    {
+                        "case_id": "R01",
+                        "configuration": "no_skill",
+                        "repetition": 1,
+                        "model": "synthetic-test",
+                        "route": "none",
+                        "loaded_modules": [],
+                        "response_text": "synthetic test response",
+                        "total_tokens": 4,
+                        "duration_ms": 1,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "grading.json").write_text(
+                json.dumps(
+                    {
+                        "case_id": "R01",
+                        "configuration": "no_skill",
+                        "assertion_results": [],
+                        "red_blockers": [],
+                        "summary": {
+                            "passed": 0,
+                            "failed": 0,
+                            "total": 0,
+                            "pass_rate": 0.0,
+                            "case_passed": False,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            aggregate = run_script(
+                "open-deep-mind/evals/scripts/aggregate_benchmark.py",
+                str(iteration),
+            )
+            self.assertEqual(aggregate.returncode, 0, msg=aggregate.stderr + aggregate.stdout)
+            benchmark = json.loads((iteration / "benchmark.json").read_text(encoding="utf-8"))
+            self.assertTrue(benchmark["artifact_set_complete"])
+            self.assertFalse(benchmark["publication_ready"])
+            self.assertEqual(
+                benchmark["publication_status"],
+                "EVIDENCE_COMPLETE_AWAITING_INDEPENDENT_ATTESTATION",
+            )
+            self.assertIn(
+                "INDEPENDENT_PUBLICATION_ATTESTATION_NOT_VERIFIED",
+                benchmark["publication_blockers"],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
