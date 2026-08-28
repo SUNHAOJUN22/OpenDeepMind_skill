@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -33,7 +34,10 @@ def read_json(path: Path) -> dict[str, Any] | None:
 
 
 def numeric(value: Any) -> float | None:
-    return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    return number if math.isfinite(number) else None
 
 
 def get_assertion_pass_rate(grade: dict[str, Any]) -> float | None:
@@ -269,7 +273,10 @@ def main() -> int:
     }
 
     output = Path(args.output).resolve() if args.output else workspace / "benchmark.json"
-    output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    output.write_text(
+        json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False),
+        encoding="utf-8",
+    )
     print(json.dumps({
         "ok": True,
         "output": str(output),
@@ -281,7 +288,7 @@ def main() -> int:
         "artifact_set_complete": result["artifact_set_complete"],
         "publication_status": result["publication_status"],
         "publication_ready": result["publication_ready"],
-    }, ensure_ascii=False))
+    }, ensure_ascii=False, allow_nan=False))
     return 0
 
 

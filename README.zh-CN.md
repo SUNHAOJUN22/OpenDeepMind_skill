@@ -27,6 +27,14 @@
   <img alt="已发布跑分" src="https://img.shields.io/badge/published_benchmark-none_yet-91a7bd?style=flat-square">
 </p>
 
+<!-- CLOSURE_STATUS_START -->
+## 当前代码资格与发布边界
+
+- Benchmark 聚合只接受有限实数；布尔值、`NaN` 和无穷值会被排除，输出 JSON 使用 `allow_nan=False` 严格序列化。
+- 工件齐全不等于可以发布。无依赖聚合器始终要求独立发布 attestation，不能自行发布模型行为分数。
+- 已提交的 60 个 case、Schema 和验证器证明评测框架可执行，不证明任何外部模型已经运行；没有原始输出、独立 grader、holdout seal 与签名 attestation 时，状态保持 `NO_PUBLISHED_BEHAVIORAL_SCORE`。
+<!-- CLOSURE_STATUS_END -->
+
 > **项目独立声明：**OpenDeepMind_skill 与 Google DeepMind、OpenAI、Anthropic、MATRIZ、Altshuller Institute 及所引用仓库维护者均无隶属或背书关系。
 
 > **评测状态：**60 个 benchmark case、评测协议、Schema、workspace 与聚合脚本已经进入仓库；**目前没有发布任何真实模型性能分数**。只有完成可复现实验、原始输出、评分记录、模型/版本/设置和完整聚合后才允许发布结果。
