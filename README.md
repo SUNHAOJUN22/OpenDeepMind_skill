@@ -31,6 +31,14 @@
   <img alt="TRIZ SIS" src="https://img.shields.io/badge/TRIZ_SIS-76-7b61ff?style=flat-square">
 </p>
 
+<!-- CLOSURE_STATUS_START -->
+## Current code qualification / 当前代码资格
+
+- Benchmark aggregation accepts only finite real metrics; booleans, `NaN` and infinities are excluded, and generated JSON is serialized with `allow_nan=False`.
+- Artifact completeness remains distinct from publication readiness. The dependency-free aggregator always requires independent publication attestation and cannot publish a behavioral model score by itself.
+- 已提交的 60 个 case、Schema 和验证器证明评测框架可执行，不证明任何外部模型已经运行；没有原始输出、独立 grader、holdout seal 与签名 attestation 时，状态保持 `NO_PUBLISHED_BEHAVIORAL_SCORE`.
+<!-- CLOSURE_STATUS_END -->
+
 > **Independent project / 独立项目：** OpenDeepMind_skill is not affiliated with, sponsored by, or endorsed by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute, or the maintainers of referenced repositories.
 
 > **Benchmark status / 评测状态：** the evaluation framework and 60 authored cases are committed. **No behavioral performance score is published yet.** Real scores require controlled model runs, raw outputs, grading artifacts, model/settings metadata, and complete aggregate results.
