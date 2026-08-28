@@ -38,10 +38,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m compileall -q open-deep-mind tests
+          python open-deep-mind/first-philosophy/scripts/validate_module.py
+          python open-deep-mind/first-principles/scripts/validate_module.py
+          python open-deep-mind/triz/scripts/validate_triz_module.py
+          python open-deep-mind/evals/scripts/validate_evals.py
+          python open-deep-mind/scripts/validate_repository.py .
+          python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-ledger.json
+          python open-deep-mind/triz/scripts/lookup_matrix.py --improve 1 --worsen 3 --json
+          python open-deep-mind/triz/scripts/lookup_standard_solution.py 1.2.1 --json
           python -m unittest discover -s open-deep-mind/tests -p 'test_*.py' -v
-          python open-deep-mind/evals/scripts/validate_cases.py
-          python open-deep-mind/evals/scripts/validate_task_contract.py
+          python -m compileall -q open-deep-mind
           git diff --check
       - name: Commit qualified source changes
         shell: bash
