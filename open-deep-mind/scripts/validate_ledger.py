@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -21,6 +22,8 @@ RULES = {
     "optimization",
     "normative",
 }
+MAX_LEDGER_BYTES = 8 * 1024 * 1024
+
 ID_RE = re.compile(r"^[A-Z][A-Z0-9_-]*$")
 
 
@@ -208,6 +211,51 @@ def validate(data: dict[str, Any]) -> list[str]:
     return errors
 
 
+def load_ledger(path: Path) -> Any:
+    """Read bounded, unambiguous UTF-8 JSON without nonfinite values."""
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_LEDGER_BYTES + 1)
+    if len(raw) > MAX_LEDGER_BYTES:
+        raise ValueError("ledger exceeds the 8 MiB input budget")
+
+    def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate JSON key: {key!r}")
+            result[key] = value
+        return result
+
+    def reject_constant(token: str) -> Any:
+        raise ValueError(f"nonfinite JSON constant: {token}")
+
+    def finite_float(token: str) -> float:
+        value = float(token)
+        if not math.isfinite(value):
+            raise ValueError("JSON number exceeds the finite range")
+        return value
+
+    data = json.loads(
+        raw.decode("utf-8"),
+        object_pairs_hook=unique_object,
+        parse_constant=reject_constant,
+        parse_float=finite_float,
+    )
+    pending = [(data, 0)]
+    while pending:
+        value, depth = pending.pop()
+        if depth > 128:
+            raise ValueError("ledger nesting exceeds the 128-level budget")
+        if isinstance(value, str):
+            value.encode("utf-8", errors="strict")
+        elif isinstance(value, dict):
+            pending.extend((key, depth + 1) for key in value)
+            pending.extend((item, depth + 1) for item in value.values())
+        elif isinstance(value, list):
+            pending.extend((item, depth + 1) for item in value)
+    return data
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("ledger", help="path to ledger JSON")
@@ -215,8 +263,8 @@ def main() -> int:
 
     path = Path(args.ledger)
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        data = load_ledger(path)
+    except (OSError, ValueError, RecursionError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))
         return 1
 
