@@ -34,38 +34,42 @@ def nonempty_string(value: Any) -> bool:
 
 
 def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
-    """Return dependency cycles. Edges point from node to its prerequisites."""
+    """Iterative, deterministic DFS with an explicit graph-size budget."""
+    if len(graph) > 10_000 or sum(map(len, graph.values())) > 100_000:
+        raise ValueError("ledger graph exceeds the validation budget")
     cycles: list[list[str]] = []
-    state: dict[str, int] = {node: 0 for node in graph}  # 0 unseen, 1 active, 2 done
-    stack: list[str] = []
-    position: dict[str, int] = {}
-
-    def dfs(node: str) -> None:
-        state[node] = 1
-        position[node] = len(stack)
-        stack.append(node)
-        for dep in graph.get(node, set()):
-            if dep not in graph:
-                continue
-            if state[dep] == 0:
-                dfs(dep)
-            elif state[dep] == 1:
-                start = position[dep]
-                cycle = stack[start:] + [dep]
-                if cycle not in cycles:
-                    cycles.append(cycle)
-        stack.pop()
-        position.pop(node, None)
-        state[node] = 2
-
-    for node in graph:
-        if state[node] == 0:
-            dfs(node)
+    state = {node: 0 for node in graph}
+    for root in sorted(graph):
+        if state[root]:
+            continue
+        path: list[str] = [root]
+        positions = {root: 0}
+        frames = [(root, iter(sorted(graph[root])))]
+        state[root] = 1
+        while frames:
+            node, dependencies = frames[-1]
+            dep = next(dependencies, None)
+            if dep is None:
+                frames.pop()
+                path.pop()
+                positions.pop(node, None)
+                state[node] = 2
+            elif dep in graph and state[dep] == 0:
+                state[dep] = 1
+                positions[dep] = len(path)
+                path.append(dep)
+                frames.append((dep, iter(sorted(graph[dep]))))
+            elif dep in graph and state[dep] == 1:
+                cycles.append(path[positions[dep]:] + [dep])
+                if len(cycles) >= 20:
+                    return cycles
     return cycles
 
 
 def validate(data: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    if not isinstance(data, dict):
+        return ["top-level JSON must be an object"]
 
     for key in ("analysis_id", "question", "domain", "scale", "purpose"):
         require(nonempty_string(data.get(key)), f"{key} must be a non-empty string", errors)
@@ -92,11 +96,11 @@ def validate(data: dict[str, Any]) -> list[str]:
                 claim_ids.add(cid)
             else:
                 errors.append(f"{prefix}.id must be a string")
-            require(ctype in TYPES, f"{prefix}.type must be one of {sorted(TYPES)}", errors)
-            if isinstance(cid, str) and ctype in TYPES:
+            require(isinstance(ctype, str) and ctype in TYPES, f"{prefix}.type must be one of {sorted(TYPES)}", errors)
+            if isinstance(cid, str) and isinstance(ctype, str) and ctype in TYPES:
                 require(cid.startswith(ctype), f"{prefix}.id should start with its type {ctype}", errors)
             require(nonempty_string(claim.get("claim")), f"{prefix}.claim must be non-empty", errors)
-            require(status in STATUSES, f"{prefix}.status must be one of {sorted(STATUSES)}", errors)
+            require(isinstance(status, str) and status in STATUSES, f"{prefix}.status must be one of {sorted(STATUSES)}", errors)
             require(isinstance(claim.get("scope"), str), f"{prefix}.scope must be a string", errors)
             require(isinstance(claim.get("falsifier"), str), f"{prefix}.falsifier must be a string", errors)
             confidence = claim.get("confidence")
@@ -160,7 +164,7 @@ def validate(data: dict[str, Any]) -> list[str]:
             premises = inference.get("premises", [])
             require(isinstance(premises, list), f"{prefix}.premises must be a list", errors)
             require(nonempty_string(inference.get("conclusion")), f"{prefix}.conclusion must be non-empty", errors)
-            require(inference.get("rule") in RULES, f"{prefix}.rule is invalid", errors)
+            require(isinstance(inference.get("rule"), str) and inference.get("rule") in RULES, f"{prefix}.rule is invalid", errors)
             if isinstance(premises, list):
                 require(len(premises) > 0, f"{prefix}.premises must not be empty", errors)
                 for premise in premises:
@@ -180,7 +184,12 @@ def validate(data: dict[str, Any]) -> list[str]:
             require(isinstance(defeaters, list), f"{prefix}.defeaters must be a list", errors)
 
     # The auditable reasoning graph must be acyclic.
-    for cycle in find_cycles(graph):
+    try:
+        cycles = find_cycles(graph)
+    except ValueError as exc:
+        errors.append(str(exc))
+        cycles = []
+    for cycle in cycles:
         errors.append("dependency cycle detected: " + " -> ".join(cycle))
 
     decision = data.get("decision")
