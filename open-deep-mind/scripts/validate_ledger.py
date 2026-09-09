@@ -23,6 +23,8 @@ RULES = {
     "normative",
 }
 MAX_LEDGER_BYTES = 8 * 1024 * 1024
+MAX_LEDGER_RECORDS = 10_000
+MAX_LEDGER_REFERENCES = 100_000
 
 ID_RE = re.compile(r"^[A-Z][A-Z0-9_-]*$")
 
@@ -38,7 +40,7 @@ def nonempty_string(value: Any) -> bool:
 
 def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
     """Iterative, deterministic DFS with an explicit graph-size budget."""
-    if len(graph) > 10_000 or sum(map(len, graph.values())) > 100_000:
+    if len(graph) > MAX_LEDGER_RECORDS or sum(map(len, graph.values())) > MAX_LEDGER_REFERENCES:
         raise ValueError("ledger graph exceeds the validation budget")
     cycles: list[list[str]] = []
     state = {node: 0 for node in graph}
@@ -69,10 +71,38 @@ def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
     return cycles
 
 
+def _raw_budget_error(data: dict[str, Any]) -> str | None:
+    """Bound work before ID/reference deduplication or error-list expansion."""
+    collections = ((data.get("claims", []), "dependencies"), (data.get("inferences", []), "premises"))
+    records = sum(len(rows) for rows, _ in collections if isinstance(rows, list))
+    if records > MAX_LEDGER_RECORDS:
+        return f"ledger record count exceeds the {MAX_LEDGER_RECORDS}-record budget"
+    references = 0
+    for rows, field in collections:
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            values = row.get(field, []) if isinstance(row, dict) else []
+            if isinstance(values, list):
+                references += len(values)
+                if references > MAX_LEDGER_REFERENCES:
+                    return f"ledger reference count exceeds the {MAX_LEDGER_REFERENCES}-reference budget"
+    decision = data.get("decision")
+    trace = decision.get("foundation_trace", []) if isinstance(decision, dict) else []
+    if isinstance(trace, list):
+        references += len(trace)
+    if references > MAX_LEDGER_REFERENCES:
+        return f"ledger reference count exceeds the {MAX_LEDGER_REFERENCES}-reference budget"
+    return None
+
+
 def validate(data: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     if not isinstance(data, dict):
         return ["top-level JSON must be an object"]
+    budget_error = _raw_budget_error(data)
+    if budget_error is not None:
+        return [budget_error]
 
     for key in ("analysis_id", "question", "domain", "scale", "purpose"):
         require(nonempty_string(data.get(key)), f"{key} must be a non-empty string", errors)
