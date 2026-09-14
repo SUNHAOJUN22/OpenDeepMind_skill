@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = json.loads((ROOT / "benchmark-config.json").read_text(encoding="utf-8"))
 EVALS = json.loads((ROOT / "evals.json").read_text(encoding="utf-8"))
 CASE_MAP = {c["id"]: c for c in EVALS["evals"]}
+CONFIG_MAP = {c["id"]: c for c in CONFIG["configurations"]}
 
 
 def mean(values: list[float]) -> float | None:
@@ -63,7 +64,8 @@ def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any
             pass_rates.append(value)
         blocker_flags.append(bool(grade.get("red_blockers", [])))
         rc = grade.get("route_correct")
-        if isinstance(rc, bool):
+        score_route = CONFIG_MAP.get(run.get("configuration"), {}).get("score_routing_accuracy", True)
+        if score_route and isinstance(rc, bool):
             route_flags.append(rc)
         ft = grade.get("triz_false_activation")
         if isinstance(ft, bool):
@@ -182,6 +184,7 @@ def main() -> int:
     indexed: dict[str, dict[tuple[str, int], tuple[dict[str, Any], dict[str, Any], dict[str, Any]]]] = defaultdict(dict)
     incomplete: list[str] = []
     metadata_errors: list[str] = []
+    seen_slots: set[tuple[str, str, int]] = set()
 
     for slot in expected_slots:
         if not isinstance(slot, dict):
@@ -190,20 +193,33 @@ def main() -> int:
         case_id = slot.get("case_id")
         cfg = slot.get("configuration")
         rep = slot.get("repetition")
-        if not isinstance(case_id, str) or not isinstance(cfg, str) or not isinstance(rep, int):
+        if (not isinstance(case_id, str) or not isinstance(cfg, str)
+                or isinstance(rep, bool) or not isinstance(rep, int) or rep < 1):
             metadata_errors.append(f"invalid expected slot fields: {slot!r}")
             continue
+        # Validate identity before file access. One artifact slot gets one weight,
+        # both in marginal metrics and in the paired-comparison index.
+        case = CASE_MAP.get(case_id)
+        if not case:
+            metadata_errors.append(f"unknown case in manifest: {case_id}")
+            continue
+        if cfg not in CONFIG_MAP:
+            metadata_errors.append(f"unknown configuration in manifest: {cfg}")
+            continue
+        identity = (case_id, cfg, rep)
+        if identity in seen_slots:
+            metadata_errors.append(f"duplicate expected run slot: {identity!r}")
+            continue
+        seen_slots.add(identity)
         run_dir = workspace / f"eval-{case_id}" / cfg / f"run-{rep}"
         run = read_json(run_dir / "run_record.json")
         grade = read_json(run_dir / "grading.json")
         if not run or not grade:
             incomplete.append(str(run_dir))
             continue
-        case = CASE_MAP.get(case_id)
-        if not case:
-            metadata_errors.append(f"unknown case in manifest: {case_id}")
-            continue
-        if run.get("case_id") != case_id or run.get("configuration") != cfg or run.get("repetition") != rep:
+        if (run.get("case_id") != case_id or run.get("configuration") != cfg
+                or isinstance(run.get("repetition"), bool)
+                or not isinstance(run.get("repetition"), int) or run.get("repetition") != rep):
             metadata_errors.append(f"run metadata mismatch: {run_dir}")
             continue
         if grade.get("case_id") != case_id or grade.get("configuration") != cfg:
@@ -233,7 +249,10 @@ def main() -> int:
 
     complete_run_count = sum(len(rows) for rows in by_cfg.values())
     expected_run_count = len(expected_slots)
-    expected_cfg_ids = {slot.get("configuration") for slot in expected_slots if isinstance(slot, dict)}
+    expected_cfg_ids = {
+        slot["configuration"] for slot in expected_slots
+        if isinstance(slot, dict) and isinstance(slot.get("configuration"), str)
+    }
     observed_cfg_ids = set(configurations)
     all_expected_configs_present = observed_cfg_ids == expected_cfg_ids
 

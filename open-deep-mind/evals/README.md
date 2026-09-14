@@ -82,6 +82,19 @@ A single successful response is not evidence of reliability. Multiple repetition
 
 Create the workspace with `create_workspace.py`. Its `manifest.json` enumerates **every expected run slot**; the aggregator uses that manifest as the source of truth, so a missing run directory cannot silently disappear from the denominator.
 
+Each `(case_id, configuration, repetition)` identity contributes at most once.
+Duplicate manifest entries are metadata errors, do not reweight metrics, and
+prevent `artifact_set_complete`. Unknown cases/configurations and non-positive
+or Boolean repetition indices are rejected before artifact lookup. Distinct
+valid repetitions remain distinct observations; deduplication is not evidence
+that external runs were statistically independent. Routing accuracy is omitted
+for configurations whose `score_routing_accuracy` is false (the forced-route
+TRIZ ablation), without changing their other metrics or publication gate.
+
+每个“案例—配置—重复编号”最多计入一次；重复条目使产物完整性检查失败，
+不能用于提高分数或充当新增试验。强制路由的消融配置不计生产路由准确率，
+但仍计算其余指标。计数一致性不证明外部模型执行或统计独立性。
+
 A benchmark harness writes one `run_record.json` for each expected case/configuration/repetition:
 
 ```json
