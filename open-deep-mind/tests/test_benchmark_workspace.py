@@ -126,8 +126,7 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
                 benchmark["publication_blockers"],
             )
 
-
-    def test_nonfinite_metrics_are_excluded_and_strict_json_is_emitted(self) -> None:
+    def test_nonfinite_artifacts_are_rejected_before_completeness_or_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             iteration = Path(tmp) / "iteration-1"
             run_dir = iteration / "eval-R01" / "no_skill" / "run-1"
@@ -146,13 +145,26 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
             )
             (run_dir / "run_record.json").write_text(
                 '{"case_id":"R01","configuration":"no_skill","repetition":1,'
-                '"total_tokens":NaN,"duration_ms":Infinity}',
+                '"model":"synthetic-test","route":"none","loaded_modules":[],'
+                '"response_text":"synthetic","total_tokens":NaN,"duration_ms":1}',
                 encoding="utf-8",
             )
             (run_dir / "grading.json").write_text(
-                '{"case_id":"R01","configuration":"no_skill","assertion_results":[],'
-                '"red_blockers":[],"judge_score":-Infinity,'
-                '"summary":{"pass_rate":NaN,"case_passed":false}}',
+                json.dumps(
+                    {
+                        "case_id": "R01",
+                        "configuration": "no_skill",
+                        "assertion_results": [],
+                        "red_blockers": [],
+                        "summary": {
+                            "passed": 0,
+                            "failed": 1,
+                            "total": 1,
+                            "pass_rate": 0.0,
+                            "case_passed": False,
+                        },
+                    }
+                ),
                 encoding="utf-8",
             )
 
@@ -165,11 +177,11 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
             self.assertNotIn("NaN", raw)
             self.assertNotIn("Infinity", raw)
             benchmark = json.loads(raw)
-            metrics = benchmark["configurations"]["no_skill"]
-            self.assertIsNone(metrics["assertion_pass_rate"])
-            self.assertIsNone(metrics["judge_score_mean"])
-            self.assertIsNone(metrics["mean_tokens"])
-            self.assertIsNone(metrics["mean_duration_ms"])
+            self.assertEqual(benchmark["complete_runs"], 0)
+            self.assertFalse(benchmark["artifact_set_complete"])
+            self.assertEqual(benchmark["publication_status"], "INCOMPLETE_ARTIFACT_SET")
+            self.assertTrue(any("nonfinite JSON constant" in error for error in benchmark["metadata_errors"]))
+            self.assertNotIn("no_skill", benchmark["configurations"])
 
 
 class WorkspacePreservationTests(unittest.TestCase):

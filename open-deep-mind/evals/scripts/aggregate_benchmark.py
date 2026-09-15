@@ -16,6 +16,7 @@ CONFIG = json.loads((ROOT / "benchmark-config.json").read_text(encoding="utf-8")
 EVALS = json.loads((ROOT / "evals.json").read_text(encoding="utf-8"))
 CASE_MAP = {c["id"]: c for c in EVALS["evals"]}
 CONFIG_MAP = {c["id"]: c for c in CONFIG["configurations"]}
+RUN_ROUTES = {"phi", "p", "phi-p", "triz", "none", "unknown"}
 
 
 def mean(values: list[float]) -> float | None:
@@ -26,12 +27,38 @@ def rate(values: list[bool]) -> float | None:
     return statistics.fmean(1.0 if x else 0.0 for x in values) if values else None
 
 
-def read_json(path: Path) -> dict[str, Any] | None:
+def read_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
+    """Read one strict JSON object, rejecting duplicate keys and non-finite numbers."""
+
+    def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate JSON key: {key!r}")
+            result[key] = value
+        return result
+
+    def reject_constant(token: str) -> Any:
+        raise ValueError(f"nonfinite JSON constant: {token}")
+
+    def finite_float(token: str) -> float:
+        value = float(token)
+        if not math.isfinite(value):
+            raise ValueError("JSON number exceeds the finite range")
+        return value
+
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else None
-    except Exception:
-        return None
+        data = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=reject_constant,
+            parse_float=finite_float,
+        )
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        return None, str(exc)
+    if not isinstance(data, dict):
+        return None, "top-level JSON must be an object"
+    return data, None
 
 
 def numeric(value: Any) -> float | None:
@@ -39,6 +66,118 @@ def numeric(value: Any) -> float | None:
         return None
     number = float(value)
     return number if math.isfinite(number) else None
+
+
+def _nonnegative_integer(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _nullable_bool(value: Any) -> bool:
+    return value is None or isinstance(value, bool)
+
+
+def validate_run_record(run: dict[str, Any]) -> list[str]:
+    """Validate the dependency-free subset of run-record.schema.json used here."""
+    errors: list[str] = []
+    required = (
+        "case_id", "configuration", "repetition", "model", "route", "loaded_modules",
+        "response_text", "total_tokens", "duration_ms",
+    )
+    for field in required:
+        if field not in run:
+            errors.append(f"missing required field: {field}")
+
+    for field in ("case_id", "configuration", "model", "response_text"):
+        if field in run and not isinstance(run[field], str):
+            errors.append(f"{field} must be a string")
+    for field in ("model_version", "repository_commit", "run_timestamp"):
+        if field in run and not isinstance(run[field], str):
+            errors.append(f"{field} must be a string")
+
+    repetition = run.get("repetition")
+    if not (isinstance(repetition, int) and not isinstance(repetition, bool) and repetition >= 1):
+        errors.append("repetition must be an integer >= 1")
+    if run.get("route") not in RUN_ROUTES:
+        errors.append(f"route must be one of {sorted(RUN_ROUTES)}")
+
+    loaded_modules = run.get("loaded_modules")
+    if not isinstance(loaded_modules, list) or not all(isinstance(item, str) for item in loaded_modules):
+        errors.append("loaded_modules must be an array of strings")
+    for field in ("total_tokens", "duration_ms"):
+        if not _nonnegative_integer(run.get(field)):
+            errors.append(f"{field} must be an integer >= 0")
+    return errors
+
+
+def validate_grading_record(grade: dict[str, Any]) -> list[str]:
+    """Validate the dependency-free subset of grading.schema.json used here."""
+    errors: list[str] = []
+    for field in ("case_id", "configuration", "assertion_results", "summary"):
+        if field not in grade:
+            errors.append(f"missing required field: {field}")
+    for field in ("case_id", "configuration"):
+        if field in grade and not isinstance(grade[field], str):
+            errors.append(f"{field} must be a string")
+
+    assertions = grade.get("assertion_results")
+    if not isinstance(assertions, list):
+        errors.append("assertion_results must be an array")
+    else:
+        allowed_assertion_fields = {"text", "passed", "evidence"}
+        for index, assertion in enumerate(assertions):
+            prefix = f"assertion_results[{index}]"
+            if not isinstance(assertion, dict):
+                errors.append(f"{prefix} must be an object")
+                continue
+            missing = allowed_assertion_fields - assertion.keys()
+            extra = assertion.keys() - allowed_assertion_fields
+            if missing:
+                errors.append(f"{prefix} missing fields: {sorted(missing)}")
+            if extra:
+                errors.append(f"{prefix} has unsupported fields: {sorted(extra)}")
+            if "text" in assertion and not isinstance(assertion["text"], str):
+                errors.append(f"{prefix}.text must be a string")
+            if "passed" in assertion and not isinstance(assertion["passed"], bool):
+                errors.append(f"{prefix}.passed must be a boolean")
+            if "evidence" in assertion and not isinstance(assertion["evidence"], str):
+                errors.append(f"{prefix}.evidence must be a string")
+
+    blockers = grade.get("red_blockers", [])
+    if not isinstance(blockers, list) or not all(isinstance(item, str) for item in blockers):
+        errors.append("red_blockers must be an array of strings")
+    for field in ("route_correct", "rival_model_present", "falsifier_present"):
+        if field in grade and not _nullable_bool(grade[field]):
+            errors.append(f"{field} must be a boolean or null")
+    for field in ("triz_false_activation", "module_leakage"):
+        if field in grade and not isinstance(grade[field], bool):
+            errors.append(f"{field} must be a boolean")
+
+    if "judge_score" in grade and grade["judge_score"] is not None:
+        score = numeric(grade["judge_score"])
+        if score is None or not 0 <= score <= 100:
+            errors.append("judge_score must be null or a finite number between 0 and 100")
+
+    summary = grade.get("summary")
+    required_summary_fields = {"passed", "failed", "total", "pass_rate", "case_passed"}
+    if not isinstance(summary, dict):
+        errors.append("summary must be an object")
+    else:
+        missing = required_summary_fields - summary.keys()
+        extra = summary.keys() - required_summary_fields
+        if missing:
+            errors.append(f"summary missing fields: {sorted(missing)}")
+        if extra:
+            errors.append(f"summary has unsupported fields: {sorted(extra)}")
+        for field in ("passed", "failed", "total"):
+            if field in summary and not _nonnegative_integer(summary[field]):
+                errors.append(f"summary.{field} must be an integer >= 0")
+        if "pass_rate" in summary:
+            value = numeric(summary["pass_rate"])
+            if value is None or not 0 <= value <= 1:
+                errors.append("summary.pass_rate must be a finite number between 0 and 1")
+        if "case_passed" in summary and not isinstance(summary["case_passed"], bool):
+            errors.append("summary.case_passed must be a boolean")
+    return errors
 
 
 def get_assertion_pass_rate(grade: dict[str, Any]) -> float | None:
@@ -170,9 +309,10 @@ def main() -> int:
     if not workspace.is_dir():
         parser.error(f"workspace does not exist: {workspace}")
 
-    manifest = read_json(workspace / "manifest.json")
+    manifest, manifest_error = read_json(workspace / "manifest.json")
     if not manifest:
-        parser.error("workspace manifest.json is missing or invalid; create the workspace with create_workspace.py")
+        detail = f": {manifest_error}" if manifest_error else ""
+        parser.error(f"workspace manifest.json is missing or invalid; create the workspace with create_workspace.py{detail}")
     if manifest.get("benchmark_version") != CONFIG.get("benchmark_version"):
         parser.error("workspace benchmark_version does not match the current benchmark definition")
 
@@ -197,8 +337,6 @@ def main() -> int:
                 or isinstance(rep, bool) or not isinstance(rep, int) or rep < 1):
             metadata_errors.append(f"invalid expected slot fields: {slot!r}")
             continue
-        # Validate identity before file access. One artifact slot gets one weight,
-        # both in marginal metrics and in the paired-comparison index.
         case = CASE_MAP.get(case_id)
         if not case:
             metadata_errors.append(f"unknown case in manifest: {case_id}")
@@ -212,14 +350,32 @@ def main() -> int:
             continue
         seen_slots.add(identity)
         run_dir = workspace / f"eval-{case_id}" / cfg / f"run-{rep}"
-        run = read_json(run_dir / "run_record.json")
-        grade = read_json(run_dir / "grading.json")
-        if not run or not grade:
+        run_path = run_dir / "run_record.json"
+        grade_path = run_dir / "grading.json"
+        if not run_path.is_file() or not grade_path.is_file():
             incomplete.append(str(run_dir))
             continue
+
+        run, run_read_error = read_json(run_path)
+        grade, grade_read_error = read_json(grade_path)
+        if run_read_error is not None or run is None:
+            metadata_errors.append(f"invalid run_record.json at {run_dir}: {run_read_error or 'invalid object'}")
+            continue
+        if grade_read_error is not None or grade is None:
+            metadata_errors.append(f"invalid grading.json at {run_dir}: {grade_read_error or 'invalid object'}")
+            continue
+
+        run_contract_errors = validate_run_record(run)
+        grade_contract_errors = validate_grading_record(grade)
+        if run_contract_errors:
+            metadata_errors.extend(f"run_record schema violation at {run_dir}: {error}" for error in run_contract_errors)
+        if grade_contract_errors:
+            metadata_errors.extend(f"grading schema violation at {run_dir}: {error}" for error in grade_contract_errors)
+        if run_contract_errors or grade_contract_errors:
+            continue
+
         if (run.get("case_id") != case_id or run.get("configuration") != cfg
-                or isinstance(run.get("repetition"), bool)
-                or not isinstance(run.get("repetition"), int) or run.get("repetition") != rep):
+                or run.get("repetition") != rep):
             metadata_errors.append(f"run metadata mismatch: {run_dir}")
             continue
         if grade.get("case_id") != case_id or grade.get("configuration") != cfg:

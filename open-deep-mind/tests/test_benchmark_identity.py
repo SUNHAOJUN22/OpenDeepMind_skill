@@ -20,6 +20,39 @@ def run_script(rel: str, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def valid_run(slot: dict) -> dict:
+    return {
+        **slot,
+        "model": "synthetic-regression-no-real-model-execution",
+        "route": "none",
+        "loaded_modules": [],
+        "response_text": "synthetic regression response",
+        "total_tokens": 4,
+        "duration_ms": 1,
+    }
+
+
+def valid_grade(slot: dict, passed: bool) -> dict:
+    return {
+        "case_id": slot["case_id"],
+        "configuration": slot["configuration"],
+        "assertion_results": [],
+        "route_correct": passed,
+        "red_blockers": [],
+        "triz_false_activation": False,
+        "module_leakage": False,
+        "rival_model_present": False,
+        "falsifier_present": False,
+        "summary": {
+            "passed": int(passed),
+            "failed": int(not passed),
+            "total": 1,
+            "pass_rate": float(passed),
+            "case_passed": passed,
+        },
+    }
+
+
 class BenchmarkIdentityTests(unittest.TestCase):
     def _aggregate_slots(self, slots: list[dict], records: list[tuple[dict, bool]]) -> dict:
         with tempfile.TemporaryDirectory() as tmp:
@@ -31,15 +64,8 @@ class BenchmarkIdentityTests(unittest.TestCase):
             for slot, passed in records:
                 run_dir = iteration / f"eval-{slot['case_id']}" / slot["configuration"] / f"run-{slot['repetition']}"
                 run_dir.mkdir(parents=True, exist_ok=True)
-                (run_dir / "run_record.json").write_text(json.dumps({
-                    **slot, "total_tokens": 4, "duration_ms": 1,
-                    "model": "synthetic-regression-no-real-model-execution",
-                }), encoding="utf-8")
-                (run_dir / "grading.json").write_text(json.dumps({
-                    "case_id": slot["case_id"], "configuration": slot["configuration"],
-                    "route_correct": passed, "red_blockers": [],
-                    "summary": {"pass_rate": float(passed), "case_passed": passed},
-                }), encoding="utf-8")
+                (run_dir / "run_record.json").write_text(json.dumps(valid_run(slot)), encoding="utf-8")
+                (run_dir / "grading.json").write_text(json.dumps(valid_grade(slot, passed)), encoding="utf-8")
             process = run_script("open-deep-mind/evals/scripts/aggregate_benchmark.py", str(iteration))
             self.assertEqual(process.returncode, 0, msg=process.stderr + process.stdout)
             return json.loads((iteration / "benchmark.json").read_text(encoding="utf-8"))
@@ -87,23 +113,47 @@ class BenchmarkIdentityTests(unittest.TestCase):
                 self.assertEqual(report["incomplete_run_directories"], [])
 
     def test_boolean_run_repetition_cannot_impersonate_integer_repetition(self) -> None:
-        # Direct fixture because run-1's metadata (not the directory) is malformed.
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             slot = {"case_id": "R01", "configuration": "no_skill", "repetition": 1}
             (root / "manifest.json").write_text(json.dumps({"benchmark_version": "1.0.0", "expected_run_slots": [slot]}))
             run_dir = root / "eval-R01/no_skill/run-1"
             run_dir.mkdir(parents=True)
-            (run_dir / "run_record.json").write_text(json.dumps({**slot, "repetition": True}))
-            (run_dir / "grading.json").write_text(json.dumps({"case_id": "R01", "configuration": "no_skill"}))
+            malformed = valid_run(slot)
+            malformed["repetition"] = True
+            (run_dir / "run_record.json").write_text(json.dumps(malformed))
+            (run_dir / "grading.json").write_text(json.dumps(valid_grade(slot, False)))
             process = run_script("open-deep-mind/evals/scripts/aggregate_benchmark.py", str(root))
             self.assertEqual(process.returncode, 0, msg=process.stderr)
             report = json.loads((root / "benchmark.json").read_text())
             self.assertEqual(report["complete_runs"], 0)
-            self.assertTrue(report["metadata_errors"])
+            self.assertFalse(report["artifact_set_complete"])
+            self.assertTrue(any("repetition must be an integer" in error for error in report["metadata_errors"]))
+
+    def test_schema_invalid_artifacts_cannot_count_as_complete_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            slot = {"case_id": "R01", "configuration": "no_skill", "repetition": 1}
+            (root / "manifest.json").write_text(json.dumps({"benchmark_version": "1.0.0", "expected_run_slots": [slot]}))
+            run_dir = root / "eval-R01/no_skill/run-1"
+            run_dir.mkdir(parents=True)
+            malformed_run = valid_run(slot)
+            malformed_run["route"] = "invented-route"
+            malformed_grade = valid_grade(slot, False)
+            malformed_grade["summary"].pop("total")
+            (run_dir / "run_record.json").write_text(json.dumps(malformed_run))
+            (run_dir / "grading.json").write_text(json.dumps(malformed_grade))
+
+            process = run_script("open-deep-mind/evals/scripts/aggregate_benchmark.py", str(root))
+            self.assertEqual(process.returncode, 0, msg=process.stderr + process.stdout)
+            report = json.loads((root / "benchmark.json").read_text())
+            self.assertEqual(report["complete_runs"], 0)
+            self.assertFalse(report["artifact_set_complete"])
+            self.assertEqual(report["publication_status"], "INCOMPLETE_ARTIFACT_SET")
+            self.assertTrue(any("run_record schema violation" in error for error in report["metadata_errors"]))
+            self.assertTrue(any("grading schema violation" in error for error in report["metadata_errors"]))
 
     def test_forced_route_ablation_is_not_scored_as_production_routing(self) -> None:
-        # The configuration explicitly excludes routing accuracy; other metrics remain.
         slot = {"case_id": "T01", "configuration": "opendeepmind_no_triz_ablation", "repetition": 1}
         report = self._aggregate_slots([slot], [(slot, False)])
         metrics = report["configurations"][slot["configuration"]]
