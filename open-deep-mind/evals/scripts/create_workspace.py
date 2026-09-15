@@ -35,7 +35,15 @@ def main() -> int:
 
     workspace_root = (ROOT.parent.parent / args.workspace).resolve()
     iteration = workspace_root / f"iteration-{args.iteration}"
-    iteration.mkdir(parents=True, exist_ok=True)
+    try:
+        # Reserve a fresh iteration before writing any manifest or run instructions.
+        # An exists-check followed by exist_ok=True would race with another creator.
+        iteration.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        parser.error(
+            f"iteration already exists: {iteration}; choose a new --iteration. "
+            "Existing artifacts were not modified."
+        )
 
     expected_slots: list[dict] = []
     for case in cases:

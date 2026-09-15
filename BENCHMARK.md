@@ -109,6 +109,32 @@ python open-deep-mind/evals/scripts/create_workspace.py \
   --iteration 1 --split validation
 ```
 
+Creation reserves a **new** iteration directory exclusively. Reusing an iteration
+number fails before modifying its manifest, case definitions, instructions or
+recorded outputs, even when the existing directory is empty. Use a new iteration
+number for another split or revised configuration; aggregate the existing
+iteration without running the creation command again. Concurrent creators of
+the same iteration cannot both succeed. Interrupted creation may leave an
+incomplete directory: it is preserved for inspection, not automatically deleted
+or resumed. This is an exclusive-creation rule, not an atomic publish protocol
+for completed model results or protection against arbitrary external writers.
+
+### Workspace preservation change record
+
+- **Problem / failed assumption:** directory reuse was treated as harmless, but
+  creation rewrote metadata around any old outputs and could change the expected
+  run denominator without executing a new model run.
+- **Evidence / affected component:** temporary-workspace regressions reproduce
+  same-split and changed-split overwrites, and two successful competing creators
+  in `create_workspace.py`; existing grading and routing definitions are unchanged.
+- **Rule / expected improvement:** reject existing iterations using exclusive
+  directory creation before the first metadata write; preserve old evidence.
+- **Compatibility / new risk:** callers must choose a fresh iteration number;
+  partially created directories are retained and cannot be silently adopted.
+- **Validation:** rerun the original workspace tests and new preservation and
+  competing-creator tests, followed by repository and evaluation-definition checks.
+  Synthetic fixtures do not establish model performance or publication readiness.
+
 After the external agent/model runner has populated every expected run slot with `run_record.json` and `grading.json`:
 
 ```bash
