@@ -174,9 +174,11 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
             )
             self.assertEqual(aggregate.returncode, 0, msg=aggregate.stderr + aggregate.stdout)
             raw = (iteration / "benchmark.json").read_text(encoding="utf-8")
-            self.assertNotIn("NaN", raw)
-            self.assertNotIn("Infinity", raw)
-            benchmark = json.loads(raw)
+
+            def reject_nonfinite(token: str):
+                self.fail(f"serialized benchmark contains non-finite JSON value: {token}")
+
+            benchmark = json.loads(raw, parse_constant=reject_nonfinite)
             self.assertEqual(benchmark["complete_runs"], 0)
             self.assertFalse(benchmark["artifact_set_complete"])
             self.assertEqual(benchmark["publication_status"], "INCOMPLETE_ARTIFACT_SET")
