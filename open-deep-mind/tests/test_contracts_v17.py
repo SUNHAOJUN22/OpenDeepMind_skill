@@ -51,14 +51,15 @@ class OpenDeepMindContractsV17Tests(unittest.TestCase):
         self.assertEqual(decision.duplicate_slots, ("phi-1",))
         self.assertEqual(decision.orphan_slots, ("orphan",))
 
-    def test_complete_unique_exact_revision_can_be_ready(self) -> None:
+    def test_complete_unique_slots_do_not_self_authorize_publication(self) -> None:
         decision = MODULE.publication_decision(
             ["phi-1", "p-1"],
             ["phi-1", "p-1"],
             holdout_sealed=True,
             exact_revision_bound=True,
         )
-        self.assertEqual(decision.status, "READY")
+        self.assertEqual(decision.status, "ARTIFACT_SET_COMPLETE")
+        self.assertFalse(decision.publication_ready)
         self.assertEqual(decision.completeness, 1.0)
 
     def test_missing_slot_scores_do_not_produce_a_behavior_score(self) -> None:

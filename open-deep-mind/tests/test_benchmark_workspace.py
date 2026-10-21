@@ -58,6 +58,8 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
             self.assertFalse(benchmark["publication_ready"])
 
     def test_complete_synthetic_slot_still_requires_independent_attestation(self) -> None:
+        cases = json.loads((REPO / "open-deep-mind/evals/evals.json").read_text(encoding="utf-8"))["evals"]
+        criteria = next(case["assertions"] for case in cases if case["id"] == "R01")
         with tempfile.TemporaryDirectory() as tmp:
             iteration = Path(tmp) / "iteration-1"
             run_dir = iteration / "eval-R01" / "no_skill" / "run-1"
@@ -95,12 +97,15 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
                     {
                         "case_id": "R01",
                         "configuration": "no_skill",
-                        "assertion_results": [],
+                        "assertion_results": [
+                            {"text": criterion, "passed": False, "evidence": "synthetic test response"}
+                            for criterion in criteria
+                        ],
                         "red_blockers": [],
                         "summary": {
                             "passed": 0,
-                            "failed": 0,
-                            "total": 0,
+                            "failed": len(criteria),
+                            "total": len(criteria),
                             "pass_rate": 0.0,
                             "case_passed": False,
                         },

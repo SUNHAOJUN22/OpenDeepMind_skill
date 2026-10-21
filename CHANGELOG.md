@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased — artifact integrity and bilingual delivery
+
+- Bind aggregate and paired verdicts to consistent assertion evidence and recorded TRIZ activation.
+- Reject unsafe counters, malformed/nested JSON, duplicate assertions and orphan artifacts.
+- Align compatibility claim types and keep artifact completeness separate from publication authority.
+- Add public-entrypoint regressions and activate previously uncollected v16 tests.
+- Rewrite Chinese/English README with source-linked mathematical contracts and matching-language concept artwork.
+- Migration and validation details: [acceptance repair](docs/acceptance-repair.md).
+
+
 All notable changes are documented here.
 
 ## [Unreleased] — Behavioral benchmark

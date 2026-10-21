@@ -33,10 +33,12 @@ def valid_run(slot: dict) -> dict:
 
 
 def valid_grade(slot: dict, passed: bool) -> dict:
+    cases = json.loads((REPO / "open-deep-mind/evals/evals.json").read_text(encoding="utf-8"))["evals"]
+    criteria = next(case["assertions"] for case in cases if case["id"] == slot["case_id"])
     return {
         "case_id": slot["case_id"],
         "configuration": slot["configuration"],
-        "assertion_results": [],
+        "assertion_results": [{"text": text, "passed": passed, "evidence": "synthetic regression response"} for text in criteria],
         "route_correct": passed,
         "red_blockers": [],
         "triz_false_activation": False,
@@ -44,9 +46,9 @@ def valid_grade(slot: dict, passed: bool) -> dict:
         "rival_model_present": False,
         "falsifier_present": False,
         "summary": {
-            "passed": int(passed),
-            "failed": int(not passed),
-            "total": 1,
+            "passed": len(criteria) * int(passed),
+            "failed": len(criteria) * int(not passed),
+            "total": len(criteria),
             "pass_rate": float(passed),
             "case_passed": passed,
         },

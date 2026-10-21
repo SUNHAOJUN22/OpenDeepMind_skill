@@ -114,6 +114,15 @@ A benchmark harness writes one `run_record.json` for each expected case/configur
 ```
 
 A grader then writes `grading.json` conforming to `grading.schema.json`.
+Each `assertion_results[].text` must reproduce one official assertion from the
+case in `evals.json` (outer whitespace is ignored), and every official assertion
+must appear exactly once. Deleting a failed criterion, replacing it with an
+easier one, or adding criteria to reweight the score is rejected even when the
+self-reported summary is numerically consistent. `loaded_modules` accepts only
+unique canonical IDs: `first-philosophy`, `first-principles`, and `triz`.
+
+评分记录必须完整覆盖 `evals.json` 对应案例的官方断言，每条恰好一次；不能删减、
+替换或增添评分项。模块标识必须使用上述规范名称，不能用大写或路径别名绕过检查。
 
 ## 6. Grading layers
 
@@ -233,3 +242,7 @@ human/model-judge rubric and identity when applicable
 `artifact_set_complete=true` means only that every expected run slot has consistent run and grading artifacts. The dependency-free aggregator deliberately keeps `publication_ready=false` until a separate, independently verified publication attestation binds the exact repository revision, model/provider settings, raw artifacts, holdout seal, grader identity and release authority.
 
 Authored cases, complete slots, or aggregated scores are not themselves a published model result. Do not claim that a benchmark result proves universal superiority. It establishes performance only on the disclosed task distribution, models, settings and graders.
+
+## Artifact integrity checks
+
+The aggregator validates assertion counts and rates against their records; passing assertions need response evidence. Empty assertions, red blockers and reported leakage cannot yield a passing case. Routing and forbidden TRIZ activation derive from recorded metadata, and aggregate/paired case verdicts share one rule. Orphan artifacts prevent completeness. JSON inputs are bounded to 8 MiB and 128 levels, with finite metrics and safe integer counters. These checks establish internal consistency, not external model execution or publication authority.

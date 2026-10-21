@@ -17,6 +17,9 @@ EVALS = json.loads((ROOT / "evals.json").read_text(encoding="utf-8"))
 CASE_MAP = {c["id"]: c for c in EVALS["evals"]}
 CONFIG_MAP = {c["id"]: c for c in CONFIG["configurations"]}
 RUN_ROUTES = {"phi", "p", "phi-p", "triz", "none", "unknown"}
+MODULE_IDS = {"first-philosophy", "first-principles", "triz"}
+MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
+MAX_SAFE_INTEGER = 2 ** 53 - 1
 
 
 def mean(values: list[float]) -> float | None:
@@ -48,13 +51,28 @@ def read_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
         return value
 
     try:
+        with path.open("rb") as stream:
+            raw = stream.read(MAX_ARTIFACT_BYTES + 1)
+        if len(raw) > MAX_ARTIFACT_BYTES:
+            raise ValueError("JSON artifact exceeds the 8 MiB validation budget")
         data = json.loads(
-            path.read_text(encoding="utf-8"),
+            raw.decode("utf-8"),
             object_pairs_hook=unique_object,
             parse_constant=reject_constant,
             parse_float=finite_float,
         )
-    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        stack = [(data, 0)]
+        while stack:
+            item, depth = stack.pop()
+            if depth > 128:
+                raise ValueError("JSON artifact exceeds the 128-level nesting budget")
+            if isinstance(item, dict):
+                stack.extend((value, depth + 1) for pair in item.items() for value in pair)
+            elif isinstance(item, list):
+                stack.extend((value, depth + 1) for value in item)
+            elif isinstance(item, str) and any(0xD800 <= ord(char) <= 0xDFFF for char in item):
+                raise ValueError("JSON strings must not contain unpaired Unicode surrogates")
+    except (OSError, UnicodeError, ValueError, RecursionError) as exc:
         return None, str(exc)
     if not isinstance(data, dict):
         return None, "top-level JSON must be an object"
@@ -64,7 +82,10 @@ def read_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
 def numeric(value: Any) -> float | None:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    number = float(value)
+    try:
+        number = float(value)
+    except (OverflowError, ValueError):
+        return None
     return number if math.isfinite(number) else None
 
 
@@ -88,24 +109,27 @@ def validate_run_record(run: dict[str, Any]) -> list[str]:
             errors.append(f"missing required field: {field}")
 
     for field in ("case_id", "configuration", "model", "response_text"):
-        if field in run and not isinstance(run[field], str):
-            errors.append(f"{field} must be a string")
+        if field in run and (not isinstance(run[field], str) or not run[field].strip()):
+            errors.append(f"{field} must be a non-empty string")
     for field in ("model_version", "repository_commit", "run_timestamp"):
         if field in run and not isinstance(run[field], str):
             errors.append(f"{field} must be a string")
 
     repetition = run.get("repetition")
-    if not (isinstance(repetition, int) and not isinstance(repetition, bool) and repetition >= 1):
-        errors.append("repetition must be an integer >= 1")
-    if run.get("route") not in RUN_ROUTES:
+    if not (isinstance(repetition, int) and not isinstance(repetition, bool)
+            and 1 <= repetition <= MAX_SAFE_INTEGER):
+        errors.append(f"repetition must be an integer between 1 and {MAX_SAFE_INTEGER}")
+    if not isinstance(run.get("route"), str) or run["route"] not in RUN_ROUTES:
         errors.append(f"route must be one of {sorted(RUN_ROUTES)}")
 
     loaded_modules = run.get("loaded_modules")
     if not isinstance(loaded_modules, list) or not all(isinstance(item, str) for item in loaded_modules):
         errors.append("loaded_modules must be an array of strings")
+    elif any(item not in MODULE_IDS for item in loaded_modules) or len(set(loaded_modules)) != len(loaded_modules):
+        errors.append(f"loaded_modules must contain unique canonical IDs from {sorted(MODULE_IDS)}")
     for field in ("total_tokens", "duration_ms"):
-        if not _nonnegative_integer(run.get(field)):
-            errors.append(f"{field} must be an integer >= 0")
+        if not _nonnegative_integer(run.get(field)) or run[field] > MAX_SAFE_INTEGER:
+            errors.append(f"{field} must be an integer between 0 and {MAX_SAFE_INTEGER}")
     return errors
 
 
@@ -116,14 +140,15 @@ def validate_grading_record(grade: dict[str, Any]) -> list[str]:
         if field not in grade:
             errors.append(f"missing required field: {field}")
     for field in ("case_id", "configuration"):
-        if field in grade and not isinstance(grade[field], str):
-            errors.append(f"{field} must be a string")
+        if field in grade and (not isinstance(grade[field], str) or not grade[field].strip()):
+            errors.append(f"{field} must be a non-empty string")
 
     assertions = grade.get("assertion_results")
     if not isinstance(assertions, list):
         errors.append("assertion_results must be an array")
     else:
         allowed_assertion_fields = {"text", "passed", "evidence"}
+        seen_text: set[str] = set()
         for index, assertion in enumerate(assertions):
             prefix = f"assertion_results[{index}]"
             if not isinstance(assertion, dict):
@@ -135,12 +160,19 @@ def validate_grading_record(grade: dict[str, Any]) -> list[str]:
                 errors.append(f"{prefix} missing fields: {sorted(missing)}")
             if extra:
                 errors.append(f"{prefix} has unsupported fields: {sorted(extra)}")
-            if "text" in assertion and not isinstance(assertion["text"], str):
-                errors.append(f"{prefix}.text must be a string")
+            text = assertion.get("text")
+            if not isinstance(text, str) or not text.strip():
+                errors.append(f"{prefix}.text must be a non-empty string")
+            elif text.strip() in seen_text:
+                errors.append(f"{prefix} duplicates an assertion")
+            else:
+                seen_text.add(text.strip())
             if "passed" in assertion and not isinstance(assertion["passed"], bool):
                 errors.append(f"{prefix}.passed must be a boolean")
             if "evidence" in assertion and not isinstance(assertion["evidence"], str):
                 errors.append(f"{prefix}.evidence must be a string")
+            elif assertion.get("passed") is True and not str(assertion.get("evidence", "")).strip():
+                errors.append(f"{prefix} PASS requires non-empty response evidence")
 
     blockers = grade.get("red_blockers", [])
     if not isinstance(blockers, list) or not all(isinstance(item, str) for item in blockers):
@@ -177,11 +209,44 @@ def validate_grading_record(grade: dict[str, Any]) -> list[str]:
                 errors.append("summary.pass_rate must be a finite number between 0 and 1")
         if "case_passed" in summary and not isinstance(summary["case_passed"], bool):
             errors.append("summary.case_passed must be a boolean")
+    if not errors:
+        case = CASE_MAP.get(grade["case_id"])
+        if case is None:
+            errors.append("grading case_id must name an official benchmark case")
+        elif seen_text != {text.strip() for text in case["assertions"]}:
+            errors.append("grading must cover the complete official assertion set without replacement or additions")
+        total = len(assertions)
+        passed = sum(assertion["passed"] for assertion in assertions)
+        for field, expected in (("total", total), ("passed", passed), ("failed", total - passed)):
+            if summary[field] != expected:
+                errors.append(f"summary.{field} contradicts assertion_results")
+        expected_rate = passed / total if total else 0.0
+        if not math.isclose(summary["pass_rate"], expected_rate, rel_tol=0.0, abs_tol=1e-12):
+            errors.append("summary.pass_rate contradicts assertion_results")
+        if summary["case_passed"] and (
+            not total or passed != total or blockers
+            or grade.get("triz_false_activation") or grade.get("module_leakage")
+        ):
+            errors.append("case_passed requires nonempty passing assertions and no red blockers")
     return errors
 
 
 def get_assertion_pass_rate(grade: dict[str, Any]) -> float | None:
     return numeric(grade.get("summary", {}).get("pass_rate"))
+
+
+def false_triz_activation(case: dict[str, Any], run: dict[str, Any]) -> bool:
+    invokes = run.get("route") == "triz" or "triz" in run.get("loaded_modules", [])
+    return invokes and case.get("triz_allowed") is not True
+
+
+def effective_case_pass(case: dict[str, Any], run: dict[str, Any], grade: dict[str, Any]) -> bool | None:
+    """Keep aggregate and paired verdicts subject to identical hard exclusions."""
+    claimed = grade.get("summary", {}).get("case_passed")
+    if not isinstance(claimed, bool):
+        return None
+    return (claimed and not false_triz_activation(case, run)
+            and not bool(grade.get("module_leakage")) and not bool(grade.get("red_blockers", [])))
 
 
 def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any]]]) -> dict[str, Any]:
@@ -197,18 +262,18 @@ def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any
     durations: list[float] = []
     case_pass_flags: list[bool] = []
 
-    for _case, run, grade in rows:
+    for case, run, grade in rows:
         value = get_assertion_pass_rate(grade)
         if value is not None:
             pass_rates.append(value)
         blocker_flags.append(bool(grade.get("red_blockers", [])))
-        rc = grade.get("route_correct")
+        # Internal consistency of the recorded run, not external execution attestation.
+        rc = run.get("route") == case.get("expected_route")
         score_route = CONFIG_MAP.get(run.get("configuration"), {}).get("score_routing_accuracy", True)
         if score_route and isinstance(rc, bool):
             route_flags.append(rc)
-        ft = grade.get("triz_false_activation")
-        if isinstance(ft, bool):
-            false_triz_flags.append(ft)
+        ft = false_triz_activation(case, run)
+        false_triz_flags.append(ft)
         ml = grade.get("module_leakage")
         if isinstance(ml, bool):
             leakage_flags.append(ml)
@@ -227,7 +292,7 @@ def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any
         d = numeric(run.get("duration_ms"))
         if d is not None:
             durations.append(d)
-        cp = grade.get("summary", {}).get("case_passed")
+        cp = effective_case_pass(case, run, grade)
         if isinstance(cp, bool):
             case_pass_flags.append(cp)
 
@@ -261,8 +326,8 @@ def paired_comparison(
     ties = 0
 
     for key in common:
-        _lc, lrun, lgrade = left_rows[key]
-        _rc, rrun, rgrade = right_rows[key]
+        lc, lrun, lgrade = left_rows[key]
+        rc, rrun, rgrade = right_rows[key]
         la, ra = get_assertion_pass_rate(lgrade), get_assertion_pass_rate(rgrade)
         if la is not None and ra is not None:
             assertion_deltas.append(la - ra)
@@ -276,8 +341,8 @@ def paired_comparison(
         if ld is not None and rd is not None:
             duration_deltas.append(ld - rd)
 
-        lp = lgrade.get("summary", {}).get("case_passed")
-        rp = rgrade.get("summary", {}).get("case_passed")
+        lp = effective_case_pass(lc, lrun, lgrade)
+        rp = effective_case_pass(rc, rrun, rgrade)
         if isinstance(lp, bool) and isinstance(rp, bool):
             if lp and not rp:
                 left_case_wins += 1
@@ -325,6 +390,7 @@ def main() -> int:
     incomplete: list[str] = []
     metadata_errors: list[str] = []
     seen_slots: set[tuple[str, str, int]] = set()
+    expected_artifact_paths: set[Path] = set()
 
     for slot in expected_slots:
         if not isinstance(slot, dict):
@@ -334,7 +400,7 @@ def main() -> int:
         cfg = slot.get("configuration")
         rep = slot.get("repetition")
         if (not isinstance(case_id, str) or not isinstance(cfg, str)
-                or isinstance(rep, bool) or not isinstance(rep, int) or rep < 1):
+                or isinstance(rep, bool) or not isinstance(rep, int) or not 1 <= rep <= MAX_SAFE_INTEGER):
             metadata_errors.append(f"invalid expected slot fields: {slot!r}")
             continue
         case = CASE_MAP.get(case_id)
@@ -352,6 +418,7 @@ def main() -> int:
         run_dir = workspace / f"eval-{case_id}" / cfg / f"run-{rep}"
         run_path = run_dir / "run_record.json"
         grade_path = run_dir / "grading.json"
+        expected_artifact_paths.update((run_path, grade_path))
         if not run_path.is_file() or not grade_path.is_file():
             incomplete.append(str(run_dir))
             continue
@@ -384,6 +451,11 @@ def main() -> int:
         row = (case, run, grade)
         by_cfg[cfg].append(row)
         indexed[cfg][(case_id, rep)] = row
+
+    for filename in ("run_record.json", "grading.json"):
+        for artifact in workspace.rglob(filename):
+            if artifact not in expected_artifact_paths:
+                metadata_errors.append(f"orphan artifact outside the manifest: {artifact}")
 
     configurations = {cfg: build_metrics(rows) for cfg, rows in sorted(by_cfg.items())}
 
