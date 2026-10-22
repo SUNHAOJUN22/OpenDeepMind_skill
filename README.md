@@ -86,7 +86,7 @@ $$
 \forall (u,v)\in E,\quad u,v\in N,\qquad G\text{ must be acyclic}.
 $$
 
-The validator uses iterative graph traversal with a raw-input budget of 8 MiB, 10,000 records and 100,000 references. JSON nesting is limited to 128 levels. Duplicate JSON keys, non-finite JSON numbers and unpaired Unicode surrogates are rejected. These are software resource and consistency checks, not proof that the recorded claims are true.
+The validator uses iterative graph traversal with a raw-input budget of 8 MiB, 10,000 records and 100,000 references. JSON nesting is limited to 128 levels. Duplicate JSON keys, non-finite JSON numbers and unpaired Unicode surrogates are rejected. Ledger and benchmark JSON readers also reject nonzero numbers that underflow to zero during floating-point conversion: a negative confidence or judge score such as `-1e-999` cannot become an accepted zero. Exact zero significands such as `0e-999` and representable subnormal values such as `5e-324` remain valid numeric inputs, subject to each field's range. These are software resource and consistency checks, not proof that the recorded claims are true.
 
 Where confidence is supplied, it is a finite, non-Boolean number:
 

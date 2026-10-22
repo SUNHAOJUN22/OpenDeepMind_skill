@@ -48,6 +48,9 @@ def read_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
         value = float(token)
         if not math.isfinite(value):
             raise ValueError("JSON number exceeds the finite range")
+        # Inspect the significand: exponent digits do not make an exact zero nonzero.
+        if value == 0.0 and any(digit in "123456789" for digit in token.lower().split("e", 1)[0]):
+            raise ValueError("nonzero JSON number underflows to zero")
         return value
 
     try:
