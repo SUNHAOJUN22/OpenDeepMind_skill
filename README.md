@@ -94,6 +94,8 @@ $$
 0\le c_i\le1.
 $$
 
+For both claims and inferences, `confidence` may be omitted when no numeric estimate is available. Explicit JSON `null`, Boolean values and numeric strings are invalid; omission does not imply zero confidence.
+
 Do not interpret a confidence label as a calibrated probability unless a calibration procedure and relevant data support that interpretation.
 
 ## 4. Mathematical model contracts
@@ -185,13 +187,13 @@ The forced-route ablation omits production routing accuracy. Semantic module lea
 
 ### Paired comparisons and semantic scoring
 
-Only shared case/repetition identities contribute to a pair. For metric $z$ and common set $I$,
+Only shared case/repetition identities contribute to a pair. Let $I$ be that common set, and let $I_z\subseteq I$ contain only identities with a valid metric $z$ on both sides. For $|I_z|>0$,
 
 $$
-\overline{\Delta z}=\frac1{|I|}\sum_{i\in I}(z_{L,i}-z_{R,i}).
+\overline{\Delta z}=\frac1{|I_z|}\sum_{i\in I_z}(z_{L,i}-z_{R,i}).
 $$
 
-The report includes assertion-rate, judge-score, token and duration deltas, plus effective case wins/ties. Missing metrics are not silently replaced with zero. Blind pairwise judgment remains a separate evidence artifact.
+The report includes assertion-rate, judge-score, token and duration deltas, plus effective case wins/ties. `paired_runs` counts $|I|$; an optional metric such as `judge_score` may use fewer pairs. If $I_z$ is empty, its mean delta is JSON `null`. Missing metrics are not silently replaced with zero. Blind pairwise judgment remains a separate evidence artifact.
 
 The [semantic rubric](open-deep-mind/evals/rubric.md) has ten dimensions, weights $w_k$ totaling 100 and anchored scores $s_k\in[0,5]$:
 

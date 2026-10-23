@@ -137,7 +137,7 @@ def validate(data: dict[str, Any]) -> list[str]:
             require(isinstance(claim.get("scope"), str), f"{prefix}.scope must be a string", errors)
             require(isinstance(claim.get("falsifier"), str), f"{prefix}.falsifier must be a string", errors)
             confidence = claim.get("confidence")
-            if confidence is not None:
+            if "confidence" in claim:
                 require(
                     isinstance(confidence, (int, float)) and not isinstance(confidence, bool) and 0 <= confidence <= 1,
                     f"{prefix}.confidence must be between 0 and 1",
@@ -207,7 +207,7 @@ def validate(data: dict[str, Any]) -> list[str]:
                         if isinstance(iid, str) and premise in all_ids:
                             graph[iid].add(premise)
             confidence = inference.get("confidence")
-            if confidence is not None:
+            if "confidence" in inference:
                 require(
                     isinstance(confidence, (int, float)) and not isinstance(confidence, bool) and 0 <= confidence <= 1,
                     f"{prefix}.confidence must be between 0 and 1",
