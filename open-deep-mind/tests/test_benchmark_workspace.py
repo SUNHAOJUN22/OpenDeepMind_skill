@@ -253,6 +253,38 @@ class WorkspacePreservationTests(unittest.TestCase):
             self.assertIn("already exists", result.stderr)
             self.assertEqual(list(iteration.iterdir()), [])
 
+    def test_destination_created_after_guard_is_never_replaced(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            iteration = Path(tmp) / "iteration-1"
+            original_publish = CREATE_WORKSPACE._rename_directory_no_replace
+
+            def race_with_empty_directory(source: Path, destination: Path) -> None:
+                iteration.mkdir()
+                original_publish(source, destination)
+
+            argv = [
+                str(CREATE_SCRIPT), "--iteration", "1", "--split", "validation",
+                "--workspace", tmp,
+            ]
+            stdout = io.StringIO()
+            with (
+                patch.object(sys, "argv", argv),
+                patch.object(
+                    CREATE_WORKSPACE,
+                    "_rename_directory_no_replace",
+                    race_with_empty_directory,
+                ),
+                contextlib.redirect_stdout(stdout),
+                self.assertRaises(SystemExit) as raised,
+            ):
+                CREATE_WORKSPACE.main()
+
+            self.assertEqual(raised.exception.code, 2)
+            self.assertNotIn('"ok": true', stdout.getvalue())
+            self.assertTrue(iteration.is_dir())
+            self.assertEqual(list(iteration.iterdir()), [])
+            self.assertEqual(list(Path(tmp).iterdir()), [iteration])
+
     def test_existing_file_is_preserved_with_a_cli_diagnostic(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             iteration = Path(tmp) / "iteration-1"

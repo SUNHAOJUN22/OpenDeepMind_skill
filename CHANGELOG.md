@@ -9,6 +9,7 @@
 - Align compatibility claim types and keep artifact completeness separate from publication authority.
 - Add public-entrypoint regressions and activate previously uncollected v16 tests.
 - Build benchmark iterations in a temporary sibling directory and publish only after all files are written, so interrupted creation can be retried without adopting partial artifacts.
+- Publish benchmark iterations with an atomic no-replace rename so a concurrent creator's empty destination is preserved.
 - Rewrite Chinese/English README with source-linked mathematical contracts and matching-language concept artwork.
 - Migration and validation details: [acceptance repair](docs/acceptance-repair.md).
 

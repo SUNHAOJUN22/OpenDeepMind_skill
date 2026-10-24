@@ -4,14 +4,62 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
+import errno
 import json
 import os
+import sys
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVALS = ROOT / "evals.json"
 CONFIG = ROOT / "benchmark-config.json"
+
+
+def _rename_directory_no_replace(source: Path, destination: Path) -> None:
+    """Atomically publish a directory only if its destination is still absent."""
+    source_name = os.fsencode(source)
+    destination_name = os.fsencode(destination)
+    if sys.platform == "win32":
+        # Windows rename semantics fail if any destination already exists.
+        os.rename(source, destination)
+        return
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    if sys.platform.startswith("linux"):
+        rename = getattr(libc, "renameat2", None)
+        if rename is None:
+            raise OSError(errno.ENOTSUP, "atomic no-replace directory rename is unavailable")
+        rename.argtypes = [
+            ctypes.c_int,
+            ctypes.c_char_p,
+            ctypes.c_int,
+            ctypes.c_char_p,
+            ctypes.c_uint,
+        ]
+        rename.restype = ctypes.c_int
+        result = rename(
+            -100, source_name, -100, destination_name, 1
+        )  # AT_FDCWD, RENAME_NOREPLACE
+    elif sys.platform == "darwin":
+        rename = getattr(libc, "renamex_np", None)
+        if rename is None:
+            raise OSError(errno.ENOTSUP, "atomic no-replace directory rename is unavailable")
+        rename.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint]
+        rename.restype = ctypes.c_int
+        result = rename(source_name, destination_name, 0x00000004)  # RENAME_EXCL
+    else:
+        raise OSError(
+            errno.ENOTSUP,
+            "atomic no-replace directory rename is unsupported on this platform",
+        )
+
+    if result != 0:
+        error = ctypes.get_errno()
+        if error in (errno.EEXIST, errno.ENOTEMPTY):
+            raise FileExistsError(error, os.strerror(error), os.fspath(destination))
+        raise OSError(error, os.strerror(error), os.fspath(destination))
 
 
 def applies_to_case(cfg: dict, case: dict) -> bool:
@@ -118,7 +166,7 @@ def main() -> int:
             # iteration name, leave its directory untouched and discard our stage.
             if os.path.lexists(iteration):
                 raise FileExistsError(f"iteration already exists: {iteration}")
-            staged_iteration.rename(iteration)
+            _rename_directory_no_replace(staged_iteration, iteration)
     except FileExistsError:
         parser.error(
             f"iteration already exists: {iteration}; choose a new --iteration. "
