@@ -166,3 +166,11 @@ Detailed methodology, schemas, publication rules and rubric:
 The evaluation pattern follows the Agent Skills evaluation guidance: realistic prompts, with/without-skill or version/baseline comparisons, grading artifacts with evidence, token/time capture, aggregation, and blind review where useful.
 
 Reference: <https://agentskills.io/skill-creation/evaluating-skills>
+
+### Aggregate output preservation change record
+
+- **Problem / failed invariant:** `--output` could replace benchmark source evidence after reading it, while reporting a successful aggregation.
+- **Evidence / affected layer:** public CLI regressions reproduce manifest, case, instruction, run/grading and raw-response replacement, including an aliased parent directory.
+- **Rule / expected improvement:** reject resolved output paths naming the manifest or entering any `eval-*` case directory before writing the report. Grading, routing and numerical metrics do not change.
+- **Compatibility / new risk:** reports in case directories must move to the workspace root or outside those directories. Existing reports elsewhere remain refreshable; concurrent filesystem mutations are outside this precheck guarantee.
+- **Validation:** failure-before / preservation-after CLI tests and the original repository CI commands. Synthetic artifacts do not establish model capability or publication authority.

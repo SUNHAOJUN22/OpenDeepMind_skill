@@ -672,6 +672,20 @@ def main() -> int:
         parser.error(f"cannot inspect benchmark output path: {exc}")
     if output_mode is not None and not stat.S_ISREG(output_mode):
         parser.error("benchmark output path must be absent or a regular non-symlink file")
+    # Reports are derived artifacts. Never replace the manifest or anything in
+    # a case's evidence tree, including raw outputs not parsed by this command.
+    # Resolve parent aliases too; a path outside the workspace may point into it.
+    try:
+        relative_output = output.resolve().relative_to(workspace)
+    except ValueError:
+        relative_output = None
+    except (OSError, RuntimeError) as exc:
+        parser.error(f"cannot resolve benchmark output path: {exc}")
+    if relative_output is not None and (
+        relative_output == Path("manifest.json")
+        or (len(relative_output.parts) > 1 and relative_output.parts[0].startswith("eval-"))
+    ):
+        parser.error("benchmark output path must not replace benchmark source evidence")
     try:
         write_json_atomically(
             output,

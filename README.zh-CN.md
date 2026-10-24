@@ -223,6 +223,8 @@ python open-deep-mind/evals/scripts/create_workspace.py --iteration 1 --split va
 python open-deep-mind/evals/scripts/aggregate_benchmark.py ../OpenDeepMind_skill-workspace/iteration-1
 ```
 
+报告默认写入 `benchmark.json`。自定义 `--output` 不能指向 `manifest.json` 或任何 `eval-*` 案例目录（包括原始响应）；通过父目录别名指入这些证据路径同样会被拒绝。其他位置的默认或自定义报告仍可重复更新。该检查在发布前核对路径，不保证抵御并发文件系统变更。
+
 `artifact_set_complete=true` 仅表示工件内部完整一致。聚合器始终保持 `publication_ready=false`；模型执行、原始工件、留出集封存、评分者身份与发布权限必须由独立发布流程核验。v16/v17 兼容 API 对完整记录返回 `ARTIFACT_SET_COMPLETE`，替代含义模糊的 `READY`；类似布尔值的字符串会被拒绝。迁移说明见[修复记录](docs/acceptance-repair.md)。
 
 ## 七、软件检查与交付证据

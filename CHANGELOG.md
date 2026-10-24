@@ -2,6 +2,8 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Prevent aggregate report destinations from replacing the workspace manifest or case evidence, including parent-directory aliases; keep reports elsewhere refreshable.
+
 - Exclude known model/version mismatches from paired benchmark metrics while preserving individual observations; expose candidate, excluded and unversioned pair counts.
 - Require declared execution-condition parity (sampling/reasoning settings, tool access, input-file hashes) before including runs in paired benchmark deltas or wins; retain individual metrics for excluded pairs.
 - Bind aggregate and paired verdicts to consistent assertion evidence and recorded TRIZ activation.

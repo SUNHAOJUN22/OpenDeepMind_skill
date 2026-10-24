@@ -224,6 +224,8 @@ Use an external authorized model runner to populate the expected `run_record.jso
 python open-deep-mind/evals/scripts/aggregate_benchmark.py ../OpenDeepMind_skill-workspace/iteration-1
 ```
 
+Reports default to `benchmark.json`. A custom `--output` must stay outside `manifest.json` and every `eval-*` case directory (including raw responses); parent-directory aliases into those evidence paths are also rejected. Existing default or custom report files elsewhere can still be refreshed. This is a pre-publication path check, not protection against concurrent filesystem changes.
+
 `artifact_set_complete=true` establishes internal artifact completeness only. The aggregator always retains `publication_ready=false`; an independent release process must verify model execution, raw artifacts, holdout sealing, grader identity and publication authority. The v16/v17 compatibility APIs now return `ARTIFACT_SET_COMPLETE` for complete records, rather than the ambiguous `READY`. Boolean-looking strings are rejected. See [migration and repair notes](docs/acceptance-repair.md).
 
 ## 7. Software checks and delivery evidence

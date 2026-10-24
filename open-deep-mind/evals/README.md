@@ -297,3 +297,9 @@ Authored cases, complete slots, or aggregated scores are not themselves a publis
 ## Artifact integrity checks
 
 The aggregator validates assertion counts and rates against their records; passing assertions need response evidence. Every grading record must explicitly include its red-blocker list and module-leakage verdict; missing status is unknown and cannot count as clear. Empty assertions, red blockers and reported leakage cannot yield a passing case. Routing and forbidden TRIZ activation derive from recorded metadata, and aggregate/paired case verdicts share one rule. Expected artifacts must be regular files within the workspace; symlinks and special files are rejected. Reports are written atomically, and output symlinks are refused. Orphan artifacts prevent completeness. JSON inputs are bounded to 8 MiB and 128 levels, with finite metrics and safe integer counters. These checks establish internal consistency, not external model execution or publication authority.
+
+### Report destination preservation
+
+`--output` cannot target the workspace manifest or any path below a workspace `eval-*` directory, including case definitions, instructions, run/grading records and raw outputs. Resolved parent-directory aliases receive the same check. Keep derived reports at the workspace root or outside case directories; existing report destinations there remain refreshable. The path precheck does not provide isolation from concurrent directory replacement.
+
+输出位置不得覆盖工作区清单或 `eval-*` 目录中的案例、指令、运行/评分记录及原始输出；解析父目录别名后采用相同规则。派生报告应位于工作区根目录或案例目录之外，原有报告可重复更新。路径预检查不提供并发目录替换隔离。
