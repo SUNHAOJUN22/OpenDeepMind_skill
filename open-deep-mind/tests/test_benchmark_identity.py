@@ -21,11 +21,12 @@ def run_script(rel: str, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 def valid_run(slot: dict) -> dict:
+    ablation = slot.get("configuration") == "opendeepmind_no_triz_ablation"
     return {
         **slot,
         "model": "synthetic-regression-no-real-model-execution",
-        "route": "none",
-        "loaded_modules": [],
+        "route": "p" if ablation else "none",
+        "loaded_modules": ["first-principles"] if ablation else [],
         "response_text": "synthetic regression response",
         "total_tokens": 4,
         "duration_ms": 1,

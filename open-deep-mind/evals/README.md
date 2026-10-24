@@ -130,6 +130,42 @@ unique canonical IDs: `first-philosophy`, `first-principles`, and `triz`.
 评分记录必须完整覆盖 `evals.json` 对应案例的官方断言，每条恰好一次；不能删减、
 替换或增添评分项。模块标识必须使用上述规范名称，不能用大写或路径别名绕过检查。
 
+The aggregator also checks each run against its configuration before admitting it
+to individual metrics or paired comparisons. `forced_route` specifies the selected
+method: a no-TRIZ ablation must record `route="p"`, including when production
+routing accuracy is intentionally not scored. A module in `disabled_modules`
+must appear in neither `loaded_modules` nor the selected route. Contradictory
+records produce path-specific `metadata_errors`, do not count toward
+`complete_runs`, and block `artifact_set_complete`; their source artifacts remain
+unchanged. Pair candidate counts include only admitted records. Production
+routing errors remain measured observations, and no-skill/external baselines
+are not required to load OpenDeepMind modules.
+
+聚合前须核验运行记录与实验配置一致：禁用模块既不能出现在加载列表中，也不能由
+选定路由调用；强制 P 路由的消融记录必须报告 `route="p"`。不计生产路由准确率
+不等于免除配置校验。违例记录保留原始文件和路径诊断，但不进入完整运行数、
+单配置指标或配对统计。这些检查仅验证自报元数据的一致性，不能证明真实模型执行。
+
+### Configuration integrity change record
+
+- **Problem / failed invariant:** schema-valid records could declare a no-TRIZ
+  ablation while selecting or loading TRIZ and still contribute ablation wins
+  and deltas.
+- **Evidence / affected layer:** public workspace-creation and aggregation CLI
+  regressions populate all 114 validation slots with synthetic artifacts, then
+  contradict the configuration in one or all six ablation slots.
+- **Rule / expected improvement:** validate forced routes and disabled modules
+  before admitting a record to any configuration or paired metric. Invalid arm
+  records cannot establish complete evidence for that experiment.
+- **Compatibility / new risk:** no schema fields or case distributions change;
+  previously admitted contradictory records are now excluded and require
+  investigation of the original run. Do not relabel an observed TRIZ run as P
+  merely to pass validation. Valid baselines and ablations remain compatible.
+- **Validation / remaining limit:** CLI controls cover forbidden routes, forbidden
+  loads, alternative forced routes, partial contamination, production failures,
+  source preservation, and valid full workspaces. Self-reported metadata remains
+  insufficient for model-execution attestation or causal performance claims.
+
 ## 6. Grading layers
 
 ### Layer A — deterministic

@@ -12,7 +12,7 @@ metadata:
 
 ## Φ — qualification
 
-Classify propositions as definition, observation, law, causal claim, assumption, epistemic claim, value, or unknown. Expose unresolved assumptions and scope boundaries before modeling.
+Classify propositions as D Definition, O Observation, L Law / invariant, C Constraint, A Assumption, E Empirical closure / estimate, V Value, or U Unknown, following the [canonical proposition ledger](../../../open-deep-mind/SKILL.md#5-shared-proposition-ledger). Expose unresolved assumptions and scope boundaries before modeling.
 
 ## P — first principles
 

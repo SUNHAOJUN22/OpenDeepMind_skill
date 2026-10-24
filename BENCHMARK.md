@@ -94,6 +94,11 @@ In addition to assertion quality, time and tokens, the benchmark tracks:
 
 The aggregator computes paired common-case deltas for the declared comparisons. It does not compare metrics across different task scopes as though they were directly interchangeable.
 
+Runs must also satisfy their configuration's forced route and disabled-module
+constraints. Contradictory records are reported as metadata errors and excluded
+from completed-run counts, individual metrics and paired comparisons. Valid
+no-TRIZ ablations still omit production routing accuracy.
+
 Paired deltas and win/tie counts require the same declared model/version and
 matching `execution_conditions` (effective sampling/reasoning settings, tool
 access, and input-file paths/digests). Missing or mismatched conditions are

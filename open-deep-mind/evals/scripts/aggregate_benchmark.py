@@ -21,6 +21,12 @@ CASE_MAP = {c["id"]: c for c in EVALS["evals"]}
 CONFIG_MAP = {c["id"]: c for c in CONFIG["configurations"]}
 RUN_ROUTES = {"phi", "p", "phi-p", "triz", "none", "unknown"}
 MODULE_IDS = {"first-philosophy", "first-principles", "triz"}
+ROUTE_MODULES = {
+    "phi": {"first-philosophy"},
+    "p": {"first-principles"},
+    "phi-p": {"first-philosophy", "first-principles"},
+    "triz": {"triz"},
+}
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
 MAX_SAFE_INTEGER = 2 ** 53 - 1
 
@@ -224,6 +230,20 @@ def validate_run_record(run: dict[str, Any]) -> list[str]:
     for field in ("total_tokens", "duration_ms"):
         if not _nonnegative_integer(run.get(field)) or run[field] > MAX_SAFE_INTEGER:
             errors.append(f"{field} must be an integer between 0 and {MAX_SAFE_INTEGER}")
+    return errors
+
+
+def validate_configuration_run(run: dict[str, Any], configuration: dict[str, Any]) -> list[str]:
+    """Check experiment-arm constraints after schema and slot identity validation."""
+    errors: list[str] = []
+    forced_route = configuration.get("forced_route")
+    if forced_route is not None and run["route"] != forced_route:
+        errors.append(f"route {run['route']!r} contradicts forced_route={forced_route!r}")
+    # The selected method can reveal a forbidden module even if the load list omits it.
+    invoked = set(run["loaded_modules"]) | ROUTE_MODULES.get(run["route"], set())
+    forbidden = invoked & set(configuration.get("disabled_modules", []))
+    if forbidden:
+        errors.append(f"route or loaded_modules invoke disabled_modules: {sorted(forbidden)}")
     return errors
 
 
@@ -589,6 +609,12 @@ def main() -> int:
             continue
         if grade.get("case_id") != case_id or grade.get("configuration") != cfg:
             metadata_errors.append(f"grading metadata mismatch: {run_dir}")
+            continue
+        configuration_errors = validate_configuration_run(run, CONFIG_MAP[cfg])
+        if configuration_errors:
+            metadata_errors.extend(
+                f"run configuration violation at {run_dir}: {error}" for error in configuration_errors
+            )
             continue
         row = (case, run, grade)
         by_cfg[cfg].append(row)

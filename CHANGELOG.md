@@ -2,6 +2,8 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Reject benchmark records that contradict forced routes or disabled modules before counting completeness, configuration metrics or paired comparisons; retain path-specific diagnostics and original artifacts.
+- Align the repository-local Skill adapter with the canonical C Constraint and E Empirical closure / estimate proposition types; this corrects a textual contract mismatch, not a measured model failure.
 - Prevent aggregate report destinations from replacing the workspace manifest or case evidence, including parent-directory aliases; keep reports elsewhere refreshable.
 
 - Exclude known model/version mismatches from paired benchmark metrics while preserving individual observations; expose candidate, excluded and unversioned pair counts.
