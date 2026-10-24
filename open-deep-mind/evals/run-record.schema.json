@@ -34,6 +34,28 @@
     "model_version": {
       "type": "string"
     },
+    "execution_conditions": {
+      "type": "object",
+      "required": ["sampling_settings", "reasoning_settings", "tool_access", "input_files"],
+      "properties": {
+        "sampling_settings": {"type": "object"},
+        "reasoning_settings": {"type": "object"},
+        "tool_access": {"type": "object"},
+        "input_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": {"type": "string", "minLength": 1, "pattern": "\\S"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "route": {
       "enum": [
         "phi",

@@ -29,6 +29,12 @@ def valid_run(slot: dict) -> dict:
         "response_text": "synthetic regression response",
         "total_tokens": 4,
         "duration_ms": 1,
+        "execution_conditions": {
+            "sampling_settings": {},
+            "reasoning_settings": {},
+            "tool_access": {},
+            "input_files": [],
+        },
     }
 
 

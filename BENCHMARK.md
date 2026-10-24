@@ -94,6 +94,12 @@ In addition to assertion quality, time and tokens, the benchmark tracks:
 
 The aggregator computes paired common-case deltas for the declared comparisons. It does not compare metrics across different task scopes as though they were directly interchangeable.
 
+Paired deltas and win/tie counts require the same declared model/version and
+matching `execution_conditions` (effective sampling/reasoning settings, tool
+access, and input-file paths/digests). Missing or mismatched conditions are
+listed in `excluded_pairs`; individual run metrics remain available. This is a
+metadata comparison, not provider-side execution attestation.
+
 ## Commands
 
 Validate the authored benchmark:

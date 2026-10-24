@@ -65,7 +65,7 @@
                 "repetition": {"type": "integer", "minimum": 1},
                 "reason_codes": {
                   "type": "array", "minItems": 1, "uniqueItems": true,
-                  "items": {"enum": ["MODEL_MISMATCH", "MODEL_VERSION_MISMATCH"]}
+                  "items": {"enum": ["MODEL_MISMATCH", "MODEL_VERSION_MISMATCH", "EXECUTION_CONDITIONS_MISSING", "EXECUTION_CONDITIONS_MISMATCH"]}
                 }
               },
               "additionalProperties": false

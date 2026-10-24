@@ -218,7 +218,7 @@ python open-deep-mind/evals/scripts/validate_evals.py
 python open-deep-mind/evals/scripts/create_workspace.py --iteration 1 --split validation
 ```
 
-Use an external authorized model runner to populate the expected `run_record.json` and `grading.json` files. Keep model/version/settings, tool access, prompt inputs, repository revision and repetition design comparable. Then aggregate:
+Use an external authorized model runner to populate the expected `run_record.json` and `grading.json` files. Keep model/version, recorded `execution_conditions` (effective sampling/reasoning settings, tool access, and input-file identities), repository revision and repetition design comparable. The aggregator excludes pairs with missing or mismatched execution conditions while preserving individual run metrics. Then aggregate:
 
 ```bash
 python open-deep-mind/evals/scripts/aggregate_benchmark.py ../OpenDeepMind_skill-workspace/iteration-1

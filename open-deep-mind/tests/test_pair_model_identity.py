@@ -23,6 +23,7 @@ def row(configuration, model="synthetic-model", version="snapshot-1", passed=Tru
         "case_id": "R01", "configuration": configuration, "repetition": 1,
         "model": model, "model_version": version, "route": "phi", "loaded_modules": [],
         "response_text": "synthetic fixture, no model called", "total_tokens": 20, "duration_ms": 3,
+        "execution_conditions": execution_conditions(),
     }
     assertions = case["assertions"]
     grade = {
@@ -34,6 +35,15 @@ def row(configuration, model="synthetic-model", version="snapshot-1", passed=Tru
                     "pass_rate": float(passed), "case_passed": passed},
     }
     return case, run, grade
+
+
+def execution_conditions():
+    return {
+        "sampling_settings": {"temperature": 0.2, "top_p": 1.0},
+        "reasoning_settings": {"effort": "medium"},
+        "tool_access": {"python": {"definition_sha256": "b" * 64}, "web": {"definition_sha256": "c" * 64}},
+        "input_files": [],
+    }
 
 
 class PairedModelIdentityTests(unittest.TestCase):
@@ -63,6 +73,52 @@ class PairedModelIdentityTests(unittest.TestCase):
         self.assertEqual(result["left_case_pass_wins"], 1)
         self.assertEqual(result["excluded_pairs"], [])
         self.assertEqual(result["unversioned_paired_runs"], 0)
+
+    def test_different_sampling_reasoning_tools_or_inputs_exclude_the_pair(self):
+        mutations = (
+            ("sampling_settings", {"temperature": 0.0, "top_p": 1.0}),
+            ("reasoning_settings", {"effort": "high"}),
+            ("tool_access", {"python": {"definition_sha256": "b" * 64}}),
+            ("input_files", [{"path": "data.csv", "sha256": "a" * 64}]),
+        )
+        for field, value in mutations:
+            with self.subTest(field=field):
+                left, right = row("opendeepmind_full"), row("no_skill", passed=False)
+                left[1]["execution_conditions"][field] = value
+                result = self.pair(left, right)
+                self.assertEqual(result["candidate_paired_runs"], 1)
+                self.assertEqual(result["paired_runs"], 0)
+                self.assertIsNone(result["mean_assertion_pass_rate_delta_left_minus_right"])
+                self.assertEqual(result["excluded_pairs"][0]["reason_codes"], ["EXECUTION_CONDITIONS_MISMATCH"])
+
+    def test_missing_execution_conditions_are_not_paired(self):
+        left, right = row("opendeepmind_full"), row("no_skill", passed=False)
+        del right[1]["execution_conditions"]
+        result = self.pair(left, right)
+        self.assertEqual(result["candidate_paired_runs"], 1)
+        self.assertEqual(result["paired_runs"], 0)
+        self.assertEqual(result["excluded_pairs"][0]["reason_codes"], ["EXECUTION_CONDITIONS_MISSING"])
+
+    def test_execution_condition_contract_rejects_incomplete_or_invalid_profiles(self):
+        run = row("opendeepmind_full")[1]
+        del run["execution_conditions"]["tool_access"]
+        self.assertTrue(any("tool_access" in error for error in AGG.validate_run_record(run)))
+
+        run = row("opendeepmind_full")[1]
+        run["execution_conditions"]["input_files"] = [{"path": "data.csv", "sha256": "bad"}]
+        self.assertTrue(any("sha256" in error for error in AGG.validate_run_record(run)))
+
+        run = row("opendeepmind_full")[1]
+        run["execution_conditions"]["input_files"] = [{"path": " \t ", "sha256": "a" * 64}]
+        self.assertTrue(any("path" in error for error in AGG.validate_run_record(run)))
+
+        run = row("opendeepmind_full")[1]
+        run["execution_conditions"]["sampling_settings"]["temperature"] = float("nan")
+        self.assertTrue(any("finite JSON" in error for error in AGG.validate_run_record(run)))
+
+        run = row("opendeepmind_full")[1]
+        run["execution_conditions"]["sampling_profile_id"] = "profile-1"
+        self.assertTrue(any("unsupported fields" in error for error in AGG.validate_run_record(run)))
 
     def test_legacy_unversioned_records_remain_explicitly_unverified(self):
         left, right = row("opendeepmind_full"), row("no_skill")
@@ -94,6 +150,30 @@ class PairedModelIdentityTests(unittest.TestCase):
             self.assertEqual(paired["paired_runs"], 0)
             self.assertIsNone(paired["mean_assertion_pass_rate_delta_left_minus_right"])
             self.assertFalse(report["publication_ready"])
+
+    def test_cli_preserves_individual_metrics_but_excludes_execution_mismatch(self):
+        rows = [row("opendeepmind_full"), row("no_skill", passed=False)]
+        rows[1][1]["execution_conditions"]["tool_access"] = {}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            slots = [{key: run[key] for key in ("case_id", "configuration", "repetition")} for _, run, _ in rows]
+            (root / "manifest.json").write_text(json.dumps({"benchmark_version": "1.0.0", "expected_run_slots": slots}), encoding="utf-8")
+            for _, run, grade in rows:
+                directory = root / "eval-R01" / run["configuration"] / "run-1"
+                directory.mkdir(parents=True)
+                (directory / "run_record.json").write_text(json.dumps(run), encoding="utf-8")
+                (directory / "grading.json").write_text(json.dumps(grade), encoding="utf-8")
+            process = subprocess.run([sys.executable, str(ROOT / "open-deep-mind/evals/scripts/aggregate_benchmark.py"), str(root)], text=True, capture_output=True)
+            self.assertEqual(process.returncode, 0, process.stderr)
+            report = json.loads((root / "benchmark.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["complete_runs"], 2)
+            self.assertTrue(report["artifact_set_complete"])
+            self.assertEqual(report["configurations"]["opendeepmind_full"]["case_pass_rate"], 1.0)
+            paired = report["comparisons"]["full_vs_no_skill"]
+            self.assertEqual(paired["candidate_paired_runs"], 1)
+            self.assertEqual(paired["paired_runs"], 0)
+            self.assertEqual(paired["excluded_pairs"][0]["reason_codes"], ["EXECUTION_CONDITIONS_MISMATCH"])
+            self.assertIsNone(paired["mean_assertion_pass_rate_delta_left_minus_right"])
 
 
 if __name__ == "__main__":

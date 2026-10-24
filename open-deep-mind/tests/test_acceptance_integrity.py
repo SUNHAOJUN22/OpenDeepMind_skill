@@ -113,7 +113,9 @@ class GradingIntegrityTests(unittest.TestCase):
 
     def test_pairwise_uses_same_effective_case_verdict(self):
         case = {"expected_route": "phi", "triz_allowed": False}
-        run = {"configuration": "opendeepmind_full", "route": "triz", "loaded_modules": ["triz"]}
+        run = {"configuration": "opendeepmind_full", "route": "triz", "loaded_modules": ["triz"],
+               "execution_conditions": {"sampling_settings": {}, "reasoning_settings": {},
+                                        "tool_access": {}, "input_files": []}}
         left = (case, run, grade())
         right_grade = grade()
         right_grade["assertion_results"][0]["passed"] = False

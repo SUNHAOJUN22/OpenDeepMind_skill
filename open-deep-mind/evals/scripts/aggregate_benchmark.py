@@ -153,6 +153,42 @@ def _nullable_bool(value: Any) -> bool:
     return value is None or isinstance(value, bool)
 
 
+def validate_execution_conditions(conditions: Any) -> list[str]:
+    """Validate the comparable request settings captured by a model runner."""
+    if not isinstance(conditions, dict):
+        return ["execution_conditions must be an object"]
+    required = {"sampling_settings", "reasoning_settings", "tool_access", "input_files"}
+    errors = [f"execution_conditions missing required field: {field}" for field in sorted(required - conditions.keys())]
+    extra = conditions.keys() - required
+    if extra:
+        errors.append(f"execution_conditions contains unsupported fields: {sorted(extra)}")
+    for field in ("sampling_settings", "reasoning_settings", "tool_access"):
+        if field in conditions and not isinstance(conditions[field], dict):
+            errors.append(f"execution_conditions.{field} must be an object")
+    try:
+        json.dumps(conditions, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError):
+        errors.append("execution_conditions must contain only finite JSON values")
+    input_files = conditions.get("input_files")
+    if "input_files" in conditions and not isinstance(input_files, list):
+        errors.append("execution_conditions.input_files must be an array")
+    elif isinstance(input_files, list):
+        for index, item in enumerate(input_files):
+            prefix = f"execution_conditions.input_files[{index}]"
+            if not isinstance(item, dict):
+                errors.append(f"{prefix} must be an object")
+                continue
+            if set(item) != {"path", "sha256"}:
+                errors.append(f"{prefix} must contain only path and sha256")
+            path = item.get("path")
+            if not isinstance(path, str) or not path.strip():
+                errors.append(f"{prefix}.path must be a non-empty string")
+            digest = item.get("sha256")
+            if not isinstance(digest, str) or len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+                errors.append(f"{prefix}.sha256 must be a lowercase SHA-256 hex digest")
+    return errors
+
+
 def validate_run_record(run: dict[str, Any]) -> list[str]:
     """Validate the dependency-free subset of run-record.schema.json used here."""
     errors: list[str] = []
@@ -170,6 +206,8 @@ def validate_run_record(run: dict[str, Any]) -> list[str]:
     for field in ("model_version", "repository_commit", "run_timestamp"):
         if field in run and not isinstance(run[field], str):
             errors.append(f"{field} must be a string")
+    if "execution_conditions" in run:
+        errors.extend(validate_execution_conditions(run["execution_conditions"]))
 
     repetition = run.get("repetition")
     if not (isinstance(repetition, int) and not isinstance(repetition, bool)
@@ -393,11 +431,24 @@ def paired_comparison(
     for key in common:
         lc, lrun, lgrade = left_rows[key]
         rc, rrun, rgrade = right_rows[key]
-        # Matching tasks/repetitions alone do not isolate a skill's effect.
-        # Preserve individual observations, but never pair known different models.
+        # Pair only observations with the same model snapshot and execution conditions.
+        # Preserve all valid individual observations even when a pair is excluded.
         reasons = [code for field, code in (
             ("model", "MODEL_MISMATCH"), ("model_version", "MODEL_VERSION_MISMATCH"),
         ) if lrun.get(field) != rrun.get(field)]
+        left_conditions = lrun.get("execution_conditions")
+        right_conditions = rrun.get("execution_conditions")
+        if not isinstance(left_conditions, dict) or not isinstance(right_conditions, dict):
+            reasons.append("EXECUTION_CONDITIONS_MISSING")
+        else:
+            try:
+                left_identity = json.dumps(left_conditions, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+                right_identity = json.dumps(right_conditions, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+            except (TypeError, ValueError):
+                reasons.append("EXECUTION_CONDITIONS_MISMATCH")
+            else:
+                if left_identity != right_identity:
+                    reasons.append("EXECUTION_CONDITIONS_MISMATCH")
         if reasons:
             excluded_pairs.append({"case_id": key[0], "repetition": key[1], "reason_codes": reasons})
             continue

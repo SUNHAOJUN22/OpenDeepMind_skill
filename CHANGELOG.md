@@ -3,6 +3,7 @@
 ## Unreleased — artifact integrity and bilingual delivery
 
 - Exclude known model/version mismatches from paired benchmark metrics while preserving individual observations; expose candidate, excluded and unversioned pair counts.
+- Require declared execution-condition parity (sampling/reasoning settings, tool access, input-file hashes) before including runs in paired benchmark deltas or wins; retain individual metrics for excluded pairs.
 - Bind aggregate and paired verdicts to consistent assertion evidence and recorded TRIZ activation.
 - Reject unsafe counters, malformed/nested JSON, duplicate assertions and orphan artifacts.
 - Require explicit red-blocker and module-leakage grading status; reject workspace symlink artifacts and write aggregate reports atomically without following output links.

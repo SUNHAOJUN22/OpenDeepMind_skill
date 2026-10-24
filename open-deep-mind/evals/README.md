@@ -104,6 +104,12 @@ A benchmark harness writes one `run_record.json` for each expected case/configur
   "repetition": 1,
   "model": "model-name",
   "model_version": "provider-version-or-snapshot",
+  "execution_conditions": {
+    "sampling_settings": {"temperature": 0.2, "top_p": 1.0},
+    "reasoning_settings": {"effort": "medium"},
+    "tool_access": {"python": {"definition_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}},
+    "input_files": [{"path": "dataset.csv", "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]
+  },
   "route": "phi",
   "loaded_modules": ["first-philosophy"],
   "response_text": "...",
@@ -194,36 +200,49 @@ mean_duration_ms
 
 For each declared comparison it also computes common-case/repetition paired deltas for assertion score, judge score, tokens and duration. Blind pairwise results remain a separate grading artifact when supplied.
 
-Pairing also checks the declared `model` and `model_version`. A mismatch in either
-field excludes that pair from every paired delta and win/tie count, with its case,
-repetition and reason in `excluded_pairs`. `candidate_paired_runs` counts the
-common case/repetition identities before this check; `paired_runs` counts the
-remaining pairs. Individual configuration metrics and artifact completeness
-still describe the original observations and are not rewritten or discarded.
-If both versions are absent/empty, legacy descriptive pairing is preserved and
-counted in `unversioned_paired_runs`; it does not establish matched model snapshots.
-Matching reported identifiers also does not attest provider identity, equal
-sampling/tool settings, independent grading, or a causal skill improvement.
-The independent publication gate remains closed.
+Pairing checks the declared `model` and `model_version` and requires matching
+`execution_conditions`: effective sampling settings, reasoning settings, tool
+access/definitions, and ordered input-file paths and SHA-256 digests. Object keys
+are compared without regard to order; array order remains significant. Missing
+conditions exclude a pair with `EXECUTION_CONDITIONS_MISSING`; differing
+conditions exclude it with `EXECUTION_CONDITIONS_MISMATCH`. These reasons appear
+with the case and repetition in `excluded_pairs`. `candidate_paired_runs` counts
+common case/repetition identities before compatibility checks; `paired_runs`
+counts only compatible pairs. Individual configuration metrics and artifact
+completeness still describe all valid observations and are not rewritten or
+discarded. If both versions are absent/empty but conditions match, descriptive
+pairing is preserved and counted in `unversioned_paired_runs`; it does not
+establish matched model snapshots. Legacy records without execution conditions
+remain usable for individual metrics but do not contribute paired deltas or wins.
+The run harness must record the effective request conditions in this field. The
+aggregator compares declared metadata; it cannot attest provider execution,
+independent grading, or a causal skill improvement. The independent publication
+gate remains closed.
 
-配对比较同时核对记录中的模型及版本；明确不同的记录不再计算为技能效果差值，
-并保留排除原因。双方都没有版本时保留历史描述性结果，但明确计入未验证版本的配对数。
-模型字段相同不代表执行身份、工具条件或科学结论已获验证。
+配对比较除模型及版本外，还要求双方都提供且完全匹配的 `execution_conditions`，
+包括有效采样/推理设置、工具访问条件以及输入文件路径和 SHA-256。条件缺失或不匹配时，
+配对差值及胜负计数会排除该样本并记录原因；各配置的单独指标仍保留。旧记录缺少
+执行条件时仍可用于单独指标，但不参与配对差值。双方都没有模型版本但执行条件匹配时，
+仍保留描述性配对并计入未验证版本数。上述字段均为运行器自报，不能证明服务端实际执行身份。
 
 ### Pair identity change record
 
 - **Problem / failed invariant:** case and repetition identity alone admitted
-  comparisons between explicitly different models or model snapshots.
+  comparisons between explicitly different models or model snapshots. Even after
+  model/version matching, settings, tool access and input differences could still
+  produce a paired delta.
 - **Evidence / affected layer:** synthetic regression artifacts reproduce a
-  one-point assertion delta even though the declared model differs; the
-  aggregation layer now excludes known incompatible pairs.
+  one-point assertion delta with the same model/version but different temperature
+  and tool access. The aggregator now excludes missing or differing execution
+  conditions from pair deltas and wins.
 - **API / compatibility:** existing fields remain; exclusion records, candidate
   counts and unversioned counts are additive. Only incompatible paired metrics
   change. Source records, per-configuration metrics and runtime methods are unchanged.
-- **Expected improvement / remaining risk:** removes known model confounding
-  from paired summaries; self-reported identity and missing settings still need
-  independent review. These fixtures are software checks, not model experiments.
-- **Validation:** paired-identity and CLI regressions, original aggregation tests,
+- **Expected improvement / remaining risk:** prevents reported settings, tools or
+  input differences from being attributed to the skill. Conditions remain
+  self-reported; this does not attest provider-side execution or grading
+  independence. These fixtures are software checks, not model experiments.
+- **Validation:** paired-identity and CLI regressions, run-record schema,
   repository/module/evaluation validators and the complete unittest suite.
 
 Do not publish benchmark scores until actual runs and grading artifacts exist.
