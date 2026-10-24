@@ -109,15 +109,18 @@ python open-deep-mind/evals/scripts/create_workspace.py \
   --iteration 1 --split validation
 ```
 
-Creation reserves a **new** iteration directory exclusively. Reusing an iteration
-number fails before modifying its manifest, case definitions, instructions or
-recorded outputs, even when the existing directory is empty. Use a new iteration
-number for another split or revised configuration; aggregate the existing
-iteration without running the creation command again. Concurrent creators of
-the same iteration cannot both succeed. Interrupted creation may leave an
-incomplete directory: it is preserved for inspection, not automatically deleted
-or resumed. This is an exclusive-creation rule, not an atomic publish protocol
-for completed model results or protection against arbitrary external writers.
+Creation builds a complete iteration in a unique temporary sibling directory and
+publishes it with one same-filesystem rename only after every manifest, case and
+instruction file has been written. If a write fails, the temporary stage is
+cleaned and the final iteration path remains absent, so the same iteration number
+can be retried. Reusing an existing iteration still fails without modifying its
+manifest, case definitions, instructions or recorded outputs, even when the
+existing directory is empty. Use a new iteration number for another split or
+revised configuration; aggregate the existing iteration without running the
+creation command again. Concurrent creators of the same iteration cannot both
+publish successfully. A hard process termination may leave a temporary sibling
+directory; it is not a published iteration and should be inspected before any
+manual cleanup.
 
 ### Workspace preservation change record
 
@@ -127,13 +130,16 @@ for completed model results or protection against arbitrary external writers.
 - **Evidence / affected component:** temporary-workspace regressions reproduce
   same-split and changed-split overwrites, and two successful competing creators
   in `create_workspace.py`; existing grading and routing definitions are unchanged.
-- **Rule / expected improvement:** reject existing iterations using exclusive
-  directory creation before the first metadata write; preserve old evidence.
+- **Rule / expected improvement:** build in a unique temporary sibling and
+  rename the complete tree into place; preserve old evidence and make ordinary
+  write failures retryable without publishing partial iterations.
 - **Compatibility / new risk:** callers must choose a fresh iteration number;
-  partially created directories are retained and cannot be silently adopted.
-- **Validation:** rerun the original workspace tests and new preservation and
-  competing-creator tests, followed by repository and evaluation-definition checks.
-  Synthetic fixtures do not establish model performance or publication readiness.
+  a hard process termination can leave an unpublished temporary sibling that
+  requires inspection before manual cleanup.
+- **Validation:** rerun the original workspace tests plus write-failure,
+  preservation and competing-creator regressions, followed by repository and
+  evaluation-definition checks. Synthetic fixtures do not establish model
+  performance or publication readiness.
 
 After the external agent/model runner has populated every expected run slot with `run_record.json` and `grading.json`:
 
