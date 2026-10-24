@@ -239,8 +239,13 @@ def validate_configuration_run(run: dict[str, Any], configuration: dict[str, Any
     forced_route = configuration.get("forced_route")
     if forced_route is not None and run["route"] != forced_route:
         errors.append(f"route {run['route']!r} contradicts forced_route={forced_route!r}")
+    route_modules = ROUTE_MODULES.get(run["route"], set())
+    if configuration.get("kind") in {"local-skill", "local-skill-ablation"}:
+        missing = route_modules - set(run["loaded_modules"])
+        if missing:
+            errors.append(f"route requires route modules to appear in loaded_modules: {sorted(missing)}")
     # The selected method can reveal a forbidden module even if the load list omits it.
-    invoked = set(run["loaded_modules"]) | ROUTE_MODULES.get(run["route"], set())
+    invoked = set(run["loaded_modules"]) | route_modules
     forbidden = invoked & set(configuration.get("disabled_modules", []))
     if forbidden:
         errors.append(f"route or loaded_modules invoke disabled_modules: {sorted(forbidden)}")

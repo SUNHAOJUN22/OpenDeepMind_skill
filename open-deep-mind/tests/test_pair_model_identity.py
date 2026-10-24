@@ -21,7 +21,8 @@ def row(configuration, model="synthetic-model", version="snapshot-1", passed=Tru
     case = AGG.CASE_MAP["R01"]
     run = {
         "case_id": "R01", "configuration": configuration, "repetition": 1,
-        "model": model, "model_version": version, "route": "phi", "loaded_modules": [],
+        "model": model, "model_version": version, "route": "phi",
+        "loaded_modules": ["first-philosophy"] if configuration == "opendeepmind_full" else [],
         "response_text": "synthetic fixture, no model called", "total_tokens": 20, "duration_ms": 3,
         "execution_conditions": execution_conditions(),
     }

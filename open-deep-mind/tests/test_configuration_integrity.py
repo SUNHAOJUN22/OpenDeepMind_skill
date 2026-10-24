@@ -133,6 +133,29 @@ class ConfigurationIntegrityTests(unittest.TestCase):
                 self.mutate_ablation(route=route, loaded_modules=[])
                 self.assert_rejected_ablation(self.aggregate(), "forced_route")
 
+    def test_route_requires_its_modules_to_be_listed_as_loaded(self) -> None:
+        path = self.production_non_triz[0]
+        for route, loaded_modules, missing in (
+            ("phi", [], ["first-philosophy"]),
+            ("p", [], ["first-principles"]),
+            ("phi-p", ["first-philosophy"], ["first-principles"]),
+            ("triz", [], ["triz"]),
+        ):
+            with self.subTest(route=route, missing=missing):
+                run = json.loads(path.read_text(encoding="utf-8"))
+                run.update(route=route, loaded_modules=loaded_modules)
+                path.write_text(json.dumps(run), encoding="utf-8")
+
+                report = self.aggregate()
+
+                self.assertFalse(report["artifact_set_complete"])
+                self.assertEqual(report["configurations"]["opendeepmind_full"]["runs"], 35)
+                self.assertTrue(any(
+                    str(path.parent) in error and "route requires route modules" in error
+                    and str(missing) in error
+                    for error in report["metadata_errors"]
+                ), report["metadata_errors"])
+
     def test_one_invalid_run_excludes_only_its_slot_and_pair(self) -> None:
         path, run = next(iter(self.ablation_records.items()))
         path.write_text(json.dumps({**run, "loaded_modules": ["first-principles", "triz"]}), encoding="utf-8")
