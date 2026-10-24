@@ -52,7 +52,25 @@
           "left": {"type": "string"},
           "right": {"type": "string"},
           "scope": {"type": ["string", "null"]},
+          "candidate_paired_runs": {"type": "integer", "minimum": 0},
           "paired_runs": {"type": "integer", "minimum": 0},
+          "unversioned_paired_runs": {"type": "integer", "minimum": 0},
+          "excluded_pairs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["case_id", "repetition", "reason_codes"],
+              "properties": {
+                "case_id": {"type": "string"},
+                "repetition": {"type": "integer", "minimum": 1},
+                "reason_codes": {
+                  "type": "array", "minItems": 1, "uniqueItems": true,
+                  "items": {"enum": ["MODEL_MISMATCH", "MODEL_VERSION_MISMATCH"]}
+                }
+              },
+              "additionalProperties": false
+            }
+          },
           "left_case_pass_wins": {"type": "integer", "minimum": 0},
           "right_case_pass_wins": {"type": "integer", "minimum": 0},
           "case_pass_ties": {"type": "integer", "minimum": 0},

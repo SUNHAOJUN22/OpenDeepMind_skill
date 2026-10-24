@@ -387,10 +387,22 @@ def paired_comparison(
     left_case_wins = 0
     right_case_wins = 0
     ties = 0
+    excluded_pairs: list[dict[str, Any]] = []
+    unversioned_pairs = 0
 
     for key in common:
         lc, lrun, lgrade = left_rows[key]
         rc, rrun, rgrade = right_rows[key]
+        # Matching tasks/repetitions alone do not isolate a skill's effect.
+        # Preserve individual observations, but never pair known different models.
+        reasons = [code for field, code in (
+            ("model", "MODEL_MISMATCH"), ("model_version", "MODEL_VERSION_MISMATCH"),
+        ) if lrun.get(field) != rrun.get(field)]
+        if reasons:
+            excluded_pairs.append({"case_id": key[0], "repetition": key[1], "reason_codes": reasons})
+            continue
+        if not lrun.get("model_version"):
+            unversioned_pairs += 1
         la, ra = get_assertion_pass_rate(lgrade), get_assertion_pass_rate(rgrade)
         if la is not None and ra is not None:
             assertion_deltas.append(la - ra)
@@ -415,7 +427,10 @@ def paired_comparison(
                 ties += 1
 
     return {
-        "paired_runs": len(common),
+        "candidate_paired_runs": len(common),
+        "paired_runs": len(common) - len(excluded_pairs),
+        "excluded_pairs": excluded_pairs,
+        "unversioned_paired_runs": unversioned_pairs,
         "left_case_pass_wins": left_case_wins,
         "right_case_pass_wins": right_case_wins,
         "case_pass_ties": ties,

@@ -194,6 +194,38 @@ mean_duration_ms
 
 For each declared comparison it also computes common-case/repetition paired deltas for assertion score, judge score, tokens and duration. Blind pairwise results remain a separate grading artifact when supplied.
 
+Pairing also checks the declared `model` and `model_version`. A mismatch in either
+field excludes that pair from every paired delta and win/tie count, with its case,
+repetition and reason in `excluded_pairs`. `candidate_paired_runs` counts the
+common case/repetition identities before this check; `paired_runs` counts the
+remaining pairs. Individual configuration metrics and artifact completeness
+still describe the original observations and are not rewritten or discarded.
+If both versions are absent/empty, legacy descriptive pairing is preserved and
+counted in `unversioned_paired_runs`; it does not establish matched model snapshots.
+Matching reported identifiers also does not attest provider identity, equal
+sampling/tool settings, independent grading, or a causal skill improvement.
+The independent publication gate remains closed.
+
+配对比较同时核对记录中的模型及版本；明确不同的记录不再计算为技能效果差值，
+并保留排除原因。双方都没有版本时保留历史描述性结果，但明确计入未验证版本的配对数。
+模型字段相同不代表执行身份、工具条件或科学结论已获验证。
+
+### Pair identity change record
+
+- **Problem / failed invariant:** case and repetition identity alone admitted
+  comparisons between explicitly different models or model snapshots.
+- **Evidence / affected layer:** synthetic regression artifacts reproduce a
+  one-point assertion delta even though the declared model differs; the
+  aggregation layer now excludes known incompatible pairs.
+- **API / compatibility:** existing fields remain; exclusion records, candidate
+  counts and unversioned counts are additive. Only incompatible paired metrics
+  change. Source records, per-configuration metrics and runtime methods are unchanged.
+- **Expected improvement / remaining risk:** removes known model confounding
+  from paired summaries; self-reported identity and missing settings still need
+  independent review. These fixtures are software checks, not model experiments.
+- **Validation:** paired-identity and CLI regressions, original aggregation tests,
+  repository/module/evaluation validators and the complete unittest suite.
+
 Do not publish benchmark scores until actual runs and grading artifacts exist.
 
 ## 9. Commands
