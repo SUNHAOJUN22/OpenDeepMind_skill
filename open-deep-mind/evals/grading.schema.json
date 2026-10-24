@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "OpenDeepMind Eval Grading",
   "type": "object",
-  "required": ["case_id", "configuration", "assertion_results", "summary"],
+  "required": ["case_id", "configuration", "assertion_results", "red_blockers", "module_leakage", "summary"],
   "properties": {
     "case_id": {"type": "string"},
     "configuration": {"type": "string"},

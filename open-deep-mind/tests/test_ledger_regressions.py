@@ -3,6 +3,9 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
+import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +28,31 @@ class LedgerRegressionTests(unittest.TestCase):
         data = json.loads((ROOT / "assets/example-ledger.json").read_text(encoding="utf-8"))
         data["inferences"][0]["rule"] = []
         self.assertTrue(ledger.validate(data))
+
+    def test_defeaters_must_match_schema_item_type(self) -> None:
+        for invalid in (None, 1, [], {}):
+            with self.subTest(invalid=invalid):
+                data = json.loads((ROOT / "assets/example-ledger.json").read_text(encoding="utf-8"))
+                data["inferences"][0]["defeaters"] = [invalid]
+                self.assertIn(
+                    "inferences[0].defeaters must contain strings",
+                    ledger.validate(data),
+                )
+
+    def test_cli_rejects_non_string_defeaters(self) -> None:
+        data = json.loads((ROOT / "assets/example-ledger.json").read_text(encoding="utf-8"))
+        data["inferences"][0]["defeaters"] = [None]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            process = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/validate_ledger.py"), str(path)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertEqual(process.returncode, 1)
+        self.assertIn("defeaters must contain strings", process.stdout)
 
     def test_deep_acyclic_graph_does_not_use_recursion(self) -> None:
         graph = {f"A{i}": {f"A{i+1}"} for i in range(2000)}

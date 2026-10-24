@@ -4,6 +4,8 @@
 
 - Bind aggregate and paired verdicts to consistent assertion evidence and recorded TRIZ activation.
 - Reject unsafe counters, malformed/nested JSON, duplicate assertions and orphan artifacts.
+- Require explicit red-blocker and module-leakage grading status; reject workspace symlink artifacts and write aggregate reports atomically without following output links.
+- Match claim-ledger defeaters item validation to the declared string-array schema.
 - Align compatibility claim types and keep artifact completeness separate from publication authority.
 - Add public-entrypoint regressions and activate previously uncollected v16 tests.
 - Rewrite Chinese/English README with source-linked mathematical contracts and matching-language concept artwork.

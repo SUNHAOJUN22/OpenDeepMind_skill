@@ -6,7 +6,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import stat
 import statistics
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -54,7 +57,11 @@ def read_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
         return value
 
     try:
-        with path.open("rb") as stream:
+        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(path, flags)
+        with os.fdopen(descriptor, "rb") as stream:
+            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                raise ValueError("JSON artifact must be a regular file")
             raw = stream.read(MAX_ARTIFACT_BYTES + 1)
         if len(raw) > MAX_ARTIFACT_BYTES:
             raise ValueError("JSON artifact exceeds the 8 MiB validation budget")
@@ -80,6 +87,52 @@ def read_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     if not isinstance(data, dict):
         return None, "top-level JSON must be an object"
     return data, None
+
+
+def is_regular_workspace_file(workspace: Path, path: Path) -> bool:
+    """Reject links and special files at every component of an expected artifact path."""
+    try:
+        relative = path.relative_to(workspace)
+        if not relative.parts:
+            return False
+        root_mode = workspace.lstat().st_mode
+        if stat.S_ISLNK(root_mode) or not stat.S_ISDIR(root_mode):
+            return False
+        current = workspace
+        for index, part in enumerate(relative.parts):
+            current = current / part
+            mode = current.lstat().st_mode
+            if stat.S_ISLNK(mode):
+                return False
+            if index < len(relative.parts) - 1:
+                if not stat.S_ISDIR(mode):
+                    return False
+            elif not stat.S_ISREG(mode):
+                return False
+    except (OSError, ValueError):
+        return False
+    return True
+
+
+def write_json_atomically(path: Path, content: str) -> None:
+    """Write a complete report before replacing its destination entry."""
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+    )
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(content)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_name, path)
+    except BaseException:
+        try:
+            os.unlink(temporary_name)
+        except OSError:
+            pass
+        raise
 
 
 def numeric(value: Any) -> float | None:
@@ -139,7 +192,7 @@ def validate_run_record(run: dict[str, Any]) -> list[str]:
 def validate_grading_record(grade: dict[str, Any]) -> list[str]:
     """Validate the dependency-free subset of grading.schema.json used here."""
     errors: list[str] = []
-    for field in ("case_id", "configuration", "assertion_results", "summary"):
+    for field in ("case_id", "configuration", "assertion_results", "red_blockers", "module_leakage", "summary"):
         if field not in grade:
             errors.append(f"missing required field: {field}")
     for field in ("case_id", "configuration"):
@@ -230,7 +283,7 @@ def validate_grading_record(grade: dict[str, Any]) -> list[str]:
             not total or passed != total or blockers
             or grade.get("triz_false_activation") or grade.get("module_leakage")
         ):
-            errors.append("case_passed requires nonempty passing assertions and no red blockers")
+            errors.append("case_passed requires nonempty passing assertions and explicit clear blocker/leakage checks")
     return errors
 
 
@@ -246,10 +299,17 @@ def false_triz_activation(case: dict[str, Any], run: dict[str, Any]) -> bool:
 def effective_case_pass(case: dict[str, Any], run: dict[str, Any], grade: dict[str, Any]) -> bool | None:
     """Keep aggregate and paired verdicts subject to identical hard exclusions."""
     claimed = grade.get("summary", {}).get("case_passed")
-    if not isinstance(claimed, bool):
+    blockers = grade.get("red_blockers")
+    leakage = grade.get("module_leakage")
+    if (
+        not isinstance(claimed, bool)
+        or not isinstance(blockers, list)
+        or not all(isinstance(item, str) for item in blockers)
+        or not isinstance(leakage, bool)
+    ):
         return None
     return (claimed and not false_triz_activation(case, run)
-            and not bool(grade.get("module_leakage")) and not bool(grade.get("red_blockers", [])))
+            and not leakage and not blockers)
 
 
 def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any]]]) -> dict[str, Any]:
@@ -377,7 +437,10 @@ def main() -> int:
     if not workspace.is_dir():
         parser.error(f"workspace does not exist: {workspace}")
 
-    manifest, manifest_error = read_json(workspace / "manifest.json")
+    manifest_path = workspace / "manifest.json"
+    if not is_regular_workspace_file(workspace, manifest_path):
+        parser.error("workspace manifest.json must be a regular non-symlink file inside the workspace")
+    manifest, manifest_error = read_json(manifest_path)
     if not manifest:
         detail = f": {manifest_error}" if manifest_error else ""
         parser.error(f"workspace manifest.json is missing or invalid; create the workspace with create_workspace.py{detail}")
@@ -422,8 +485,18 @@ def main() -> int:
         run_path = run_dir / "run_record.json"
         grade_path = run_dir / "grading.json"
         expected_artifact_paths.update((run_path, grade_path))
-        if not run_path.is_file() or not grade_path.is_file():
+        if not run_path.exists() or not grade_path.exists():
             incomplete.append(str(run_dir))
+            continue
+        unsafe_artifacts = [
+            path for path in (run_path, grade_path)
+            if not is_regular_workspace_file(workspace, path)
+        ]
+        if unsafe_artifacts:
+            metadata_errors.extend(
+                f"expected artifact must be a regular non-symlink file inside the workspace: {path}"
+                for path in unsafe_artifacts
+            )
             continue
 
         run, run_read_error = read_json(run_path)
@@ -522,11 +595,24 @@ def main() -> int:
         "publication_ready": False,
     }
 
-    output = Path(args.output).resolve() if args.output else workspace / "benchmark.json"
-    output.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False),
-        encoding="utf-8",
-    )
+    output = Path(args.output) if args.output else workspace / "benchmark.json"
+    if not output.is_absolute():
+        output = Path(os.path.abspath(output))
+    try:
+        output_mode = output.lstat().st_mode
+    except FileNotFoundError:
+        output_mode = None
+    except OSError as exc:
+        parser.error(f"cannot inspect benchmark output path: {exc}")
+    if output_mode is not None and not stat.S_ISREG(output_mode):
+        parser.error("benchmark output path must be absent or a regular non-symlink file")
+    try:
+        write_json_atomically(
+            output,
+            json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False),
+        )
+    except OSError as exc:
+        parser.error(f"cannot write benchmark output: {exc}")
     print(json.dumps({
         "ok": True,
         "output": str(output),

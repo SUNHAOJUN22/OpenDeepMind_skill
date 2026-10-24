@@ -31,7 +31,8 @@ def grade():
     return {"case_id": "R01", "configuration": "no_skill",
             "assertion_results": [{"text": text, "passed": True,
                                    "evidence": "synthetic response excerpt"} for text in assertions],
-            "red_blockers": [], "summary": {"passed": len(assertions), "failed": 0, "total": len(assertions),
+            "red_blockers": [], "module_leakage": False,
+            "summary": {"passed": len(assertions), "failed": 0, "total": len(assertions),
                                                "pass_rate": 1.0, "case_passed": True}}
 
 
@@ -55,6 +56,16 @@ class GradingIntegrityTests(unittest.TestCase):
         record = grade()
         record["red_blockers"] = ["fabricated_source_data_or_experiment"]
         self.assertTrue(AGG.validate_grading_record(record))
+
+    def test_passing_grade_requires_explicit_blocker_and_leakage_status(self):
+        case = AGG.CASE_MAP["R01"]
+        run = {"configuration": "no_skill", "route": "none", "loaded_modules": []}
+        for field in ("red_blockers", "module_leakage"):
+            with self.subTest(field=field):
+                record = grade()
+                record.pop(field)
+                self.assertTrue(AGG.validate_grading_record(record))
+                self.assertIsNone(AGG.effective_case_pass(case, run, record))
 
     def test_empty_assertions_cannot_pass(self):
         record = grade()

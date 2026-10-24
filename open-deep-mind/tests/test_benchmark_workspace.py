@@ -102,6 +102,7 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
                             for criterion in criteria
                         ],
                         "red_blockers": [],
+                        "module_leakage": False,
                         "summary": {
                             "passed": 0,
                             "failed": len(criteria),
@@ -161,6 +162,7 @@ class BenchmarkWorkspaceTests(unittest.TestCase):
                         "configuration": "no_skill",
                         "assertion_results": [],
                         "red_blockers": [],
+                        "module_leakage": False,
                         "summary": {
                             "passed": 0,
                             "failed": 1,

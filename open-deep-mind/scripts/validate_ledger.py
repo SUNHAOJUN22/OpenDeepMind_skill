@@ -215,6 +215,9 @@ def validate(data: dict[str, Any]) -> list[str]:
                 )
             defeaters = inference.get("defeaters", [])
             require(isinstance(defeaters, list), f"{prefix}.defeaters must be a list", errors)
+            if isinstance(defeaters, list):
+                require(all(isinstance(item, str) for item in defeaters),
+                        f"{prefix}.defeaters must contain strings", errors)
 
     # The auditable reasoning graph must be acyclic.
     try:

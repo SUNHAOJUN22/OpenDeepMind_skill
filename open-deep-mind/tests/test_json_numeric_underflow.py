@@ -79,6 +79,8 @@ class BenchmarkNumericUnderflowTests(unittest.TestCase):
                 {"text": text, "passed": True, "evidence": "synthetic response excerpt"}
                 for text in assertions
             ],
+            "red_blockers": [],
+            "module_leakage": False,
             "summary": {"passed": len(assertions), "failed": 0, "total": len(assertions),
                         "pass_rate": 1.0, "case_passed": True},
         }

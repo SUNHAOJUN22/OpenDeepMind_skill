@@ -56,6 +56,17 @@ def valid_grade(slot: dict, passed: bool) -> dict:
 
 
 class BenchmarkIdentityTests(unittest.TestCase):
+    def _write_single_workspace(self, root: Path, slot: dict) -> Path:
+        root.mkdir(parents=True)
+        (root / "manifest.json").write_text(json.dumps({
+            "benchmark_version": "1.0.0",
+            "split": "validation",
+            "expected_run_slots": [slot],
+        }), encoding="utf-8")
+        run_dir = root / f"eval-{slot['case_id']}" / slot["configuration"] / f"run-{slot['repetition']}"
+        run_dir.mkdir(parents=True)
+        return run_dir
+
     def _aggregate_slots(self, slots: list[dict], records: list[tuple[dict, bool]]) -> dict:
         with tempfile.TemporaryDirectory() as tmp:
             iteration = Path(tmp)
@@ -154,6 +165,81 @@ class BenchmarkIdentityTests(unittest.TestCase):
             self.assertEqual(report["publication_status"], "INCOMPLETE_ARTIFACT_SET")
             self.assertTrue(any("run_record schema violation" in error for error in report["metadata_errors"]))
             self.assertTrue(any("grading schema violation" in error for error in report["metadata_errors"]))
+
+    def test_expected_artifact_symlinks_cannot_count_as_complete_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "workspace"
+            external = Path(tmp) / "external"
+            external.mkdir()
+            slot = {"case_id": "R01", "configuration": "no_skill", "repetition": 1}
+            run_dir = self._write_single_workspace(root, slot)
+            (external / "run_record.json").write_text(json.dumps(valid_run(slot)), encoding="utf-8")
+            (external / "grading.json").write_text(json.dumps(valid_grade(slot, True)), encoding="utf-8")
+            try:
+                (run_dir / "run_record.json").symlink_to(external / "run_record.json")
+                (run_dir / "grading.json").symlink_to(external / "grading.json")
+            except OSError as exc:
+                self.skipTest(f"symbolic links unavailable: {exc}")
+            process = run_script("open-deep-mind/evals/scripts/aggregate_benchmark.py", str(root))
+            self.assertEqual(process.returncode, 0, msg=process.stderr + process.stdout)
+            report = json.loads((root / "benchmark.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["complete_runs"], 0)
+            self.assertFalse(report["artifact_set_complete"])
+            self.assertTrue(any("regular non-symlink file" in error for error in report["metadata_errors"]))
+
+    def test_missing_hard_gate_status_cannot_count_as_complete_evidence(self) -> None:
+        slot = {"case_id": "R01", "configuration": "no_skill", "repetition": 1}
+        for field in ("red_blockers", "module_leakage"):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp) / "workspace"
+                run_dir = self._write_single_workspace(root, slot)
+                (run_dir / "run_record.json").write_text(json.dumps(valid_run(slot)), encoding="utf-8")
+                grade = valid_grade(slot, True)
+                grade.pop(field)
+                (run_dir / "grading.json").write_text(json.dumps(grade), encoding="utf-8")
+                process = run_script("open-deep-mind/evals/scripts/aggregate_benchmark.py", str(root))
+                self.assertEqual(process.returncode, 0, msg=process.stderr + process.stdout)
+                report = json.loads((root / "benchmark.json").read_text(encoding="utf-8"))
+                self.assertEqual(report["complete_runs"], 0)
+                self.assertFalse(report["artifact_set_complete"])
+                self.assertTrue(any(f"missing required field: {field}" in error for error in report["metadata_errors"]))
+
+    def test_manifest_symlink_is_rejected_before_reading(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "workspace"
+            root.mkdir()
+            outside = Path(tmp) / "manifest.json"
+            outside.write_text(json.dumps({
+                "benchmark_version": "1.0.0",
+                "expected_run_slots": [{"case_id": "R01", "configuration": "no_skill", "repetition": 1}],
+            }), encoding="utf-8")
+            try:
+                (root / "manifest.json").symlink_to(outside)
+            except OSError as exc:
+                self.skipTest(f"symbolic links unavailable: {exc}")
+            process = run_script("open-deep-mind/evals/scripts/aggregate_benchmark.py", str(root))
+            self.assertNotEqual(process.returncode, 0)
+            self.assertIn("regular non-symlink file", process.stderr)
+            self.assertTrue((root / "manifest.json").is_symlink())
+
+    def test_output_symlink_does_not_overwrite_external_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "workspace"
+            outside = Path(tmp) / "outside.txt"
+            outside.write_text("KEEP-ME", encoding="utf-8")
+            slot = {"case_id": "R01", "configuration": "no_skill", "repetition": 1}
+            run_dir = self._write_single_workspace(root, slot)
+            (run_dir / "run_record.json").write_text(json.dumps(valid_run(slot)), encoding="utf-8")
+            (run_dir / "grading.json").write_text(json.dumps(valid_grade(slot, True)), encoding="utf-8")
+            try:
+                (root / "benchmark.json").symlink_to(outside)
+            except OSError as exc:
+                self.skipTest(f"symbolic links unavailable: {exc}")
+            process = run_script("open-deep-mind/evals/scripts/aggregate_benchmark.py", str(root))
+            self.assertNotEqual(process.returncode, 0)
+            self.assertIn("regular non-symlink file", process.stderr)
+            self.assertTrue((root / "benchmark.json").is_symlink())
+            self.assertEqual(outside.read_text(encoding="utf-8"), "KEEP-ME")
 
     def test_forced_route_ablation_is_not_scored_as_production_routing(self) -> None:
         slot = {"case_id": "T01", "configuration": "opendeepmind_no_triz_ablation", "repetition": 1}
