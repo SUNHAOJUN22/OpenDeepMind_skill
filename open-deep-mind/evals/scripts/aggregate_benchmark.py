@@ -25,7 +25,7 @@ ROUTE_MODULES = {
     "phi": {"first-philosophy"},
     "p": {"first-principles"},
     "phi-p": {"first-philosophy", "first-principles"},
-    "triz": {"triz"},
+    "triz": {"triz", "first-principles"},
 }
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
 MAX_SAFE_INTEGER = 2 ** 53 - 1

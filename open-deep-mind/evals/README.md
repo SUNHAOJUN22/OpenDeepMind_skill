@@ -126,6 +126,13 @@ must appear exactly once. Deleting a failed criterion, replacing it with an
 easier one, or adding criteria to reweight the score is rejected even when the
 self-reported summary is numerically consistent. `loaded_modules` accepts only
 unique canonical IDs: `first-philosophy`, `first-principles`, and `triz`.
+For `route="triz"`, both `triz` and `first-principles` must be listed: TRIZ
+generates candidate concepts, which the repository contract requires to return
+to First Principles for engineering validation. A missing module is a
+path-specific metadata error, excludes the run from metrics, and blocks
+`artifact_set_complete`.
+
+`route="triz"` 时必须同时列出 `triz` 和 `first-principles`：仓库约定要求将 TRIZ 生成的候选概念交回第一性原理进行工程验证。缺少模块属于路径级元数据错误，该运行不计入指标，并会阻止 `artifact_set_complete` 为真。
 
 评分记录必须完整覆盖 `evals.json` 对应案例的官方断言，每条恰好一次；不能删减、
 替换或增添评分项。模块标识必须使用上述规范名称，不能用大写或路径别名绕过检查。

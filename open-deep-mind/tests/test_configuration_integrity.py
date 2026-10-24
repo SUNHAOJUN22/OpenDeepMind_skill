@@ -29,6 +29,7 @@ class ConfigurationIntegrityTests(unittest.TestCase):
                    "triz": ["triz", "first-principles"]}
         self.ablation_records: dict[Path, dict] = {}
         self.production_non_triz: list[Path] = []
+        self.production_triz: list[Path] = []
         for slot in manifest["expected_run_slots"]:
             cfg = slot["configuration"]
             case = cases[slot["case_id"]]
@@ -64,6 +65,8 @@ class ConfigurationIntegrityTests(unittest.TestCase):
                 self.ablation_records[path] = run
             if cfg == "opendeepmind_full" and case["triz_allowed"] is not True:
                 self.production_non_triz.append(path)
+            elif cfg == "opendeepmind_full" and case["triz_allowed"] is True:
+                self.production_triz.append(path)
 
     def invoke(self, name: str, *args: str) -> None:
         # Full workspaces exercise filesystem I/O; elapsed time is not a scoring assertion.
@@ -139,7 +142,8 @@ class ConfigurationIntegrityTests(unittest.TestCase):
             ("phi", [], ["first-philosophy"]),
             ("p", [], ["first-principles"]),
             ("phi-p", ["first-philosophy"], ["first-principles"]),
-            ("triz", [], ["triz"]),
+            ("triz", [], ["first-principles", "triz"]),
+            ("triz", ["triz"], ["first-principles"]),
         ):
             with self.subTest(route=route, missing=missing):
                 run = json.loads(path.read_text(encoding="utf-8"))
@@ -155,6 +159,21 @@ class ConfigurationIntegrityTests(unittest.TestCase):
                     and str(missing) in error
                     for error in report["metadata_errors"]
                 ), report["metadata_errors"])
+
+    def test_triz_route_requires_first_principles_validation_module(self) -> None:
+        path = self.production_triz[0]
+        run = json.loads(path.read_text(encoding="utf-8"))
+        run.update(route="triz", loaded_modules=["triz"])
+        path.write_text(json.dumps(run), encoding="utf-8")
+
+        report = self.aggregate()
+
+        self.assertFalse(report["artifact_set_complete"])
+        self.assertEqual(report["configurations"]["opendeepmind_full"]["runs"], 35)
+        self.assertTrue(any(
+            str(path.parent) in error and "first-principles" in error
+            for error in report["metadata_errors"]
+        ), report["metadata_errors"])
 
     def test_one_invalid_run_excludes_only_its_slot_and_pair(self) -> None:
         path, run = next(iter(self.ablation_records.items()))

@@ -2,6 +2,7 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Require TRIZ benchmark records to list First Principles validation so incomplete concept-only runs cannot count toward benchmark metrics.
 - Require each local benchmark-skill route's modules to be present in `loaded_modules` before counting the run; preserve no-skill and external-skill baseline semantics.
 - Reject benchmark records that contradict forced routes or disabled modules before counting completeness, configuration metrics or paired comparisons; retain path-specific diagnostics and original artifacts.
 - Align the repository-local Skill adapter with the canonical C Constraint and E Empirical closure / estimate proposition types; this corrects a textual contract mismatch, not a measured model failure.
