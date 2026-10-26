@@ -2,10 +2,15 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
+# The cross-repository acceptance runner uses pytest's importlib mode, which
+# does not put sibling test modules on sys.path. Keep this helper import valid
+# for both that runner and unittest's direct discovery mode.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_benchmark_identity import run_script, valid_grade, valid_run
 
 
