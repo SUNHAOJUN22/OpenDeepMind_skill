@@ -415,17 +415,58 @@ Choose the next action by balancing:
 - robustness;
 - legal, ethical, and safety constraints.
 
-Value of information can be represented as:
+For a proposed study or test design \(d\), let \(Y\) be its possible future
+observation, \(\theta\) the uncertain state, \(\mathcal A\) the feasible actions,
+and \(U(a,\theta)\) their utility. Specify the prior \(p(\theta)\) and observation
+model \(p(Y\mid\theta,d)\). Before collecting data, the expected value of sample
+information is:
 
 \[
-\operatorname{VOI}
+\operatorname{EVSI}(d)
 =
-\mathbb E[\max_a U(a,\theta)\mid\text{new information}]
--
-\max_a\mathbb E[U(a,\theta)]
+\mathbb E_{Y\mid d}\!\left[
+\max_{a\in\mathcal A}\mathbb E_{\theta\mid Y,d}[U(a,\theta)]
+\right]
+-\max_{a\in\mathcal A}\mathbb E_\theta[U(a,\theta)].
 \]
 
-Select the smallest experiment or action that most reduces decision-relevant uncertainty.
+Choose an action using its posterior expected utility after observing \(Y\),
+then average over possible observations. Maximizing utility separately for each
+unknown \(\theta\) would instead assume perfect knowledge of that state. The
+expected value of perfect information is the upper bound
+
+\[
+\operatorname{EVPI}
+=\mathbb E_\theta[\max_{a\in\mathcal A}U(a,\theta)]
+-\max_{a\in\mathcal A}\mathbb E_\theta[U(a,\theta)].
+\]
+
+With the same feasible actions, an unchanged utility model, and the option to
+ignore an observation, \(0\le\operatorname{EVSI}(d)\le\operatorname{EVPI}\).
+An observation independent of the decision-relevant state has zero EVSI; reducing
+uncertainty also has zero decision value when it cannot improve the chosen action.
+
+**Finite check:** let \(\theta\in\{0,1\}\) have equal prior probabilities, choose
+\(a\in\{0,1\}\), and receive utility 1 if \(a=\theta\), otherwise 0. Current
+expected utility is 0.5. Enumerating the four policies that map a binary
+observation to an action gives:
+
+| Observation model | EVSI | Net value if the test costs 0.1 utility units |
+|---|---:|---:|
+| Independent fair bit | 0 | -0.1 |
+| Correct state with probability 0.75 in either state | 0.25 | 0.15 |
+| Perfect observation of the state | 0.5 | 0.4 |
+
+If the state is already known, EVSI is zero. The perfect-information bound of
+0.5 for the equal-prior example must not be assigned to the independent bit.
+
+Compare designs using expected decision improvement less acquisition, delay,
+risk, and implementation costs, expressed in compatible utility units and
+counted only once. Preserve hard constraints and the option to act without a
+new test. If the prior, likelihood, or utility cannot be justified, report the
+uncertainty instead of assigning a numerical information value.
+
+Formula reference: [Heath et al. (2020), equation (2)](https://doi.org/10.1177/0272989X20912402).
 
 Record:
 

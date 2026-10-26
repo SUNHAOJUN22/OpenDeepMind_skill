@@ -2,6 +2,7 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Correct the P9 sample-information formula to optimize posterior expected utility before averaging over future observations; distinguish the perfect-information upper bound, include exact finite decision examples, and account for study costs. This repairs a mathematical method contract, not a measured model-performance result.
 - Require TRIZ benchmark records to list First Principles validation so incomplete concept-only runs cannot count toward benchmark metrics.
 - Require each local benchmark-skill route's modules to be present in `loaded_modules` before counting the run; preserve no-skill and external-skill baseline semantics.
 - Reject benchmark records that contradict forced routes or disabled modules before counting completeness, configuration metrics or paired comparisons; retain path-specific diagnostics and original artifacts.
