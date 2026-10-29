@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0] — 2026-10-29
+
+- Add an optional standard-library context preparation CLI with an explicit route, mandatory TRIZ declaration, shared quality gate, source hashes and bounded context bytes. It reads no evaluation data and reports preparation separately from model execution.
+- Add nearest-rank P50/P95 token and latency observations, descriptive route groups, and optional cost records with currency/basis/pricing-snapshot identity. Missing costs remain missing; incompatible costs cannot produce paired savings. Existing quality and publication gates remain in force. Real model comparisons are not yet measured.
+
+- Preserve the three canonical method protocols, explicit-only TRIZ activation, benchmark case set, train/validation/holdout split and pinned external baseline. This software version does not publish model-quality, token-saving or cost-saving scores.
+
 ## Unreleased — artifact integrity and bilingual delivery
 
 - Correct the P9 sample-information formula to optimize posterior expected utility before averaging over future observations; distinguish the perfect-information upper bound, include exact finite decision examples, and account for study costs. This repairs a mathematical method contract, not a measured model-performance result.

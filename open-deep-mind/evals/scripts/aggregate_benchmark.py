@@ -230,7 +230,54 @@ def validate_run_record(run: dict[str, Any]) -> list[str]:
     for field in ("total_tokens", "duration_ms"):
         if not _nonnegative_integer(run.get(field)) or run[field] > MAX_SAFE_INTEGER:
             errors.append(f"{field} must be an integer between 0 and {MAX_SAFE_INTEGER}")
+    if "cost" in run:
+        errors.extend(validate_cost(run["cost"]))
     return errors
+
+
+def validate_cost(cost: Any) -> list[str]:
+    """Require an observed or explicitly priced cost; missing is not free."""
+    if not isinstance(cost, dict):
+        return ["cost must be an object when supplied; omit it when unmeasured"]
+    errors = []
+    if set(cost) != {"amount_microunits", "currency", "basis", "pricing_reference"}:
+        errors.append("cost must contain only amount_microunits, currency, basis and pricing_reference")
+    amount = cost.get("amount_microunits")
+    if not _nonnegative_integer(amount) or amount > MAX_SAFE_INTEGER:
+        errors.append(f"cost.amount_microunits must be an integer between 0 and {MAX_SAFE_INTEGER}")
+    currency = cost.get("currency")
+    if not isinstance(currency, str) or len(currency) != 3 or any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" for c in currency):
+        errors.append("cost.currency must be a three-letter uppercase currency code")
+    if cost.get("basis") not in ("provider_reported", "usage_priced"):
+        errors.append("cost.basis must be provider_reported or usage_priced")
+    reference = cost.get("pricing_reference")
+    if not isinstance(reference, str) or not reference.strip():
+        errors.append("cost.pricing_reference must identify the billing/rate snapshot")
+    return errors
+
+
+def distribution(values: list[float]) -> dict[str, Any]:
+    """Nearest-rank quantiles of recorded samples, with no missing-value imputation."""
+    ordered = sorted(values)
+    return {
+        "count": len(ordered),
+        "quantile_method": "nearest_rank",
+        "p50": ordered[math.ceil(0.50 * len(ordered)) - 1] if ordered else None,
+        "p95": ordered[math.ceil(0.95 * len(ordered)) - 1] if ordered else None,
+    }
+
+
+def cost_identity(cost: dict[str, Any]) -> tuple[str, str, str]:
+    return cost["currency"], cost["basis"], cost["pricing_reference"]
+
+
+def summarize_cost_groups(groups: dict[tuple[str, str, str], list[int]]) -> list[dict[str, Any]]:
+    return [
+        {"currency": currency, "basis": basis, "pricing_reference": reference,
+         "unit": "millionth_of_currency_unit", "mean_microunits": mean(values),
+         "distribution_microunits": distribution(values)}
+        for (currency, basis, reference), values in sorted(groups.items())
+    ]
 
 
 def validate_configuration_run(run: dict[str, Any], configuration: dict[str, Any]) -> list[str]:
@@ -387,6 +434,8 @@ def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any
     tokens: list[float] = []
     durations: list[float] = []
     case_pass_flags: list[bool] = []
+    costs: dict[tuple[str, str, str], list[int]] = defaultdict(list)
+    missing_cost_runs = 0
 
     for case, run, grade in rows:
         value = get_assertion_pass_rate(grade)
@@ -418,6 +467,11 @@ def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any
         d = numeric(run.get("duration_ms"))
         if d is not None:
             durations.append(d)
+        cost = run.get("cost")
+        if cost is not None and not validate_cost(cost):
+            costs[cost_identity(cost)].append(cost["amount_microunits"])
+        else:
+            missing_cost_runs += 1
         cp = effective_case_pass(case, run, grade)
         if isinstance(cp, bool):
             case_pass_flags.append(cp)
@@ -435,6 +489,11 @@ def build_metrics(rows: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any
         "falsifier_coverage": rate(falsifier_flags),
         "mean_tokens": mean(tokens),
         "mean_duration_ms": mean(durations),
+        "tokens_distribution": distribution(tokens),
+        "duration_ms_distribution": distribution(durations),
+        "cost_observed_runs": len(rows) - missing_cost_runs,
+        "cost_missing_runs": missing_cost_runs,
+        "cost_summaries": summarize_cost_groups(costs),
     }
 
 
@@ -452,6 +511,8 @@ def paired_comparison(
     ties = 0
     excluded_pairs: list[dict[str, Any]] = []
     unversioned_pairs = 0
+    cost_deltas: dict[tuple[str, str, str], list[int]] = defaultdict(list)
+    excluded_cost_pairs: list[dict[str, Any]] = []
 
     for key in common:
         lc, lrun, lgrade = left_rows[key]
@@ -491,6 +552,18 @@ def paired_comparison(
         ld, rd = numeric(lrun.get("duration_ms")), numeric(rrun.get("duration_ms"))
         if ld is not None and rd is not None:
             duration_deltas.append(ld - rd)
+        left_cost, right_cost = lrun.get("cost"), rrun.get("cost")
+        if left_cost is None or right_cost is None:
+            cost_reason = "COST_MISSING"
+        elif validate_cost(left_cost) or validate_cost(right_cost):
+            cost_reason = "COST_INVALID"
+        elif cost_identity(left_cost) != cost_identity(right_cost):
+            cost_reason = "COST_BASIS_MISMATCH"
+        else:
+            cost_reason = None
+            cost_deltas[cost_identity(left_cost)].append(left_cost["amount_microunits"] - right_cost["amount_microunits"])
+        if cost_reason:
+            excluded_cost_pairs.append({"case_id": key[0], "repetition": key[1], "reason_code": cost_reason})
 
         lp = effective_case_pass(lc, lrun, lgrade)
         rp = effective_case_pass(rc, rrun, rgrade)
@@ -514,6 +587,11 @@ def paired_comparison(
         "mean_judge_score_delta_left_minus_right": mean(judge_deltas),
         "mean_tokens_delta_left_minus_right": mean(token_deltas),
         "mean_duration_ms_delta_left_minus_right": mean(duration_deltas),
+        "tokens_delta_distribution_left_minus_right": distribution(token_deltas),
+        "duration_ms_delta_distribution_left_minus_right": distribution(duration_deltas),
+        "cost_paired_runs": sum(len(values) for values in cost_deltas.values()),
+        "excluded_cost_pairs": excluded_cost_pairs,
+        "cost_delta_summaries_left_minus_right": summarize_cost_groups(cost_deltas),
         "blind_pairwise_result": None,
     }
 
@@ -631,6 +709,13 @@ def main() -> int:
                 metadata_errors.append(f"orphan artifact outside the manifest: {artifact}")
 
     configurations = {cfg: build_metrics(rows) for cfg, rows in sorted(by_cfg.items())}
+    for cfg, rows in sorted(by_cfg.items()):
+        by_route: dict[str, list[tuple[dict[str, Any], dict[str, Any], dict[str, Any]]]] = defaultdict(list)
+        for row in rows:
+            by_route[row[1]["route"]].append(row)
+        configurations[cfg]["by_route"] = {
+            route: build_metrics(route_rows) for route, route_rows in sorted(by_route.items())
+        }
 
     comparison_results: dict[str, Any] = {}
     for comparison in CONFIG.get("comparisons", []):

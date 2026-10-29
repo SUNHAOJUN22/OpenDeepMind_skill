@@ -87,6 +87,8 @@ REQUIRED = (
     "open-deep-mind/assets/claim-ledger.schema.json",
     "open-deep-mind/assets/example-ledger.json",
     "open-deep-mind/scripts/validate_ledger.py",
+    "open-deep-mind/scripts/prepare_context.py",
+    "open-deep-mind/tests/test_context_preparation.py",
     "open-deep-mind/tests/test_validators.py",
 )
 
@@ -241,6 +243,13 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         errors.append(f"MODULES.json module order/IDs invalid: {registry_ids}")
     if "eval" in " ".join(str(x).lower() for x in registry_ids):
         errors.append("eval layer must not be registered as a reasoning module")
+    if registry.get("context_preparation") != {
+        "entry": "scripts/prepare_context.py",
+        "routes": ["phi", "p", "phi-p", "triz"],
+        "triz_requires_explicit_request": True,
+        "model_execution": False,
+    }:
+        errors.append("MODULES.json context preparation contract is invalid")
 
     for module_id, rel in MODULE_MANIFESTS.items():
         path = root / rel

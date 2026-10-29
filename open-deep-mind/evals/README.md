@@ -290,6 +290,63 @@ gate remains closed.
 
 Do not publish benchmark scores until actual runs and grading artifacts exist.
 
+### Cost and latency records
+
+Optional `run_record.json` cost example (illustrative units, not a measured bill):
+
+```json
+{
+  "cost": {
+    "amount_microunits": 250,
+    "currency": "USD",
+    "basis": "usage_priced",
+    "pricing_reference": "provider-rate-snapshot-id"
+  }
+}
+```
+
+One microunit is one millionth of the named currency unit. Supply a non-negative
+safe integer, a three-letter uppercase currency code, `provider_reported` or
+`usage_priced`, and the billing/rate snapshot used. For `usage_priced`, preserve
+the actual usage breakdown and applied rates with the raw run evidence. The
+aggregator does not fetch prices, infer costs from total tokens, or convert
+currencies. Omit `cost` when unmeasured; explicit null and malformed cost records
+are metadata errors. An observed zero is valid and distinct from absence.
+
+`cost_missing_runs` counts absent observations. `cost_summaries` groups by
+currency, basis and pricing reference. A compatible quality/token/latency pair
+contributes a cost delta only if both costs have matching identities; otherwise
+`excluded_cost_pairs` records why and the other valid paired metrics remain.
+No aggregate combines unlike currencies or pricing snapshots.
+
+Token and duration distributions report their sample count and nearest-rank
+P50/P95: sort the observations and take rank `ceil(p*n)`, with one-based ranks.
+An empty sample has null quantiles. Paired delta distributions are quantiles of
+individual left-minus-right differences, not differences of marginal quantiles.
+`by_route` is descriptive and can have different case mixes; it is not an
+independent experiment or a causal comparison of routing choices.
+
+成本未测量时应省略 `cost`，不得填零。不同币种、计费方式或价格快照不会混合汇总；
+配对成本差额仍受原模型身份、执行设置和输入一致性检查约束。P50/P95 同时提供
+样本数和最近秩定义。按路由汇总是描述性观测，任务组成不同不能当作路由因果效应。
+所有外部运行与评分证据仍需独立审核，`publication_ready` 保持 false。
+
+#### Accounting change record
+
+- **Problem / evidence:** mean-only token/latency output hid tails and absent
+  costs could not be distinguished from zero cost. Known synthetic records test
+  the arithmetic and incompatible-accounting exclusions.
+- **Affected layer / API:** optional cost schema, run validation, additive
+  distribution/route/cost output. Fixed cases, splits, configurations, grading
+  assertions and publication gates are unchanged.
+- **Expected improvement / new risk:** comparable observed costs and explicit
+  missingness; supplied billing metadata can still be wrong. No pricing,
+  provider execution or scientific quality is attested by the aggregator.
+- **Compatibility / validation:** legacy cost-free records remain valid with
+  missing-cost counts. Public CLI regressions and the original complete CI
+  validate accounting. Actual model quality, tokens, costs and latency require
+  a configured external runner and independent grading.
+
 ## 9. Commands
 
 Validate the authored benchmark:

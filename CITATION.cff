@@ -7,8 +7,8 @@ authors:
     given-names: "Haojun"
 repository-code: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
 url: "https://github.com/SUNHAOJUN22/OpenDeepMind_skill"
-version: "1.2.0"
-date-released: "2026-08-10"
+version: "1.3.0"
+date-released: "2026-10-29"
 license: "Apache-2.0 AND CC-BY-4.0"
 keywords:
   - first philosophy

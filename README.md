@@ -1,6 +1,6 @@
 # OpenDeepMind_skill
 
-![Version](https://img.shields.io/badge/version-1.2.0-1f6feb)
+![Version](https://img.shields.io/badge/version-1.3.0-1f6feb)
 
 **Qualify foundations, build explicit models, and make conclusions testable.**
 
@@ -64,6 +64,24 @@ Request: Use Φ to qualify the framing, then P to compare rival models.
 ```
 
 For a well-framed engineering task, load P directly. Use Φ first when the meaning of the target, evidence standard, causal claim or objective is uncertain. TRIZ requires explicit activation; the mere presence of a trade-off does not activate it. A useful TRIZ instruction is: “Explicitly use TRIZ to propose candidate mechanisms, then return each candidate to physical and evidential checks.”
+
+### Optional context preparation CLI
+
+`python open-deep-mind/scripts/prepare_context.py --route p --format json`
+prepares the router, shared quality gate and selected canonical method. Use `phi`,
+`p`, `phi-p`, or `triz`; the last requires `--triz-requested` and includes P for
+concept validation. Additional TRIZ resources remain progressively loaded by the
+host when the task reaches them. The command does not choose a route from keywords
+or execute a model. It never reads the evaluation layer.
+
+The output includes fresh source hashes, exact UTF-8 byte counts and a default
+256 KiB context budget including source labels. `--format markdown` emits the
+prepared text; `--format manifest` emits its receipt without the text. Missing
+resources and invalid activation fail before any context is emitted. A receipt
+has status `PREPARED_NOT_EXECUTED`: model tokens, quality, cost and model latency
+remain null until an external runner measures them. This implements a repeatable
+loading entrypoint; the existing production route was already progressive, so it
+does not establish a new model speedup or quality improvement.
 
 ## 3. Typed claims and traceability
 
@@ -208,6 +226,16 @@ B=\frac1N\sum_i b_i.
 $$
 
 Do not pass 0–100 rubric points into that normalized helper. Missing coverage returns no score, and duplicate expected IDs are rejected.
+
+The aggregator also reports nearest-rank P50/P95 and sample counts for tokens
+and duration, plus descriptive observations by recorded route. Optional actual
+cost records retain currency, billing basis and pricing-snapshot identity;
+missing cost is counted as missing. Matched cost deltas require those identities
+and the existing model/settings/input parity checks to agree. Different routes
+may contain different tasks, so their descriptive averages are not a causal
+route comparison. These accounting features are implemented; real model
+quality/token/cost/latency comparisons still require external runs and grading.
+See the [cost record contract](open-deep-mind/evals/README.md#cost-and-latency-records).
 
 ## 6. Execute the framework
 

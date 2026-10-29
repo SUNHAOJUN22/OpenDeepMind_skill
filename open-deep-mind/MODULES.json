@@ -1,7 +1,13 @@
 {
   "schema_version": 1,
-  "repository_version": "1.2.0",
+  "repository_version": "1.3.0",
   "router": "SKILL.md",
+  "context_preparation": {
+    "entry": "scripts/prepare_context.py",
+    "routes": ["phi", "p", "phi-p", "triz"],
+    "triz_requires_explicit_request": true,
+    "model_execution": false
+  },
   "shared": {
     "references": "references/",
     "assets": "assets/",

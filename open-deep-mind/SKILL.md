@@ -13,7 +13,7 @@ license: Apache-2.0 AND CC-BY-4.0 with documented third-party exceptions; see ..
 compatibility: Agent Skills-compatible runtimes. Core routing and validation require no third-party Python packages. Current, disputed, high-stakes, or source-sensitive facts should be externally verified.
 metadata:
   author: SUNHAOJUN22
-  version: "1.2.0"
+  version: "1.3.0"
   repository: SUNHAOJUN22/OpenDeepMind_skill
   languages: English, Chinese
 ---
@@ -111,6 +111,12 @@ TRIZ status: analogical transfer, not canonical engineering TRIZ
 ---
 
 ## 3. Common intake contract
+
+Optional host integration: [scripts/prepare_context.py](scripts/prepare_context.py)
+prepares a selected `phi`, `p`, `phi-p`, or explicitly requested `triz` context
+with the shared quality gate, source hashes and a byte budget. Its
+`PREPARED_NOT_EXECUTED` receipt does not establish that a model loaded or followed
+the method. Continue to load only the additional resources required by the task.
 
 Normalize the task into the smallest sufficient record:
 

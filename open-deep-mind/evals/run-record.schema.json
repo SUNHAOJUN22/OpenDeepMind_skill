@@ -87,6 +87,17 @@
       "minimum": 0,
       "maximum": 9007199254740991
     },
+    "cost": {
+      "type": "object",
+      "required": ["amount_microunits", "currency", "basis", "pricing_reference"],
+      "properties": {
+        "amount_microunits": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+        "basis": {"enum": ["provider_reported", "usage_priced"]},
+        "pricing_reference": {"type": "string", "minLength": 1, "pattern": "\\S"}
+      },
+      "additionalProperties": false
+    },
     "repository_commit": {
       "type": "string"
     },

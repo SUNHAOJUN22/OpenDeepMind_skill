@@ -47,6 +47,25 @@ The evaluation package is separately located at `evals/` and has no activation e
 
 ## 3. Dependency direction
 
+### Optional context preparation
+
+`scripts/prepare_context.py` is shared runtime infrastructure registered in
+`MODULES.json`; it is not another reasoning module. The host selects a route.
+The helper reads the router, shared quality gate and only that route's canonical
+entries. It returns exact source hashes and a bounded context, without reading
+`evals/`, running a model, or following every resource link. Explicit TRIZ
+selection requires a declaration of user authorization and includes P for the
+mandatory validation handoff. The declaration is not independent proof of consent.
+
+Change record: the previous router specified progressive loading but offered no
+executable preparation receipt. The new optional API makes selected file loading,
+byte budgets and failure-before-output reproducible. It does not change Φ8/P9/T10,
+select a route from prompt keywords, or claim model quality/token/cost improvement.
+Missing resources or noncanonical entries fail closed; changed source bytes are
+read afresh. Concurrent modification of the installed skill tree is unsupported.
+Existing hosts may continue their original progressive loading. Validator and
+public CLI regression coverage exercise the new manifest/API contract.
+
 The runtime dependency graph is intentionally asymmetric:
 
 ```text

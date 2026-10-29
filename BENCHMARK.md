@@ -91,8 +91,17 @@ In addition to assertion quality, time and tokens, the benchmark tracks:
 - blind pairwise result when supplied;
 - mean tokens;
 - mean duration.
+- nearest-rank token/duration P50 and P95 with sample counts;
+- descriptive metrics by recorded route;
+- optional observed/priced costs, grouped by currency, billing basis and pricing snapshot, with explicit missing counts.
 
 The aggregator computes paired common-case deltas for the declared comparisons. It does not compare metrics across different task scopes as though they were directly interchangeable.
+
+Compatible cost observations also contribute paired cost deltas. Missing costs
+are not zero, and differing currencies or pricing snapshots are not pooled.
+See the [accounting contract](open-deep-mind/evals/README.md#cost-and-latency-records).
+No real routing quality, token, cost or model-latency result is supplied by the
+context preparation helper; it only reports the context it prepared.
 
 Runs must also satisfy their configuration's forced route and disabled-module
 constraints. Contradictory records are reported as metadata errors and excluded
