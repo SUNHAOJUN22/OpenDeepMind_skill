@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import stat
 import sys
@@ -51,6 +52,29 @@ def read_resource(root: Path, relative: str, limit: int) -> bytes:
     return data
 
 
+def _unique_registry_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate module registry key: {key!r}")
+        result[key] = value
+    return result
+
+
+def _reject_registry_constant(value: str) -> Any:
+    raise ValueError(f"nonfinite module registry number: {value}")
+
+
+def _registry_float(value: str) -> float:
+    converted = float(value)
+    significand = value.lower().split("e", 1)[0]
+    if not math.isfinite(converted):
+        raise ValueError("module registry number exceeds the finite range")
+    if converted == 0 and any(digit in "123456789" for digit in significand):
+        raise ValueError("nonzero module registry number underflows the finite range")
+    return converted
+
+
 def prepare_context(
     route: str, *, triz_requested: bool = False, max_bytes: int = DEFAULT_MAX_BYTES,
     root: Path = ROOT,
@@ -64,7 +88,12 @@ def prepare_context(
         raise ValueError("max_bytes must be an integer from 1 to 8388608")
     root = root.resolve()
     registry_bytes = read_resource(root, "MODULES.json", 64 * 1024)
-    registry = json.loads(registry_bytes)
+    registry = json.loads(
+        registry_bytes,
+        object_pairs_hook=_unique_registry_object,
+        parse_constant=_reject_registry_constant,
+        parse_float=_registry_float,
+    )
     if not isinstance(registry, dict):
         raise ValueError("invalid module registry")
     modules = registry.get("modules")
