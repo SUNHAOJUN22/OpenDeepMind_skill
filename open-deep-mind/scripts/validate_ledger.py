@@ -136,6 +136,9 @@ def validate(data: dict[str, Any]) -> list[str]:
             require(isinstance(status, str) and status in STATUSES, f"{prefix}.status must be one of {sorted(STATUSES)}", errors)
             require(isinstance(claim.get("scope"), str), f"{prefix}.scope must be a string", errors)
             require(isinstance(claim.get("falsifier"), str), f"{prefix}.falsifier must be a string", errors)
+            for key in ("source", "owner", "review_date"):
+                if key in claim:
+                    require(isinstance(claim[key], str), f"{prefix}.{key} must be a string", errors)
             confidence = claim.get("confidence")
             if "confidence" in claim:
                 require(
@@ -229,7 +232,7 @@ def validate(data: dict[str, Any]) -> list[str]:
         errors.append("dependency cycle detected: " + " -> ".join(cycle))
 
     decision = data.get("decision")
-    if decision is not None:
+    if "decision" in data:
         require(isinstance(decision, dict), "decision must be an object", errors)
         if isinstance(decision, dict):
             require(nonempty_string(decision.get("recommendation")), "decision.recommendation must be non-empty", errors)
@@ -238,6 +241,8 @@ def validate(data: dict[str, Any]) -> list[str]:
             if isinstance(trace, list):
                 for item in trace:
                     require(isinstance(item, str) and item in all_ids, f"decision trace references unknown id: {item}", errors)
+            if "uncertainty" in decision:
+                require(isinstance(decision["uncertainty"], str), "decision.uncertainty must be a string", errors)
             if "review_trigger" in decision:
                 require(nonempty_string(decision.get("review_trigger")), "decision.review_trigger must be non-empty", errors)
 

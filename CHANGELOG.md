@@ -9,6 +9,7 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Match claim-ledger source, owner, review date and decision uncertainty validation to their declared string types; reject an explicit null decision while preserving omitted optional fields and extension metadata. These are structural checks, not verification of evidence truth or completeness.
 - Correct the P9 sample-information formula to optimize posterior expected utility before averaging over future observations; distinguish the perfect-information upper bound, include exact finite decision examples, and account for study costs. This repairs a mathematical method contract, not a measured model-performance result.
 - Require TRIZ benchmark records to list First Principles validation so incomplete concept-only runs cannot count toward benchmark metrics.
 - Require each local benchmark-skill route's modules to be present in `loaded_modules` before counting the run; preserve no-skill and external-skill baseline semantics.
