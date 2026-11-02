@@ -66,7 +66,8 @@ def publication_decision(
     observed = tuple(observed_slots)
     if not expected or any(not isinstance(slot, str) or not slot.strip() for slot in expected):
         raise ValueError("expected slots must be non-empty strings")
-    if len(set(expected)) != len(expected):
+    expected_set = set(expected)
+    if len(expected_set) != len(expected):
         raise ValueError("expected slots must be unique")
     counts: dict[str, int] = {}
     for slot in observed:
@@ -75,7 +76,7 @@ def publication_decision(
         counts[slot] = counts.get(slot, 0) + 1
     missing = tuple(sorted(slot for slot in expected if counts.get(slot, 0) == 0))
     duplicates = tuple(sorted(slot for slot, count in counts.items() if count > 1))
-    orphans = tuple(sorted(slot for slot in counts if slot not in set(expected)))
+    orphans = tuple(sorted(slot for slot in counts if slot not in expected_set))
     completed = sum(1 for slot in expected if counts.get(slot, 0) == 1)
     completeness = completed / len(expected)
     reasons: list[str] = []

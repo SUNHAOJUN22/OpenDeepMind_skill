@@ -2,132 +2,197 @@
 
 ![Version](https://img.shields.io/badge/version-1.3.0-1f6feb)
 
-**Qualify foundations, build explicit models, and make conclusions testable.**
+**A traceable route from a well-posed question to an explicit model and a testable decision.**
 
-[简体中文](README.zh-CN.md) · [Runtime router](open-deep-mind/SKILL.md) · [Architecture](open-deep-mind/ARCHITECTURE.md) · [Module registry](open-deep-mind/MODULES.json) · [Benchmark](BENCHMARK.md)
+[简体中文](README.zh-CN.md) · [Skill router](open-deep-mind/SKILL.md) · [Architecture](open-deep-mind/ARCHITECTURE.md) · [Module registry](open-deep-mind/MODULES.json) · [Benchmark](BENCHMARK.md) · [Changes](CHANGELOG.md)
 
-![From questions to testable models — English functional vision](docs/assets/vision-en.png)
+![OpenDeepMind: qualified foundations, explicit models and testable conclusions](docs/assets/readme-vnext/hero.en.svg)
 
-*Concept artwork. The physical forms and mathematical motifs illustrate the workflow; they are not measured data or an executed simulation.*
+*AI-generated concept artwork with exact, outlined English labels and mathematical notation. It illustrates the implemented contracts and project vision; it is not a measured result. [Artwork provenance and diagram archive](docs/assets/README.md).*
 
-OpenDeepMind is a portable Agent Skill with three isolated reasoning modules and a separate evaluation layer. Its Python tools validate structured claims, module contracts and benchmark artifacts. They do not include a language-model service, electronic-structure solver, experimental instrument or automatic scientific certification.
+OpenDeepMind is a portable Agent Skill comprising three isolated reasoning modules. An Agent-Skills-compatible host supplies the model; this repository supplies methods, structured contracts, context preparation, evidence validation and a separate behavioral evaluation framework. The core Python tools run with the standard library. CI uses Python 3.12.
 
-This is an independent project, without affiliation with or endorsement by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute or the maintainers of referenced repositories. Version and licensing are recorded in [VERSION](VERSION), [LICENSE.md](LICENSE.md) and [NOTICE.md](NOTICE.md).
+The project is independent and has no affiliation with or endorsement by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute or referenced repository maintainers. See [LICENSE.md](LICENSE.md), [NOTICE.md](NOTICE.md) and [VERSION](VERSION).
 
-## 1. What the repository actually does
+## 1. Capabilities and concrete outputs
 
-| Component | Input and responsibility | Output / entrypoint |
+| Component | What it does | Source and output |
 |---|---|---|
-| First Philosophy, Φ8 | Examine definitions, evidence, causality, boundary, scale and values | [Foundation Charter and Φ0–Φ7](open-deep-mind/first-philosophy/METHOD.md) |
-| First Principles, P9 | Decompose requirements; distinguish laws, constraints and assumptions; construct and challenge models | [Model and decision contracts, P1–P9](open-deep-mind/first-principles/METHOD.md) |
-| TRIZ, T10 | Generate engineering concepts when explicitly requested or accepted | [T1–T10 router](open-deep-mind/triz/ROUTER.md); concepts return to P for validation |
-| Claim ledger | Check fields, typed references, inference structure and cycles | [validate_ledger.py](open-deep-mind/scripts/validate_ledger.py) |
-| Evaluation framework | Create isolated iterations; check run identity and grading consistency; aggregate comparable records | [Evaluation scripts](open-deep-mind/evals/scripts/) |
-| Software validation | Check module manifests, links, schemas, fixtures and regression behavior | [CI workflow](.github/workflows/validate.yml) |
+| First Philosophy, **Φ8 = Φ0…Φ7** | Qualifies definitions, evidence, causal commitments, boundary, scale and values | [Canonical method](open-deep-mind/first-philosophy/METHOD.md); Foundation Charter |
+| First Principles, **P9 = P1…P9** | Decomposes requirements, builds explicit models, compares alternatives and specifies falsifiers | [Canonical method](open-deep-mind/first-principles/METHOD.md); model and decision contracts |
+| TRIZ, **T10 = T1…T10** | Generates engineering concepts after explicit activation | [Canonical router](open-deep-mind/triz/ROUTER.md); candidates return to P for validation |
+| Context preparation | Loads the selected route, source identities and shared quality gate within a byte budget | [prepare_context.py](open-deep-mind/scripts/prepare_context.py); `PREPARED_NOT_EXECUTED` receipt |
+| Claim ledger | Checks typed records, references, inference dependencies and cycles | [validate_ledger.py](open-deep-mind/scripts/validate_ledger.py); structural diagnostics |
+| Evaluation layer | Creates isolated iterations, validates run/grading records and aggregates comparable observations | [Evaluation scripts](open-deep-mind/evals/scripts/); auditable JSON reports |
 
-The core Python validators use the standard library. The host agent/model is supplied by your Agent-Skills-compatible runtime. The evaluation folder is an observation layer and is never loaded as a fourth reasoning method.
+The evaluation layer observes the three modules. It is not a fourth reasoning module and is never loaded by the context-preparation CLI. Numerical solvers, experimental instruments, model API calls and independent scientific certification must be supplied externally.
 
 ```mermaid
 flowchart TD
   Q["Question and scope"] --> F["Φ: qualified foundations"]
   F --> P["P: models and alternatives"]
-  P --> V["Falsifiers and quality checks"]
+  P --> V["Evidence and falsifiers"]
   V --> D["Decision or next experiment"]
-  V -->|"Foundations need repair"| F
-  P -->|"Explicit request"| T["TRIZ: candidate concepts"]
+  V -->|"Repair framing"| F
+  P -->|"Explicit activation"| T["TRIZ: candidate concepts"]
   T --> V
 ```
 
-## 2. Start from a concrete question
-
-Clone the repository, then expose the `open-deep-mind/` folder to your runtime's skill discovery mechanism. Load [SKILL.md](open-deep-mind/SKILL.md) as the router; do not paste the entire evaluation dataset into the agent's instructions.
+## 2. Start with a runnable check and a clear question
 
 ```bash
 git clone https://github.com/SUNHAOJUN22/OpenDeepMind_skill.git
 cd OpenDeepMind_skill
 python open-deep-mind/scripts/validate_repository.py .
 python open-deep-mind/scripts/validate_ledger.py open-deep-mind/assets/example-ledger.json
+python open-deep-mind/scripts/prepare_context.py --route p --format manifest
 ```
 
-The CI uses Python 3.12. Start a task with an operational outcome, rather than a preferred technology:
+Expose `open-deep-mind/` to your host's skill discovery mechanism and use [SKILL.md](open-deep-mind/SKILL.md) as its router. For context preparation, select a route deliberately:
+
+```bash
+python open-deep-mind/scripts/prepare_context.py --route phi --format markdown
+python open-deep-mind/scripts/prepare_context.py --route phi-p --format json
+python open-deep-mind/scripts/prepare_context.py --route triz --triz-requested --format manifest
+```
+
+`--route triz` requires `--triz-requested` and includes P for subsequent concept validation. The default context budget is 256 KiB, including source labels; `--max-bytes` changes that budget. Missing resources, an invalid activation or an insufficient budget fail before context is emitted. A manifest contains fresh SHA-256 identities and UTF-8 byte counts. Preparation does not execute a model, and its token, quality, cost and model-latency observations remain null.
+
+Use this task prompt with the host agent:
 
 ```text
-Question: Which proposed mechanism best explains the observed trend?
-Decision: Select the next discriminating calculation or experiment.
-Boundary: State the system, time scale and conditions.
-Evidence: Link raw observations, units, uncertainty and provenance.
-Constraints: State limits and who can revise them.
-Unknowns: List what could change the decision.
-Request: Use Φ to qualify the framing, then P to compare rival models.
-        Separate observations, assumptions and empirical closures.
-        Give a falsifier and a reversible next step.
+Decision: Select the next calculation or experiment that can distinguish
+          the leading mechanism from a serious rival.
+Boundary: State the system, conditions, time scale and excluded effects.
+Evidence: Link observations with units, uncertainty and provenance.
+Constraints: State hard limits, their authority and who can revise them.
+Unknowns: Identify missing information that could change the decision.
+Process: Qualify unstable framing with Φ; construct and challenge models
+         with P. Keep observations, laws, assumptions and closures distinct.
+Deliver: A typed ledger, explicit model, rival, falsifier, reversible next
+         action and review trigger. Enable TRIZ only on my explicit request.
 ```
 
-For a well-framed engineering task, load P directly. Use Φ first when the meaning of the target, evidence standard, causal claim or objective is uncertain. TRIZ requires explicit activation; the mere presence of a trade-off does not activate it. A useful TRIZ instruction is: “Explicitly use TRIZ to propose candidate mechanisms, then return each candidate to physical and evidential checks.”
-
-### Optional context preparation CLI
-
-`python open-deep-mind/scripts/prepare_context.py --route p --format json`
-prepares the router, shared quality gate and selected canonical method. Use `phi`,
-`p`, `phi-p`, or `triz`; the last requires `--triz-requested` and includes P for
-concept validation. Additional TRIZ resources remain progressively loaded by the
-host when the task reaches them. The command does not choose a route from keywords
-or execute a model. It never reads the evaluation layer.
-
-The output includes fresh source hashes, exact UTF-8 byte counts and a default
-256 KiB context budget including source labels. `--format markdown` emits the
-prepared text; `--format manifest` emits its receipt without the text. Missing
-resources and invalid activation fail before any context is emitted. A receipt
-has status `PREPARED_NOT_EXECUTED`: model tokens, quality, cost and model latency
-remain null until an external runner measures them. This implements a repeatable
-loading entrypoint; the existing production route was already progressive, so it
-does not establish a new model speedup or quality improvement.
-
-## 3. Typed claims and traceability
-
-The canonical vocabulary is `D/O/L/C/A/E/V/U`, defined in the [claim schema](open-deep-mind/assets/claim-ledger.schema.json). The compatibility API accepts the codes or corresponding full names. In particular, **C means constraint** and **E means empirical closure**.
-
-| Code | Type | Required interpretation |
+| Situation | Useful route | Acceptance question |
 |---|---|---|
-| D | Definition | An explicit meaning or operational definition |
-| O | Observation | A sourced measurement or recorded observation |
-| L | Law / invariant | An independently supported relation within its domain |
-| C | Constraint | A declared boundary or requirement, with authority and scope |
-| A | Assumption | A revisable premise with a sensitivity or falsification condition |
-| E | Empirical closure / estimate | A fitted, heuristic or learned relation with provenance |
-| V | Value | A stakeholder objective, preference or normative commitment |
-| U | Unknown | A gap that may affect the next decision |
+| Objective, definition or causal framing is unstable | Φ, then P | Is the framing qualified enough to support the model? |
+| Boundary and technical objective are already clear | P | Are units, closures, constraints and falsifiers explicit? |
+| Engineering concepts are explicitly requested | TRIZ, then P | Has each candidate returned to physical and evidential checks? |
+| Comparing the skill's behavior | Separate evaluation framework | Are observations reproducible and paired under comparable conditions? |
 
-A ledger can be represented as a directed graph $G=(N,E)$, with edges linking premises, inferences and conclusions. A valid reference must name an existing node, and circular support cannot establish a conclusion:
+## 3. Claim types, graph integrity and numeric boundaries
 
-$$
-\forall (u,v)\in E,\quad u,v\in N,\qquad G\text{ must be acyclic}.
-$$
+The [claim schema](open-deep-mind/assets/claim-ledger.schema.json) preserves eight types. The compatibility API accepts these codes or their corresponding full names.
 
-The validator uses iterative graph traversal with a raw-input budget of 8 MiB, 10,000 records and 100,000 references. JSON nesting is limited to 128 levels. Duplicate JSON keys, non-finite JSON numbers and unpaired Unicode surrogates are rejected. Ledger and benchmark JSON readers also reject nonzero numbers that underflow to zero during floating-point conversion: a negative confidence or judge score such as `-1e-999` cannot become an accepted zero. Exact zero significands such as `0e-999` and representable subnormal values such as `5e-324` remain valid numeric inputs, subject to each field's range. These are software resource and consistency checks, not proof that the recorded claims are true.
+| Code | Meaning | Required distinction |
+|---|---|---|
+| D | Definition | Operational meaning, not an observed fact |
+| O | Observation | Recorded evidence with provenance |
+| L | Law / invariant | Supported relation within a stated domain |
+| C | Constraint | Boundary or requirement with authority and scope |
+| A | Assumption | Revisable premise with a failure or sensitivity condition |
+| E | Empirical closure / estimate | Fitted, learned or heuristic relation with provenance |
+| V | Value | Stakeholder objective, preference or normative commitment |
+| U | Unknown | Unresolved information that may affect the decision |
 
-Where confidence is supplied, it is a finite, non-Boolean number:
-
-$$
-0\le c_i\le1.
-$$
-
-For both claims and inferences, `confidence` may be omitted when no numeric estimate is available. Explicit JSON `null`, Boolean values and numeric strings are invalid; omission does not imply zero confidence.
-
-Do not interpret a confidence label as a calibrated probability unless a calibration procedure and relevant data support that interpretation.
-
-## 4. Mathematical model contracts
-
-P's [model contract](open-deep-mind/first-principles/model-contract.schema.json) asks for the purpose, variables, parameters, provenance, governing relations, initial/boundary conditions, closure assumptions, observation/error model, validity domain and falsifiers. The following equations describe supported **reasoning templates**; the repository does not numerically solve them.
-
-### Feasibility and objectives
+In the directed ledger graph $G=(N,E)$, $N$ contains claim and inference nodes and $E$ contains references. The edge symbol $E$ here is distinct from the empirical-closure type code.
 
 $$
-\mathcal X_f=\{x\mid h(x)=0,\;g(x)\le0\},\qquad
+\forall(u,v)\in E:\ u,v\in N,\qquad G\text{ is acyclic}.
+$$
+
+The iterative validator limits raw JSON to 8 MiB, nesting to 128 levels, records to 10,000 and references to 100,000. It rejects duplicate JSON keys, unpaired Unicode surrogates, nonfinite values and nonzero numbers that underflow to zero during float conversion. Exact zero such as `0e-999` and a representable subnormal such as `5e-324` remain subject to ordinary field validation.
+
+Optional confidence values follow:
+
+$$
+c_i\in\mathbb R,\quad \operatorname{finite}(c_i),\quad 0\le c_i\le1.
+$$
+
+Omit `confidence` if there is no numeric estimate. Explicit null, Boolean values and numeric strings are invalid. Structural consistency does not establish a claim's truth, and confidence is not a calibrated probability without a supporting calibration procedure.
+
+## 4. Mathematics that the Python code actually computes
+
+The executable sources are [contracts_v17.py](open-deep-mind/scripts/contracts_v17.py) and [aggregate_benchmark.py](open-deep-mind/evals/scripts/aggregate_benchmark.py). The following definitions describe their reported quantities.
+
+### Slot completeness and publication boundaries
+
+A benchmark slot identifies a case, configuration and repetition. In the compatibility helper, let $S$ be the nonempty unique expected set and $n_s$ the number of observations of slot $s$. Then:
+
+$$
+C_{\mathrm{helper}}=\frac{\sum_{s\in S}\mathbf1[n_s=1]}{|S|}.
+$$
+
+Missing, duplicate and orphan slots have distinct diagnostics. Duplicates do not receive extra weight. The helper now builds the expected-membership set once, avoiding its reconstruction for every observed identity; large-inventory regression tests preserve the same verdicts and use a deterministic hash-work budget rather than a noisy runtime threshold.
+
+The full aggregator counts a slot only after validating both its run and grade. With $S_{\mathrm{valid}}$ denoting those complete, validated expected identities:
+
+$$
+C_{\mathrm{aggregate}}=\frac{|S_{\mathrm{valid}}|}{|S|}.
+$$
+
+Completeness of one does not override malformed metadata, duplicates, orphans or other recorded blockers. Complete internal artifacts return `ARTIFACT_SET_COMPLETE`; `publication_ready` remains false. Publication needs independent verification of actual execution, raw evidence, holdout sealing, grader identity and authority.
+
+### Assertions, effective verdicts and optional metrics
+
+For $n$ assertions with Boolean outcomes $a_j$:
+
+$$
+p=\sum_{j=1}^{n}\mathbf1[a_j=\mathrm{true}],\qquad f=n-p,\qquad
+r_a=\begin{cases}p/n,&n>0,\\0,&n=0.\end{cases}
+$$
+
+Reported counts and rates must agree with the records; the absolute rate-consistency tolerance is $10^{-12}$. Assertion text is unique after trimming, and passing assertions need nonempty response evidence. A case passes only when every assertion passes and there is no red blocker, reported module leakage or forbidden TRIZ activation. The same effective verdict is used in aggregate rates and paired wins:
+
+$$
+\widehat P=\frac1N\sum_{i=1}^{N}\mathbf1[\operatorname{effective\_pass}_i].
+$$
+
+Routing and false-TRIZ activation also use recorded route/module metadata. Forced-route ablation omits production-routing accuracy. Semantic judgments still require substantive grading.
+
+For pairing, distinguish the common candidate identities $I_0$ from the accepted comparable identities $I$. Model/version mismatches or missing/different `execution_conditions` exclude a candidate. Equal omitted versions are counted in `unversioned_paired_runs`; they are not independent version attestation.
+
+$$
+I\subseteq I_0,\qquad I_z=\{i\in I:\ z_{L,i},z_{R,i}\text{ are both recorded}\},\qquad
+\overline{\Delta z}=\frac1{|I_z|}\sum_{i\in I_z}(z_{L,i}-z_{R,i}).
+$$
+
+`candidate_paired_runs` counts $|I_0|$ and `paired_runs` counts $|I|$. Optional metrics can have fewer pairs; an empty $I_z$ produces null, never an imputed zero. Individual valid observations remain available even when their pair is excluded. Blind pairwise judgment is a separate evidence artifact.
+
+For sorted recorded values $z_{(1)}\le\cdots\le z_{(n)}$, the distribution helper reports nearest-rank quantiles:
+
+$$
+Q_p=z_{(\lceil pn\rceil)},\qquad p\in\{0.50,0.95\},\ n>0.
+$$
+
+An empty sample returns count zero and null quantiles. Token counts and durations use non-Boolean integers bounded by $2^{53}-1$. Costs use integer millionths of a currency unit and retain currency, billing basis and pricing-snapshot identity; matched cost deltas require those identities to agree. See the [cost record contract](open-deep-mind/evals/README.md#cost-and-latency-records).
+
+The [semantic rubric](open-deep-mind/evals/rubric.md) has ten anchored dimensions $s_k\in[0,5]$ and weights totaling 100. Its scoring contract is:
+
+$$
+Q=\sum_{k=1}^{10}w_k\frac{s_k}{5},\qquad \sum_{k=1}^{10}w_k=100.
+$$
+
+The compatibility helper `weighted_behavior_score` instead computes an equal-weight mean of complete normalized slot scores:
+
+$$
+B=\frac1N\sum_{i=1}^{N}b_i,\qquad 0\le b_i\le1.
+$$
+
+Missing coverage yields no score; duplicate expected IDs and invalid/nonfinite/Boolean scores are rejected. Do not feed 0–100 rubric points into this normalized helper.
+
+## 5. Mathematical reasoning contracts for scientific work
+
+The equations below describe templates in the [P9 method](open-deep-mind/first-principles/METHOD.md) and [model schema](open-deep-mind/first-principles/model-contract.schema.json). They guide an external solver or analysis; this skill does not solve the equations itself. Record variables, units, parameters and sources, constraints, closures, initial/boundary conditions, observation errors, validity limits and falsifiers.
+
+### Feasible decisions and explicit objectives
+
+$$
+\mathcal X_f=\{x:h(x)=0,\ g(x)\le0\},\qquad
 x^\star\in\operatorname*{arg\,min}_{x\in\mathcal X_f}J(x;V).
 $$
 
-Here $x$ is the decision vector, $h$ equality constraints, $g$ inequality constraints, $J$ the objective and $V$ the explicit value commitments. An optimum is meaningful only after the feasible set and objective are justified. Alternatives that violate a hard constraint are excluded before preference scoring.
+Here $x$ is the decision vector, $h,g$ are equality/inequality constraints, $J$ is the objective and $V$ records value commitments. Exclude hard-constraint violations before preference scoring, and retain a serious rival and a do-nothing option when relevant.
 
 ### Dynamics, conservation and observation
 
@@ -136,129 +201,72 @@ $$
 \frac{\partial q}{\partial t}+\nabla\cdot\mathbf J_q=s_q.
 $$
 
-States $\mathbf x$, controls $\mathbf u$, parameters $\boldsymbol\theta$, conserved density $q$, flux $\mathbf J_q$ and source $s_q$ require units and a validity domain. Relate the model to measurement through an observation operator:
+States $\mathbf x$, controls $\mathbf u$, parameters $\boldsymbol\theta$, conserved density $q$, flux $\mathbf J_q$ and source $s_q$ require compatible units and stated domains. Measurement enters through an observation operator:
 
 $$
 \mathbf y=\mathcal H(\mathbf x,\boldsymbol\theta)+\boldsymbol\epsilon.
 $$
 
-State whether $\boldsymbol\epsilon$ represents instrument noise, model discrepancy or both. Matching calibration data is not independent validation. A nondimensional residual can be defined for the task as
+Identify whether $\boldsymbol\epsilon$ contains instrument noise, model discrepancy or both. Check limiting cases, conservation, numerical convergence, sensitivity and identifiability. Agreement with calibration data does not supply independent validation.
 
-$$
-r=\frac{|a-b|}{\max(|a|,|b|,s_0)},\qquad s_0>0,
-$$
-
-where $a,b,s_0$ share units; the scale $s_0$ and acceptance tolerance must be justified. This example is a model-review template, not a hidden numerical solver in the package.
-
-### Updating evidence and crossing scales
+### Evidence updates, scale bridges and intervention
 
 $$
 p(\theta\mid y)\propto p(y\mid\theta)p(\theta),\qquad
 z=\mathcal C(x),\qquad y_{\mathrm{macro}}=\mathcal M(z;\eta).
 $$
 
-A Bayesian update requires an explicit prior and likelihood. A scale bridge requires the mapping $\mathcal C$, closure parameters $\eta$, discarded information, uncertainty and validation domain. A molecular result alone cannot authorize a process-scale performance claim.
-
-For intervention questions, distinguish a structural relation from observational association:
+A Bayesian update needs a justified prior and likelihood. A scale bridge needs a mapping $\mathcal C$, closure parameters $\eta$, uncertainty, lost information and a validation domain. A molecular result alone does not establish process-scale performance.
 
 $$
 X_i=f_i(\operatorname{Pa}_i,U_i),\qquad
 P(Y\mid X=x)\ne P(Y\mid\operatorname{do}(X=x))\text{ in general}.
 $$
 
-Use a causal identification argument or a discriminating intervention before promoting correlation to causation.
+A structural causal hypothesis requires an identification argument or discriminating intervention before association is promoted to causation.
 
-## 5. The implemented benchmark calculations
+### Choosing the next discriminating study
 
-The authored framework contains 60 cases, with a fixed 36/12/12 train/validation/holdout split. The four configurations are `no_skill`, `first_principles_baseline`, `opendeepmind_full`, and `opendeepmind_no_triz_ablation`. The external baseline commit remains pinned in [benchmark-config.json](open-deep-mind/evals/benchmark-config.json). Holdout cases must not become case-specific runtime instructions.
-
-The default repetition count is three. The validation workspace contains 114 expected slots: 12 cases × 3 configurations × 3 repetitions, plus 2 explicit-TRIZ cases × 3 ablation repetitions. These counts describe the experimental design, not completed model runs.
-
-### Identity and completeness
-
-A slot is the ordered identity $(\mathrm{case},\mathrm{configuration},\mathrm{repetition})$. If $S$ is the expected set and $R,G$ are valid run and grade identities, completeness is
+For design $d$, future observation $Y$, uncertain state $\theta$, feasible actions $\mathcal A$ and utility $U$, P9 defines expected sample information value as:
 
 $$
-C=\frac{|S\cap R\cap G|}{|S|},\qquad |S|>0.
+\operatorname{EVSI}(d)=
+\mathbb E_{Y\mid d}\!\left[\max_{a\in\mathcal A}\mathbb E_{\theta\mid Y,d}U(a,\theta)\right]
+-\max_{a\in\mathcal A}\mathbb E_\theta U(a,\theta).
 $$
 
-Duplicate slots cannot reweight scores. Missing slots, invalid metadata and orphan run or grading files block artifact completeness. `repetition`, token counts and durations are non-Boolean integers bounded by $2^{53}-1$; repetition starts at one. Run and grade JSON files have the same 8 MiB / 128-level input limits.
-
-### Assertion and case verdicts
-
-For a case with $n$ assertions and Boolean outcomes $a_j$:
+The action is selected using posterior expected utility before averaging over possible observations. Under the same feasible actions, unchanged utility and the option to ignore data:
 
 $$
-p=\sum_{j=1}^{n}\mathbf1[a_j=\mathrm{true}],\qquad f=n-p,\qquad
-r_a=\begin{cases}p/n,&n>0\\0,&n=0.\end{cases}
+0\le\operatorname{EVSI}(d)\le\operatorname{EVPI},\qquad
+\operatorname{EVPI}=\mathbb E_\theta\max_{a\in\mathcal A}U(a,\theta)
+-\max_{a\in\mathcal A}\mathbb E_\theta U(a,\theta).
 $$
 
-The reported `passed`, `failed`, `total` and `pass_rate` must agree with the assertion records. Rates use an absolute consistency tolerance of $10^{-12}$. Assertion text must be unique after trimming; passing assertions need nonempty response evidence. An empty assertion list cannot produce a passing case.
+An independent fair bit has zero information value in the binary decision example in P9; a 75%-accurate observation has EVSI 0.25, while a perfect observation has 0.5. Those are finite illustrative utility calculations, not measured model scores. Subtract acquisition, delay and implementation costs in compatible utility units. If the prior, likelihood or utility is unsupported, keep the decision uncertainty explicit.
 
-A case can pass only with all assertions passing and no red blocker, reported module leakage or forbidden TRIZ activation. TRIZ activation and routing accuracy are derived from the recorded route/module metadata, rather than trusted solely from the grader's claimed flags. The same effective case verdict is used for both aggregate rates and paired wins:
+## 6. Run a reproducible evaluation
 
-$$
-\widehat P=\frac1N\sum_{i=1}^{N}\mathbf1[\mathrm{effective\_pass}_i].
-$$
-
-The forced-route ablation omits production routing accuracy. Semantic module leakage still needs substantive grading; a JSON consistency check cannot independently read the meaning or provenance of an external model response.
-
-### Paired comparisons and semantic scoring
-
-Only shared case/repetition identities contribute to a pair. Let $I$ be that common set, and let $I_z\subseteq I$ contain only identities with a valid metric $z$ on both sides. For $|I_z|>0$,
-
-$$
-\overline{\Delta z}=\frac1{|I_z|}\sum_{i\in I_z}(z_{L,i}-z_{R,i}).
-$$
-
-The report includes assertion-rate, judge-score, token and duration deltas, plus effective case wins/ties. `paired_runs` counts $|I|$; an optional metric such as `judge_score` may use fewer pairs. If $I_z$ is empty, its mean delta is JSON `null`. Missing metrics are not silently replaced with zero. Blind pairwise judgment remains a separate evidence artifact.
-
-The [semantic rubric](open-deep-mind/evals/rubric.md) has ten dimensions, weights $w_k$ totaling 100 and anchored scores $s_k\in[0,5]$:
-
-$$
-Q=\sum_{k=1}^{10}w_k\frac{s_k}{5},\qquad \sum_k w_k=100.
-$$
-
-The `contracts_v17.weighted_behavior_score` compatibility helper instead accepts normalized slot scores $b_i\in[0,1]$ and computes their equal-weight mean:
-
-$$
-B=\frac1N\sum_i b_i.
-$$
-
-Do not pass 0–100 rubric points into that normalized helper. Missing coverage returns no score, and duplicate expected IDs are rejected.
-
-The aggregator also reports nearest-rank P50/P95 and sample counts for tokens
-and duration, plus descriptive observations by recorded route. Optional actual
-cost records retain currency, billing basis and pricing-snapshot identity;
-missing cost is counted as missing. Matched cost deltas require those identities
-and the existing model/settings/input parity checks to agree. Different routes
-may contain different tasks, so their descriptive averages are not a causal
-route comparison. These accounting features are implemented; real model
-quality/token/cost/latency comparisons still require external runs and grading.
-See the [cost record contract](open-deep-mind/evals/README.md#cost-and-latency-records).
-
-## 6. Execute the framework
-
-Create a fresh iteration. Existing iterations are not overwritten:
+The authored case set has 60 cases, a fixed 36/12/12 train/validation/holdout split and three repetitions. Four configurations compare no skill, a commit-pinned external first-principles baseline, the full skill and a no-TRIZ ablation. The validation design contains 114 slots: 12 cases × 3 configurations × 3 repetitions, plus 2 explicit-TRIZ cases × 3 ablation repetitions. This is a design count, not completed model work.
 
 ```bash
 python open-deep-mind/evals/scripts/validate_evals.py
-python open-deep-mind/evals/scripts/create_workspace.py --iteration 1 --split validation
+python open-deep-mind/evals/scripts/create_workspace.py --iteration 1 --split validation --workspace ../OpenDeepMind_skill-workspace
 ```
 
-Use an external authorized model runner to populate the expected `run_record.json` and `grading.json` files. Keep model/version, recorded `execution_conditions` (effective sampling/reasoning settings, tool access, and input-file identities), repository revision and repetition design comparable. The aggregator excludes pairs with missing or mismatched execution conditions while preserving individual run metrics. Then aggregate:
+Creation publishes a complete iteration atomically and refuses an existing destination. Populate the expected `run_record.json`, raw response and `grading.json` artifacts with an authorized external runner. Preserve model/version, sampling/reasoning settings, tool access, input identities, repository revision, repetitions and grading evidence. Do not convert holdout cases into runtime instructions.
+
+After real records have been supplied:
 
 ```bash
 python open-deep-mind/evals/scripts/aggregate_benchmark.py ../OpenDeepMind_skill-workspace/iteration-1
 ```
 
-Reports default to `benchmark.json`. A custom `--output` must stay outside `manifest.json` and every `eval-*` case directory (including raw responses); parent-directory aliases into those evidence paths are also rejected. Existing default or custom report files elsewhere can still be refreshed. This is a pre-publication path check, not protection against concurrent filesystem changes.
+The default report is `benchmark.json`. An empty or incomplete iteration cannot certify a complete result. A custom `--output` cannot replace `manifest.json` or anything in an `eval-*` evidence directory, including parent-directory aliases. This pre-publication path check does not protect against concurrent filesystem changes. See [evaluation documentation](open-deep-mind/evals/README.md) and [repair/migration notes](docs/acceptance-repair.md).
 
-`artifact_set_complete=true` establishes internal artifact completeness only. The aggregator always retains `publication_ready=false`; an independent release process must verify model execution, raw artifacts, holdout sealing, grader identity and publication authority. The v16/v17 compatibility APIs now return `ARTIFACT_SET_COMPLETE` for complete records, rather than the ambiguous `READY`. Boolean-looking strings are rejected. See [migration and repair notes](docs/acceptance-repair.md).
+## 7. Acceptance, troubleshooting and operating strategy
 
-## 7. Software checks and delivery evidence
-
-Run all maintained gates:
+Run every maintained software gate from the repository root:
 
 ```bash
 python open-deep-mind/scripts/validate_repository.py .
@@ -274,17 +282,15 @@ python -m compileall -q open-deep-mind
 git diff --check
 ```
 
-The regression suite includes real aggregation-CLI failures, JSON boundaries, identity/duplicate handling, graph budgets and compatibility contracts. Synthetic fixtures test software behavior and do not establish model quality. The known vendored matrix anomaly remains documented rather than silently changed.
+[CI](https://github.com/SUNHAOJUN22/OpenDeepMind_skill/actions/workflows/validate.yml) also rejects generated/source drift. The [seven-repository acceptance workflow](https://github.com/SUNHAOJUN22/TsaoSciResearcher/actions/workflows/six-repository-acceptance.yml) coordinates extended software regression. Only completed receipts for the bound source commits establish six hours; this README does not predeclare that outcome or a behavioral score.
 
-Use the [exact-commit CI](https://github.com/SUNHAOJUN22/OpenDeepMind_skill/actions/workflows/validate.yml) for current results. Extended software regression is coordinated in the [seven-repository acceptance workflow](https://github.com/SUNHAOJUN22/TsaoSciResearcher/actions/workflows/six-repository-acceptance.yml). A six-hour result requires the configured completed receipts; this README does not predeclare that result.
+| Symptom | Action |
+|---|---|
+| TRIZ activation rejected | Obtain an explicit request/acceptance and pass the declaration; do not infer activation from keywords. |
+| Context exceeds budget | Choose a sufficient route and progressively load relevant resources; preserve quality gates. |
+| Ledger or JSON rejected | Repair the exact type, numeric range, source reference or cycle named in the diagnostic. |
+| Paired count is smaller than the candidate count | Inspect `excluded_pairs`, model/version and recorded execution conditions. |
+| Metric is null | Supply the missing observation; do not treat missing data as zero. |
+| Artifacts are complete but publication is not authorized | Obtain independent execution, grading, holdout and release evidence. |
 
-## 8. Practical operating strategy
-
-1. **Make the next decision explicit.** Record what evidence could change it and the minimum useful confidence.
-2. **Start with one traceable model and one serious rival.** Extra equations earn their place by changing a test or decision.
-3. **Separate construction from qualification.** A plan, template, fitted curve and executed run have different evidential roles.
-4. **Use the lightest sufficient route.** P handles a clear technical problem; Φ repairs unstable framing; explicit TRIZ explores engineering concepts.
-5. **Bind every result to its context.** Preserve units, source data, version, conditions, errors and unresolved assumptions.
-6. **Stop when evidence is insufficient.** Report the unknown, its consequence and the next discriminating action.
-
-Useful references: [architecture](open-deep-mind/ARCHITECTURE.md), [quality gates](open-deep-mind/references/quality-gates.md), [claim-ledger template](open-deep-mind/assets/claim-ledger-template.md), [model contract](open-deep-mind/first-principles/model-contract.schema.json), [decision record](open-deep-mind/first-principles/decision-record.schema.json), and [changes](CHANGELOG.md).
+Start with one traceable model and one serious rival. Use the lightest sufficient route, bind every material result to units and evidence, preserve red blockers, and choose the smallest reversible action that can change the decision. The [quality gates](open-deep-mind/references/quality-gates.md), [ledger template](open-deep-mind/assets/claim-ledger-template.md) and [decision schema](open-deep-mind/first-principles/decision-record.schema.json) make that discipline reviewable.

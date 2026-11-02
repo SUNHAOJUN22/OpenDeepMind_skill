@@ -9,6 +9,9 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Reuse the expected-slot membership set in `publication_decision`, eliminating quadratic repeated set construction while preserving missing/duplicate/orphan diagnostics, completeness and publication authority. Add an independent multiset oracle, large-inventory checks and a deterministic hash-work regression.
+- Rebuild both READMEs around executable entrypoints, distinguish candidate from accepted benchmark pairs, document nearest-rank quantiles and source-bound mathematical contracts, and embed matching-language AI concept artwork with font-independent labels and provenance.
+
 - Match claim-ledger source, owner, review date and decision uncertainty validation to their declared string types; reject an explicit null decision while preserving omitted optional fields and extension metadata. These are structural checks, not verification of evidence truth or completeness.
 - Correct the P9 sample-information formula to optimize posterior expected utility before averaging over future observations; distinguish the perfect-information upper bound, include exact finite decision examples, and account for study costs. This repairs a mathematical method contract, not a measured model-performance result.
 - Require TRIZ benchmark records to list First Principles validation so incomplete concept-only runs cannot count toward benchmark metrics.

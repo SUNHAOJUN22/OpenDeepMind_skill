@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+import random
 import sys
 import unittest
+from collections import Counter
 from pathlib import Path
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "contracts_v17.py"
@@ -71,6 +73,70 @@ class OpenDeepMindContractsV17Tests(unittest.TestCase):
             status,
             "BENCHMARK_FRAMEWORK_VALIDATED / NO_PUBLISHED_BEHAVIORAL_SCORE",
         )
+
+    def test_slot_decisions_match_an_independent_multiset_oracle(self) -> None:
+        rng = random.Random(20261102)
+        for trial in range(200):
+            expected = [f"case-{i}" for i in range(rng.randint(1, 30))]
+            observed = rng.choices(expected + ["orphan-a", "orphan-b"], k=rng.randrange(80))
+            sealed, bound = bool(trial % 2), bool(trial % 3)
+            frequencies = Counter(observed)
+            missing = tuple(sorted(set(expected) - set(observed)))
+            duplicates = tuple(sorted(key for key, count in frequencies.items() if count > 1))
+            orphans = tuple(sorted(set(observed) - set(expected)))
+            reasons = tuple(code for condition, code in (
+                (missing, "MISSING_EXPECTED_SLOT"),
+                (duplicates, "DUPLICATE_SLOT"),
+                (orphans, "ORPHAN_SLOT"),
+                (not sealed, "HOLDOUT_NOT_SEALED"),
+                (not bound, "EXACT_REVISION_NOT_BOUND"),
+            ) if condition)
+            with self.subTest(trial=trial):
+                result = MODULE.publication_decision(
+                    iter(expected), iter(observed),
+                    holdout_sealed=sealed, exact_revision_bound=bound,
+                )
+                self.assertEqual(result.missing_slots, missing)
+                self.assertEqual(result.duplicate_slots, duplicates)
+                self.assertEqual(result.orphan_slots, orphans)
+                self.assertEqual(result.reason_codes, reasons)
+                self.assertEqual(result.completeness,
+                                 sum(observed.count(slot) == 1 for slot in expected) / len(expected))
+                self.assertEqual(result.status, "BLOCKED" if reasons else "ARTIFACT_SET_COMPLETE")
+                self.assertFalse(result.publication_ready)
+
+    def test_large_slot_inventory_preserves_missing_duplicate_and_orphan_evidence(self) -> None:
+        expected = [f"slot-{i:05d}" for i in range(10_000)]
+        observed = expected[:-10] + expected[:7] + ["external-z", "external-a", "external-m"]
+        result = MODULE.publication_decision(
+            iter(expected), iter(observed), holdout_sealed=True, exact_revision_bound=True,
+        )
+        self.assertEqual(result.missing_slots, tuple(expected[-10:]))
+        self.assertEqual(result.duplicate_slots, tuple(expected[:7]))
+        self.assertEqual(result.orphan_slots, ("external-a", "external-m", "external-z"))
+        self.assertEqual(result.completeness, (10_000 - 10 - 7) / 10_000)
+        self.assertEqual(result.reason_codes,
+                         ("MISSING_EXPECTED_SLOT", "DUPLICATE_SLOT", "ORPHAN_SLOT"))
+        self.assertFalse(result.publication_ready)
+
+    def test_slot_membership_work_has_a_linear_hash_budget(self) -> None:
+        class CountedSlot(str):
+            calls = 0
+
+            def __hash__(self) -> int:
+                CountedSlot.calls += 1
+                return super().__hash__()
+
+        size = 500
+        expected = [CountedSlot(f"slot-{i}") for i in range(size)]
+        observed = [CountedSlot(f"slot-{i}") for i in range(size)]
+        CountedSlot.calls = 0
+        result = MODULE.publication_decision(
+            expected, observed, holdout_sealed=True, exact_revision_bound=True,
+        )
+        self.assertEqual(result.completeness, 1.0)
+        # A deterministic work budget, independent of CPU speed or wall-clock noise.
+        self.assertLessEqual(CountedSlot.calls, 12 * (len(expected) + len(observed)))
 
 
 if __name__ == "__main__":

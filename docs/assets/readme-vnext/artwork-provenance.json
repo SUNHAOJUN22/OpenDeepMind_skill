@@ -1,0 +1,88 @@
+{
+  "schema": "tsao.readme-concept-art/v1",
+  "repository": "OpenDeepMind_skill",
+  "generation_date_utc": "2026-11-02",
+  "artwork_tool": "OpenAI image_gen",
+  "artwork_scope": "Synthetic artistic concept. Not measured scientific data, a product screenshot, or engineering certification.",
+  "artwork_sha256": "73247632f353b1ececc23cc52156a83ec60694985188815e26076508c91824fd",
+  "composition": "Original AI PNG embedded without raster modification; exact localized facts and formulas are SVG outlines.",
+  "fonts": [
+    "Noto Sans CJK SC Regular",
+    "DejaVu Sans"
+  ],
+  "font_independent_rendering": true,
+  "implementation_references": [
+    "open-deep-mind/scripts/validate_ledger.py",
+    "open-deep-mind/first-philosophy/METHOD.md",
+    "open-deep-mind/first-principles/METHOD.md",
+    "open-deep-mind/triz/ROUTER.md"
+  ],
+  "localized_assets": [
+    {
+      "locale": "zh-CN",
+      "path": "docs/assets/readme-vnext/hero.zh-CN.svg",
+      "bytes": 2729173,
+      "sha256": "3c770e4438540162ea105a4bf300873ca33d699e5404b77051ad86b0de5b4ac9",
+      "outlined_glyphs": 151,
+      "visible_text": {
+        "eyebrow": "合格基础 · 显式模型 · 可检验结论",
+        "headline": [
+          "从清晰的问题出发",
+          "让推理与结论经得起检验"
+        ],
+        "features": [
+          "Φ8：定义、边界与证据基础",
+          "P9：模型、约束与证伪条件",
+          "T10：显式启用的工程创意"
+        ],
+        "scope": "独立项目；evals 为评估层；不内置模型或仿真服务",
+        "cards": [
+          [
+            "论断账本：引用完整且无循环支撑",
+            "G = (N, E),  cycle(G) = false",
+            "N 为论断与推理节点，E 为引用关系；结构有效不等于真实"
+          ],
+          [
+            "置信度字段：有限数值与明确边界",
+            "0 ≤ cᵢ ≤ 1",
+            "布尔值与非有限值拒绝；未经校准不解释为概率"
+          ]
+        ]
+      },
+      "synthetic_label": "AI 合成概念示意 · 非测量结果"
+    },
+    {
+      "locale": "en",
+      "path": "docs/assets/readme-vnext/hero.en.svg",
+      "bytes": 2719956,
+      "sha256": "bea52faf882e690486aae7463519881dafe131ff3b3a3b573567869c77ef5db2",
+      "outlined_glyphs": 66,
+      "visible_text": {
+        "eyebrow": "QUALIFIED FOUNDATIONS / EXPLICIT MODELS / TESTABILITY",
+        "headline": [
+          "Start with a clear question.",
+          "Make conclusions testable."
+        ],
+        "features": [
+          "Φ8: definitions, boundaries and evidence",
+          "P9: models, constraints and falsifiers",
+          "T10: explicitly activated engineering invention"
+        ],
+        "scope": "Independent project; evals is an observation layer, not a model or simulation service",
+        "cards": [
+          [
+            "Claim ledger: complete references without circular support",
+            "G = (N, E),  cycle(G) = false",
+            "N denotes claim/inference nodes and E references; validity does not establish truth"
+          ],
+          [
+            "Confidence field: finite values and explicit bounds",
+            "0 ≤ cᵢ ≤ 1",
+            "Booleans and nonfinite values are rejected; probability requires calibration"
+          ]
+        ]
+      },
+      "synthetic_label": "SYNTHETIC CONCEPT / AI ARTWORK / NOT MEASURED DATA"
+    }
+  ]
+}
