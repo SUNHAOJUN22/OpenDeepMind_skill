@@ -1,0 +1,46 @@
+name: Public refinement dependencies 20261104
+on:
+  push:
+    branches: [agent/public-model-assets-20261104]
+    paths: [.github/workflows/public-model-refine-deps-20261104.yml]
+permissions:
+  contents: read
+jobs:
+  fetch-public-dependencies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Fetch pinned OpenMM wheel and PDBFixer source only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request, pathlib, json, hashlib
+          out=pathlib.Path('public-refine-deps');out.mkdir()
+          records=[]
+          def fetch(url,name,sha=None):
+              req=urllib.request.Request(url,headers={'User-Agent':'public-model-reproduction/1.0'})
+              with urllib.request.urlopen(req,timeout=120) as r:
+                  data=r.read(40000001)
+              if len(data)>40000000 or not data: raise RuntimeError('Invalid asset size')
+              digest=hashlib.sha256(data).hexdigest()
+              if sha and digest!=sha: raise RuntimeError('Checksum mismatch')
+              (out/name).write_bytes(data)
+              records.append({'url':url,'file':name,'size_bytes':len(data),'sha256':digest})
+              print(json.dumps(records[-1]),flush=True)
+              return data
+          meta=json.loads(fetch('https://pypi.org/pypi/OpenMM/8.4.0/json','openmm_pypi.json'))
+          wanted='openmm-8.4.0-cp313-cp313-manylinux_2_34_x86_64.whl'
+          wheels=[x for x in meta['urls'] if x['filename']==wanted]
+          if len(wheels)!=1: raise RuntimeError('Expected exact Python 3.13 CPU-compatible wheel')
+          fetch(wheels[0]['url'],wanted,wheels[0]['digests']['sha256'])
+          fetch('https://codeload.github.com/openmm/pdbfixer/zip/94cfa4c0ca551cdc5f13320f9a658efd59f2b881','pdbfixer_94cfa4c.zip')
+          (out/'manifest.json').write_text(json.dumps({'public_assets_only':True,'records':records},indent=2))
+          PY
+      - name: Preserve public dependencies for immediate retrieval
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-refinement-deps-20261104
+          path: public-refine-deps/
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
