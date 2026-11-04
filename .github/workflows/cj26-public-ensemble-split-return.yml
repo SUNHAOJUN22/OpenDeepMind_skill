@@ -1,0 +1,60 @@
+name: Return public ensemble weights individually
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-ensemble-split-return.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  split-public-model-artifact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve existing public artifact from this repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 41784320992 --repo SUNHAOJUN22/OpenDeepMind_skill --name public-nanobody-models234-assets --dir public_ensemble_assets
+      - name: Verify original bytes against manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('public_ensemble_assets')
+          data=json.loads((root/'PUBLIC_ENSEMBLE_ASSETS.json').read_text())
+          for row in data['files']:
+              h=hashlib.sha256()
+              with (root/row['name']).open('rb') as f:
+                  for chunk in iter(lambda:f.read(1048576),b''):h.update(chunk)
+              assert h.hexdigest()==row['sha256']
+              print(row['name'],row['bytes'],h.hexdigest())
+          PY
+      - name: Return checkpoint 2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-nanobody-model2-verified
+          path: |
+            public_ensemble_assets/nanobody_model_2
+            public_ensemble_assets/PUBLIC_ENSEMBLE_ASSETS.json
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+      - name: Return checkpoint 3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-nanobody-model3-verified
+          path: |
+            public_ensemble_assets/nanobody_model_3
+            public_ensemble_assets/PUBLIC_ENSEMBLE_ASSETS.json
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+      - name: Return checkpoint 4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-nanobody-model4-verified
+          path: |
+            public_ensemble_assets/nanobody_model_4
+            public_ensemble_assets/PUBLIC_ENSEMBLE_ASSETS.json
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
