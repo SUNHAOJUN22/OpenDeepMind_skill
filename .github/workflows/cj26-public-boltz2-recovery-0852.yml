@@ -1,0 +1,64 @@
+name: Public Boltz2 verified weights recovery 0852
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-boltz2-recovery-0852.yml]
+permissions: {contents: read}
+concurrency: {group: cj26-public-boltz2-recovery-0852, cancel-in-progress: false}
+jobs:
+  weights:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Retrieve exact verified public structure checkpoint and split
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,pathlib,urllib.request,time
+          url='https://huggingface.co/boltz-community/boltz-2/resolve/6fdef46d763fee7fbb83ca5501ccceff43b85607/boltz2_conf.ckpt?download=true'
+          expected='090e82ac8c92f5e943fa1b39e7410a44027bea7243c0bbb3caa67a77fc1428e1'
+          p=pathlib.Path('boltz2_conf.ckpt');h=hashlib.sha256();n=0;t=time.monotonic()
+          with urllib.request.urlopen(url,timeout=180) as r,p.open('wb') as f:
+              if r.status!=200 or not r.url.startswith('https://'):raise RuntimeError('HTTPS response failed')
+              for b in iter(lambda:r.read(4*1024*1024),b''):
+                  n+=len(b)
+                  if n>2300000000 or time.monotonic()-t>600:raise RuntimeError('Download bound exceeded')
+                  f.write(b);h.update(b)
+          assert n==2286561469 and h.hexdigest()==expected
+          parts=[]
+          with p.open('rb') as f:
+              for i in range(5):
+                  b=f.read(480000000);d=pathlib.Path('parts')/str(i);d.mkdir(parents=True)
+                  q=d/f'boltz2_conf.ckpt.part{i:02d}';q.write_bytes(b)
+                  parts.append({'name':q.name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+              assert not f.read(1)
+          print(json.dumps({'public_only':True,'candidate_sequences_uploaded':False,'source_url':url,'sha256':expected,'parts':parts},indent=2))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: public-boltz2-part00-verified, path: parts/0/, retention-days: 1, compression-level: 0, if-no-files-found: error}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: public-boltz2-part01-verified, path: parts/1/, retention-days: 1, compression-level: 0, if-no-files-found: error}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: public-boltz2-part02-verified, path: parts/2/, retention-days: 1, compression-level: 0, if-no-files-found: error}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: public-boltz2-part03-verified, path: parts/3/, retention-days: 1, compression-level: 0, if-no-files-found: error}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: public-boltz2-part04-verified, path: parts/4/, retention-days: 1, compression-level: 0, if-no-files-found: error}
+  public-dependencies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with: {python-version: '3.13'}
+      - name: Build or download bounded dependencies, excluding torch and GPU packages
+        run: |
+          mkdir wheels
+          python -m pip wheel --no-deps --wheel-dir wheels hydra-core==1.3.2 einx==0.3.0 mashumaro==3.14 modelcif==1.2 ihm==2.7 frozendict==2.4.7 dm-tree==0.1.9 absl-py==2.2.2 wrapt==1.17.3 fairscale==0.4.13
+          python - <<'PY'
+          import pathlib,hashlib,json
+          files=[{'name':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in pathlib.Path('wheels').glob('*.whl')]
+          assert sum(x['bytes'] for x in files)<100000000
+          pathlib.Path('wheels/MANIFEST.json').write_text(json.dumps(files,indent=2))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with: {name: public-boltz2-python313-dependencies, path: wheels/, retention-days: 1, compression-level: 0, if-no-files-found: error}
