@@ -1,0 +1,82 @@
+name: Public NanoBodyBuilder2 asset retrieval
+
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-model-assets.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cj26-public-assets-20261104
+  cancel-in-progress: false
+
+jobs:
+  retrieve-public-assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Download author-published model and pinned source, verify public checksum
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, time, urllib.request
+          out = pathlib.Path('public_assets')
+          out.mkdir()
+          specs = [
+              {
+                  'name': 'nanobody_model_1',
+                  'url': 'https://zenodo.org/records/7258553/files/nanobody_model_1?download=1',
+                  'expected_md5': '4591075f467ca9f76a37a5d1d3cfe591',
+                  'maximum_bytes': 100_000_000,
+              },
+              {
+                  'name': 'ImmuneBuilder_0df4e2ad82a1aa60f37ea9dae335d1198159ef78.zip',
+                  'url': 'https://codeload.github.com/oxpig/ImmuneBuilder/zip/0df4e2ad82a1aa60f37ea9dae335d1198159ef78',
+                  'maximum_bytes': 30_000_000,
+              },
+          ]
+          records = []
+          for spec in specs:
+              path = out / spec['name']
+              request = urllib.request.Request(spec['url'], headers={'User-Agent': 'public-research-asset-verification/1.0'})
+              size = 0
+              sha = hashlib.sha256()
+              md5 = hashlib.md5()
+              with urllib.request.urlopen(request, timeout=90) as response, path.open('wb') as stream:
+                  if response.status != 200:
+                      raise RuntimeError('Download did not return HTTP 200')
+                  final_url = response.url
+                  if not final_url.startswith('https://'):
+                      raise RuntimeError('Non-HTTPS redirect rejected')
+                  for chunk in iter(lambda: response.read(1024 * 1024), b''):
+                      size += len(chunk)
+                      if size > spec['maximum_bytes']:
+                          raise RuntimeError('Public asset exceeds bounded size')
+                      stream.write(chunk)
+                      sha.update(chunk)
+                      md5.update(chunk)
+              if size < 1000:
+                  raise RuntimeError('Downloaded file unexpectedly small')
+              if spec.get('expected_md5') and md5.hexdigest() != spec['expected_md5']:
+                  raise RuntimeError('Published author checksum mismatch')
+              records.append({'name': spec['name'], 'source_url': spec['url'], 'resolved_url': final_url,
+                              'bytes': size, 'sha256': sha.hexdigest(), 'md5': md5.hexdigest(),
+                              'published_md5_checked': bool(spec.get('expected_md5'))})
+          manifest = {'purpose': 'Public assets for local CPU nanobody monomer structure prediction',
+                      'private_candidate_sequences_uploaded': False, 'new_protein_predictions': 0,
+                      'source_commit': '0df4e2ad82a1aa60f37ea9dae335d1198159ef78',
+                      'model': 'NanoBodyBuilder2 model 1 only; not a four-model ensemble',
+                      'files': records}
+          (out / 'PUBLIC_ASSET_MANIFEST.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          print(json.dumps(manifest, indent=2))
+          PY
+      - name: Return bounded public assets
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-nanobody-model1-assets
+          path: public_assets/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
