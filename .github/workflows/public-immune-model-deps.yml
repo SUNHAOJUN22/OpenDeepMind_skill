@@ -1,0 +1,73 @@
+name: Fetch public immune-model dependencies
+
+on:
+  push:
+    branches: [compute/public-immune-model-deps-20261104]
+    paths: [.github/workflows/public-immune-model-deps.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-immune-model-deps-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch-public-dependencies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Fetch public author files and verify published weight digests
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import concurrent.futures, datetime, hashlib, json, urllib.request
+          root = Path('public_model_dependencies')
+          root.mkdir(exist_ok=False)
+          immune_commit = '0df4e2ad82a1aa60f37ea9dae335d1198159ef78'
+          mpnn_commit = '8907e6671bfbfc92303b5f79c4b5e6ce47cdef57'
+          assets = [
+              ('weights/nanobody_model_1', 'https://zenodo.org/records/7258553/files/nanobody_model_1?download=1', 'md5', '4591075f467ca9f76a37a5d1d3cfe591'),
+              ('weights/v_48_020.pt', f'https://raw.githubusercontent.com/dauparas/ProteinMPNN/{mpnn_commit}/vanilla_model_weights/v_48_020.pt', 'sha256', 'c9cb4a671d79604111231f8dbfc7c590e06f1197453b7a6854ac6661a642f5bd'),
+          ]
+          for name in ['models.py', 'rigids.py', 'constants.py', 'util.py', 'NanoBodyBuilder2.py', 'sequence_checks.py', '__init__.py']:
+              assets.append((f'ImmuneBuilder_source/ImmuneBuilder/{name}', f'https://raw.githubusercontent.com/oxpig/ImmuneBuilder/{immune_commit}/ImmuneBuilder/{name}', None, None))
+          assets.append(('ImmuneBuilder_source/LICENSE', f'https://raw.githubusercontent.com/oxpig/ImmuneBuilder/{immune_commit}/LICENSE', None, None))
+          for name in ['protein_mpnn_run.py', 'protein_mpnn_utils.py', 'LICENSE']:
+              assets.append((f'ProteinMPNN_source/{name}', f'https://raw.githubusercontent.com/dauparas/ProteinMPNN/{mpnn_commit}/{name}', None, None))
+          def fetch(asset):
+              name, url, algorithm, expected = asset
+              dest = root / name
+              dest.parent.mkdir(parents=True, exist_ok=True)
+              h256, hmd5 = hashlib.sha256(), hashlib.md5()
+              request = urllib.request.Request(url, headers={'User-Agent': 'Public-model-dependency-check/1.0'})
+              size = 0
+              with urllib.request.urlopen(request, timeout=180) as response, dest.open('xb') as out:
+                  while chunk := response.read(1024 * 1024):
+                      size += len(chunk)
+                      if size > 100_000_000:
+                          raise RuntimeError(f'Unexpected asset size: {name}')
+                      h256.update(chunk)
+                      hmd5.update(chunk)
+                      out.write(chunk)
+              observed = {'sha256': h256.hexdigest(), 'md5': hmd5.hexdigest()}
+              if not size or algorithm and observed[algorithm] != expected:
+                  raise RuntimeError(f'Published digest check failed: {name}')
+              print(f'{name}: {size} bytes, sha256={observed["sha256"]}', flush=True)
+              return {'file': name, 'url': url, 'bytes': size, **observed, 'expected_digest_algorithm': algorithm, 'expected_digest': expected}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+              files = list(pool.map(fetch, assets))
+          manifest = {'purpose': 'Public model dependencies only; no private sequences, target structures, credentials or inference outputs.', 'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'immune_commit': immune_commit, 'mpnn_commit': mpnn_commit, 'files': files}
+          (root / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          (root / 'NOTICE.txt').write_text('Author sources and model weights only. ImmuneBuilder: oxpig/ImmuneBuilder and Zenodo DOI 10.5281/zenodo.7258553. ProteinMPNN: dauparas/ProteinMPNN. Original source licenses are included. No research data is present. This workflow does not run any model.\n')
+          PY
+      - name: Return public dependency files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-immune-model-dependencies
+          path: public_model_dependencies/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
