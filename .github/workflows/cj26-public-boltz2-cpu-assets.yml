@@ -1,14 +1,10 @@
 name: Public Boltz2 CPU prediction assets
-
 on:
   push:
     branches: [cj26-public-model-assets-20261104]
     paths: [.github/workflows/cj26-public-boltz2-cpu-assets.yml]
-permissions:
-  contents: read
-concurrency:
-  group: cj26-public-boltz2-cpu-assets-20261104
-  cancel-in-progress: false
+permissions: {contents: read}
+concurrency: {group: cj26-public-boltz2-cpu-assets-20261104, cancel-in-progress: false}
 jobs:
   retrieve:
     runs-on: ubuntu-24.04
@@ -19,14 +15,12 @@ jobs:
         run: |
           mkdir -p assets parts
           python3 - <<'PY'
-          import concurrent.futures, hashlib, json, pathlib, shutil, tarfile, urllib.request, zipfile
+          import concurrent.futures, hashlib, json, pathlib, shutil, tarfile, urllib.request
           root=pathlib.Path('assets')
           def get(url):
               return urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'CJ26-public-assets-only/1.0'}),timeout=180)
-          with get('https://huggingface.co/api/models/boltz-community/boltz-2?blobs=true') as r:
-              meta=json.load(r)
-          revision=meta['sha']
-          siblings={x['rfilename']:x for x in meta['siblings']}
+          with get('https://huggingface.co/api/models/boltz-community/boltz-2?blobs=true') as r: meta=json.load(r)
+          revision=meta['sha']; siblings={x['rfilename']:x for x in meta['siblings']}
           (root/'HF_METADATA.json').write_text(json.dumps(meta,indent=2)+'\n')
           def download(name):
               url=f'https://huggingface.co/boltz-community/boltz-2/resolve/{revision}/{name}?download=true'
@@ -40,8 +34,7 @@ jobs:
               expected=siblings[name].get('lfs',{}).get('sha256')
               if expected is None or h.hexdigest()!=expected: raise RuntimeError('HF published LFS checksum mismatch')
               return {'name':name,'bytes':size,'sha256':h.hexdigest(),'published_sha256':expected,'revision':revision,'source_url':url}
-          with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-              records=list(pool.map(download,['boltz2_conf.ckpt','mols.tar']))
+          with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool: records=list(pool.map(download,['boltz2_conf.ckpt','mols.tar']))
           wanted=set('ALA ARG ASN ASP CYS GLN GLU GLY HIS ILE LEU LYS MET PHE PRO SER THR TRP TYR VAL UNK A G C U N DA DG DC DT DN NAG'.split())
           mols=root/'mols';mols.mkdir()
           with tarfile.open(root/'mols.tar','r') as t:
@@ -51,32 +44,30 @@ jobs:
                       if member.size>50_000_000: raise RuntimeError('CCD too large')
                       with t.extractfile(member) as src,(mols/name).open('wb') as dst: shutil.copyfileobj(src,dst)
           commit='b1ebfc46ecf57f5414e0d1a6f9027bbb122c53bc'
-          url=f'https://codeload.github.com/jwohlwend/boltz/zip/{commit}'
-          with get(url) as r,(root/'boltz_source.zip').open('wb') as f: shutil.copyfileobj(r,f)
+          with get(f'https://codeload.github.com/jwohlwend/boltz/zip/{commit}') as r,(root/'boltz_source.zip').open('wb') as f: shutil.copyfileobj(r,f)
           manifest={'private_sequences_uploaded':False,'protein_predictions_in_cloud':0,'purpose':'public assets for local CPU structure prediction, no affinity head','source_commit':commit,'files':records,'canonical_components':[p.name for p in sorted(mols.iterdir())]}
-          (root/'PUBLIC_ASSET_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
-          print(json.dumps(manifest,indent=2))
+          (root/'PUBLIC_ASSET_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n');print(json.dumps(manifest,indent=2))
           with (root/'boltz2_conf.ckpt').open('rb') as f:
               index=0
               while True:
                   b=f.read(450*1024*1024)
                   if not b: break
-                  p=pathlib.Path('parts')/f'boltz2_conf.part{index:02d}';p.write_bytes(b);index+=1
+                  (pathlib.Path('parts')/f'boltz2_conf.part{index:02d}').write_bytes(b);index+=1
           if index>5: raise RuntimeError('Unexpected checkpoint size')
           with tarfile.open('parts/boltz2_public_support.tar.gz','w:gz') as t:
               for name in ['HF_METADATA.json','PUBLIC_ASSET_MANIFEST.json','mols','boltz_source.zip']:t.add(root/name,arcname=name)
           PY
-      - name: Assemble and smoke-test portable public Python 3.12 CPU runtime
+      - name: Assemble isolated portable public Python 3.12 CPU runtime
         shell: bash
         run: |
           python3 -m pip install --disable-pip-version-check 'uv==0.9.10'
           export UV_PYTHON_INSTALL_DIR="$PWD/runtime/python"
+          export UV_LINK_MODE=copy
           uv python install 3.12
           PY=$(find "$PWD/runtime/python" -path '*/bin/python3.12' -type f | head -1)
           test -n "$PY"
-          uv pip install --python "$PY" torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-          uv pip install --python "$PY" boltz==2.2.1
-          "$PY" - <<'PY'
+          uv pip install --python "$PY" --target "$PWD/runtime/site-packages" 'boltz==2.2.1' 'torch==2.5.1+cpu' --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match
+          PYTHONPATH="$PWD/runtime/site-packages" "$PY" - <<'PY'
           import boltz, torch, sys, importlib.metadata, json, pathlib
           from boltz.model.models.boltz2 import Boltz2
           versions={d.metadata['Name']:d.version for d in importlib.metadata.distributions()}
@@ -85,40 +76,52 @@ jobs:
           PY
           tar -czf runtime.tar.gz runtime
           split -b 450M -d -a 2 runtime.tar.gz parts/runtime.part
+      - name: Hash public transport parts
+        if: always()
+        shell: bash
+        run: |
           python3 - <<'PY'
           import pathlib,hashlib,json
           out=[]
           for p in sorted(pathlib.Path('parts').iterdir()):
               with p.open('rb') as f:h=hashlib.file_digest(f,'sha256').hexdigest()
               out.append({'name':p.name,'bytes':p.stat().st_size,'sha256':h})
-          pathlib.Path('parts/PARTS_MANIFEST.json').write_text(json.dumps(out,indent=2)+'\n')
-          print(json.dumps(out,indent=2))
+          pathlib.Path('parts/PARTS_MANIFEST.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out,indent=2))
           PY
       - name: Return checkpoint 00
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: public-boltz2-ckpt-00, path: parts/boltz2_conf.part00, retention-days: 1, compression-level: 0}
       - name: Return checkpoint 01
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: public-boltz2-ckpt-01, path: parts/boltz2_conf.part01, retention-days: 1, compression-level: 0}
       - name: Return checkpoint 02
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: public-boltz2-ckpt-02, path: parts/boltz2_conf.part02, retention-days: 1, compression-level: 0}
       - name: Return checkpoint 03
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: public-boltz2-ckpt-03, path: parts/boltz2_conf.part03, retention-days: 1, compression-level: 0}
       - name: Return checkpoint 04
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: public-boltz2-ckpt-04, path: parts/boltz2_conf.part04, retention-days: 1, compression-level: 0}
       - name: Return CPU runtime 00
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with: {name: public-boltz2-runtime-00, path: parts/runtime.part00, retention-days: 1, compression-level: 0}
+        with: {name: public-boltz2-runtime-00, path: parts/runtime.part00, retention-days: 1, compression-level: 0, if-no-files-found: ignore}
       - name: Return CPU runtime 01
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: public-boltz2-runtime-01, path: parts/runtime.part01, retention-days: 1, compression-level: 0, if-no-files-found: ignore}
       - name: Return CPU runtime 02
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with: {name: public-boltz2-runtime-02, path: parts/runtime.part02, retention-days: 1, compression-level: 0, if-no-files-found: ignore}
       - name: Return public support and checksum manifests
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: public-boltz2-support
