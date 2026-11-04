@@ -1,0 +1,52 @@
+name: Public target MSA retrieval
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-target-msas.yml]
+permissions: {contents: read}
+concurrency: {group: cj26-public-target-msas-20261104, cancel-in-progress: false}
+jobs:
+  public-msas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Fetch public target sequences and author MSA client
+        shell: bash
+        run: |
+          python3 -m pip install --disable-pip-version-check requests==2.32.3 tqdm==4.67.1
+          python3 - <<'PY'
+          import hashlib,importlib.util,json,pathlib,signal,urllib.request
+          out=pathlib.Path('public_msas');out.mkdir()
+          def fetch(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'CJ26-public-target-MSA/1.0'})
+              with urllib.request.urlopen(req,timeout=90) as r:return r.read()
+          source=fetch('https://raw.githubusercontent.com/jwohlwend/boltz/b1ebfc46ecf57f5414e0d1a6f9027bbb122c53bc/src/boltz/data/msa/mmseqs2.py')
+          (out/'author_mmseqs2.py').write_bytes(source)
+          spec=importlib.util.spec_from_file_location('author_mmseqs2',out/'author_mmseqs2.py');module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+          targets=[('GLP1R','P43220',21,139,'4e5c121d6ffaa2f4d58245d9cc5e298beb74eac501498cda152b38bd949f5ecf'),('TNFR1','P19438',1,211,'d789eba40906d7de44c23be02d12520328c4d85e2f9f10f457ac37ea7f1e0a78'),('IL7RA','P16871',1,236,'fa77ee36dd0e89c8ee484f1f27a99a9083d7690d6c0f65061ed78ad7c84b6c8f')]
+          seqs=[];records=[]
+          for name,acc,start,end,sha in targets:
+              raw=fetch(f'https://rest.uniprot.org/uniprotkb/{acc}.fasta');(out/(acc+'.fasta')).write_bytes(raw)
+              full=''.join(x.strip() for x in raw.decode().splitlines() if not x.startswith('>'));seq=full[start-1:end]
+              if hashlib.sha256(seq.encode()).hexdigest()!=sha:raise RuntimeError('Public target identity changed')
+              seqs.append(seq);records.append({'target':name,'accession':acc,'range':[start,end],'sequence_sha256':sha,'sequence':seq})
+          receipt={'public_targets':records,'private_candidate_queries':0,'msa_server':'https://api.colabfold.com','status':'STARTED'}
+          (out/'MANIFEST.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          def alarm(*args):raise TimeoutError('Bounded public MSA query stopped at 480 seconds')
+          signal.signal(signal.SIGALRM,alarm);signal.alarm(480)
+          try:
+              alignments=module.run_mmseqs2(seqs,prefix=str(out/'query'),use_env=True,use_filter=True,use_pairing=False)
+              for record,a3m in zip(records,alignments):
+                  p=out/(record['target']+'.a3m');p.write_text(a3m)
+                  record['msa_sha256']=hashlib.sha256(p.read_bytes()).hexdigest();record['msa_records']=a3m.count('>')
+              receipt['status']='COMPLETED'
+          except Exception as e:
+              receipt['status']='FAILED';receipt['error']=type(e).__name__+': '+str(e)
+          finally:
+              signal.alarm(0);(out/'MANIFEST.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print(json.dumps(receipt,indent=2))
+          PY
+      - name: Return public alignments and provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: public-cj26-target-msas, path: public_msas/, retention-days: 1, compression-level: 6, if-no-files-found: error}
