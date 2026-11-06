@@ -1,0 +1,148 @@
+name: CJ26 encrypted read-only existing-job recovery
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-existing-job-secure-recovery-20261106.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-existing-job-secure-recovery-20261106
+  cancel-in-progress: false
+jobs:
+  recover-existing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Create one-use recipient key on runner
+        shell: bash
+        run: |
+          umask 077
+          mkdir -p channel_public channel_private encrypted_return
+          openssl req -x509 -newkey rsa:3072 -nodes -days 1 -subj '/CN=CJ26 existing-job recovery 20261106' -keyout channel_private/key.pem -out channel_public/certificate.pem >/dev/null 2>&1
+          sha256sum channel_public/certificate.pem > channel_public/certificate.sha256
+      - name: Return public handshake only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-existing-recovery-public-handshake-20261106
+          path: channel_public/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Accept encrypted command and read existing job only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import ast, base64, hashlib, http.cookiejar, json, pathlib, re, subprocess, tarfile, textwrap, time, urllib.request, urllib.error, urllib.parse
+          from html.parser import HTMLParser
+          root=pathlib.Path('private_recovery');root.mkdir()
+          receipt={'mode':'GET_ONLY_EXISTING_JOB','post_requests':0,'state':'WAITING_FOR_ENCRYPTED_COMMAND','files_downloaded':0,'status_codes':[]}
+          cert_url='https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/1c7deae427baf7e68b7c2e8908dc7bfd8c72c8bb/.github/workflows/cj26-public-target-cloud-pilot-20261106.yml'
+          with urllib.request.urlopen(cert_url,timeout=40) as r: text=r.read(60000).decode()
+          code=textwrap.dedent(text.split("python3 - <<'PY'\n",1)[1].split('\n          PY',1)[0])
+          cert=None
+          for node in ast.walk(ast.parse(code)):
+              if isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='cert' for t in node.targets): cert=ast.literal_eval(node.value)
+          if not cert: raise RuntimeError('Result recipient certificate unavailable')
+          pathlib.Path('result_recipient.pem').write_text('\n'.join(x.strip() for x in cert.splitlines())+'\n')
+          def save(name,value): (root/name).write_text(json.dumps(value,indent=2)+'\n')
+          base='https://www.athanortools.com'
+          def safe_url(value):
+              url=urllib.parse.urljoin(base,value); p=urllib.parse.urlparse(url)
+              if p.scheme!='https' or p.hostname!='www.athanortools.com' or p.username or p.password or p.port not in (None,443):raise RuntimeError('Off-origin URL rejected')
+              return url
+          class NoForeignRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,req,fp,code,msg,headers,newurl):
+                  safe_url(newurl)
+                  return super().redirect_request(req,fp,code,msg,headers,newurl)
+          try:
+              command=None
+              mailbox='https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/cj26-public-model-assets-20261104/.cj26-transport/recovery-command-20261106.cms.b64'
+              for attempt in range(37):
+                  try:
+                      req=urllib.request.Request(mailbox+'?poll='+str(attempt),headers={'Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as r:
+                          encrypted=base64.b64decode(r.read(100000),validate=False)
+                      (root/'command.cms').write_bytes(encrypted)
+                      cp=subprocess.run(['openssl','cms','-decrypt','-binary','-inform','DER','-in',str(root/'command.cms'),'-recip','channel_public/certificate.pem','-inkey','channel_private/key.pem'],capture_output=True,check=True)
+                      command=json.loads(cp.stdout);break
+                  except urllib.error.HTTPError as e:
+                      if e.code!=404:raise
+                  time.sleep(8)
+              if command is None:receipt['state']='NO_ENCRYPTED_COMMAND';raise RuntimeError('Bounded handshake expired')
+              if command.get('mode')!='GET_ONLY_EXISTING_JOB':raise RuntimeError('Invalid command')
+              jobid=command['job_id']
+              if not re.fullmatch('[a-f0-9]{32}',jobid):raise RuntimeError('Invalid job ID')
+              status_url=safe_url(command['status_url'])
+              if urllib.parse.urlparse(status_url).path!='/api/jobs/'+jobid+'/':raise RuntimeError('Status path mismatch')
+              cookie_path=root/'session_cookies.txt';cookie_path.write_text(command['cookie_file_text']);cookie_path.chmod(0o600)
+              cookies=http.cookiejar.MozillaCookieJar(str(cookie_path));cookies.load(ignore_discard=True,ignore_expires=True)
+              opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookies),NoForeignRedirect())
+              total=0
+              def get(url,name,limit=30000000):
+                  global total
+                  req=urllib.request.Request(safe_url(url),headers={'User-Agent':'CJ26-read-only-job-recovery/1.0','Accept':'application/json, */*'},method='GET')
+                  try:
+                      with opener.open(req,timeout=60) as response: raw=response.read(limit+1);code=response.status
+                  except urllib.error.HTTPError as e:raw=e.read(500000);code=e.code
+                  if len(raw)>limit or total+len(raw)>200000000:raise RuntimeError('Response size bound')
+                  total+=len(raw);(root/name).write_bytes(raw);receipt['status_codes'].append({'phase':name,'http':code})
+                  return code,raw
+              def links(value):
+                  found=[]
+                  if isinstance(value,dict):
+                      for key,v in value.items():
+                          if isinstance(v,str) and ('url' in key.lower() or 'download' in key.lower()) and v.startswith(('https://','/')):
+                              try:found.append(safe_url(v))
+                              except Exception:pass
+                          found+=links(v)
+                  elif isinstance(value,list):
+                      for v in value:found+=links(v)
+                  return found
+              class Hrefs(HTMLParser):
+                  def __init__(self):super().__init__();self.urls=[]
+                  def handle_starttag(self,tag,attrs):
+                      for key,v in attrs:
+                          if tag=='a' and key=='href' and v and ('download' in v or re.search(r'\.(cif|pdb|json|zip|tar\.gz|fa|fasta|npz)(\?|$)',v)):
+                              try:self.urls.append(safe_url(v))
+                              except Exception:pass
+              for i in range(21):
+                  if i:time.sleep(15)
+                  code,raw=get(status_url,'status_%03d.json'%i)
+                  if code!=200:receipt['state']='STATUS_HTTP_STOP';break
+                  data=json.loads(raw);job=data.get('job',data)
+                  if job.get('id',jobid)!=jobid:raise RuntimeError('Returned job identity mismatch')
+                  state=job.get('status','unknown');receipt['state']=state
+                  print(json.dumps({'poll':i,'state':state}))
+                  if state in ('succeeded','failed','cancelled'):
+                      save('terminal_job.json',job)
+                      urls=links(job.get('result',{}))
+                      if state=='succeeded' and job.get('results_url'):
+                          code,page=get(job['results_url'],'results_page.html')
+                          if code==200:
+                              parser=Hrefs();parser.feed(page.decode('utf-8',errors='replace'));urls+=parser.urls
+                      records=[]
+                      for j,url in enumerate(list(dict.fromkeys(urls))[:32]):
+                          code,data=get(url,'artifact_%03d.bin'%j,60000000)
+                          records.append({'url':url,'file':'artifact_%03d.bin'%j,'status':code,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+                          if code==200:receipt['files_downloaded']+=1
+                      save('download_index.json',records);break
+              if receipt['state'] in ('queued','running'):receipt['state']='PENDING_AFTER_READ_ONLY_RECOVERY'
+              cookies.save(ignore_discard=True,ignore_expires=True)
+          except Exception as e:
+              save('recovery_error.json',{'type':type(e).__name__,'message':str(e)[:1000]})
+              if receipt['state']=='WAITING_FOR_ENCRYPTED_COMMAND':receipt['state']='RECOVERY_SETUP_STOP'
+          finally:
+              save('receipt.json',receipt)
+              with tarfile.open('recovery_private.tar.gz','w:gz') as a:a.add(root,arcname='private_recovery')
+              subprocess.run(['openssl','cms','-encrypt','-binary','-aes-256-cbc','-in','recovery_private.tar.gz','-outform','DER','-out','encrypted_return/payload.cms','result_recipient.pem'],check=True)
+              data=pathlib.Path('encrypted_return/payload.cms').read_bytes();receipt['payload_sha256']=hashlib.sha256(data).hexdigest()
+              pathlib.Path('encrypted_return/public_receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+              print(json.dumps(receipt,indent=2))
+          PY
+      - name: Return encrypted recovery payload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-existing-job-recovery-encrypted-20261106
+          path: encrypted_return/
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
