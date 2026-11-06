@@ -1,0 +1,51 @@
+name: Final bounded GET-only recovery of existing design
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-final-readonly-recovery-20261106-1440.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-final-readonly-20261106-1440
+  cancel-in-progress: false
+jobs:
+  recover-existing-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Prepare the pinned prior GET-only recovery source
+        shell: bash
+        run: |
+          python3 -m pip install --disable-pip-version-check 'cryptography==46.0.3' 'PyYAML==6.0.3'
+          python3 - <<'PY'
+          import urllib.request, pathlib, yaml, hashlib, json
+          source='https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/ef22c66d3ed7c3872fc0b67b5edf00592a3035fc/.github/workflows/cj26-readonly-sealed-recovery-20261106-1415.yml'
+          with urllib.request.urlopen(source,timeout=40) as r: raw=r.read(200000)
+          doc=yaml.safe_load(raw)
+          steps=doc['jobs']['recover-existing-only']['steps']
+          first=steps[0]['run'].split("python3 - <<'PY'\n",1)[1].rsplit('\nPY',1)[0]
+          second=steps[2]['run'].split("python3 - <<'PY'\n",1)[1].rsplit('\nPY',1)[0]
+          second=second.replace('handoff-20261106-1415.json','handoff-20261106-1440.json')
+          second=second.replace('time.monotonic()+480','time.monotonic()+240')
+          compile(first,'pinned_key_generation.py','exec');compile(second,'pinned_readonly_recovery.py','exec')
+          pathlib.Path('pinned_readonly_recovery.py').write_text(second)
+          exec(compile(first,'pinned_key_generation.py','exec'),{})
+          pathlib.Path('transport_public/source_provenance.json').write_text(json.dumps({'source':source,'source_sha256':hashlib.sha256(raw).hexdigest(),'changes':['new encrypted handoff path','poll budget 480 to 240 seconds'],'new_submission_code_added':False},indent=2))
+          PY
+      - name: Return the public receiver key only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-final-readonly-public-key-1440
+          path: transport_public/
+          retention-days: 1
+      - name: Poll the existing task and recover outputs, no POST
+        run: python3 pinned_readonly_recovery.py
+      - name: Return encrypted recovery only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-final-readonly-sealed-1440
+          path: sealed_recovery/
+          if-no-files-found: warn
+          retention-days: 3
+          compression-level: 0
