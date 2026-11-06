@@ -1,0 +1,178 @@
+name: Public VHH novelty calibration 20261106
+on:
+  push:
+    branches: [cj26-public-novelty-calibration-20261106]
+    paths: [.github/workflows/cj26-public-novelty-calibration-20261106.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-public-novelty-calibration-20261106
+  cancel-in-progress: false
+jobs:
+  public-calibration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - name: Install public CPU tools only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p delivery/source delivery/results
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --disable-pip-version-check --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 > delivery/results/install_torch.log 2>&1
+          .venv/bin/python -m pip install --disable-pip-version-check anarcii==2.0.8 > delivery/results/install_anarcii.log 2>&1
+          curl --fail --location --retry 2 --max-time 180 https://mmseqs.com/latest/mmseqs-linux-avx2.tar.gz -o mmseqs.tar.gz
+          sha256sum mmseqs.tar.gz > delivery/results/mmseqs_download.sha256
+          tar xzf mmseqs.tar.gz
+          ./mmseqs/bin/mmseqs version > delivery/results/mmseqs_version.txt
+          .venv/bin/python -m pip freeze > delivery/results/environment.txt
+      - name: Retrieve published references and execute numbering and real alignments
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > delivery/calibrate.py <<'PY'
+          """Public controls only. No participant sequences and no binding/design claims."""
+          import csv, datetime, hashlib, json, os, pathlib, platform, random, re, subprocess, sys, traceback, urllib.request
+          from fractions import Fraction
+          ROOT = pathlib.Path(__file__).resolve().parent
+          OUT = ROOT / 'results'
+          SOURCE = ROOT / 'source'
+          MM = pathlib.Path('mmseqs/bin/mmseqs').resolve()
+          AA = set('ACDEFGHIKLMNPQRSTVWY')
+          def save(name, value):
+              (OUT / name).write_text(json.dumps(value, ensure_ascii=False, indent=2, default=str)+'\n')
+          def download_json(url, name):
+              req = urllib.request.Request(url, headers={'User-Agent':'Public-VHH-calibration/1.0'})
+              with urllib.request.urlopen(req, timeout=60) as response:
+                  raw = response.read(2_000_000)
+                  status = response.status
+              path = SOURCE / name
+              path.write_bytes(raw)
+              return json.loads(raw), {'url':url,'file':str(path.relative_to(ROOT)),'status':status,'sha256':hashlib.sha256(raw).hexdigest()}
+          def fasta(path, seqs):
+              path.write_text(''.join('>'+k+'\n'+s+'\n' for k,s in seqs.items()))
+          def evaluate(qlen, qcovered, nident, columns):
+              if not (0 < qcovered <= qlen and qcovered <= columns and 0 <= nident <= qcovered):
+                  raise ValueError('Inconsistent alignment counts')
+              cov = Fraction(qcovered, qlen)
+              ident = Fraction(nident, columns)
+              return {'query_coverage':float(cov),'identity_including_gaps':float(ident),
+                      'trigger':cov >= Fraction(4,5) and ident > Fraction(7,10)}
+          def boundary_tests():
+              cases = [(50,40,28,40,False),(50,40,29,40,True),(50,39,39,39,False),
+                       (37,30,21,30,False),(37,30,22,30,True),(37,30,21,31,False),
+                       (37,30,30,40,True),(50,40,28,41,False)]
+              result=[]
+              for q,c,n,l,expected in cases:
+                  row=evaluate(q,c,n,l)
+                  assert row['trigger'] is expected
+                  result.append({'query_length':q,'covered_query_residues':c,'identical_pairs':n,'alignment_columns':l,'expected_trigger':expected,**row})
+              save('boundary_tests.json',result)
+              return len(result)
+          def main():
+              receipt={'started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                       'python':sys.version,'platform':platform.platform(),'github_sha':os.getenv('GITHUB_SHA'),
+                       'private_candidate_sequences_received':False,'candidate_design_runs':0,
+                       'candidate_numbering_runs':0,'candidate_screening_runs':0,
+                       'binding_validated':False,'official_novelty_cleared':False,
+                       'main_branch_modified':False,'scope':'Published TNF VHH references and explicitly synthetic software controls only.'}
+              save('receipt.json',receipt)
+              receipt['boundary_tests_passed']=boundary_tests()
+              refs={}; evidence=[]; entities=[]
+              for pdb in ['5M2I','5M2J','5M2M']:
+                  entry,ev=download_json('https://data.rcsb.org/rest/v1/core/entry/'+pdb,pdb+'_entry.json'); evidence.append(ev)
+                  for eid in entry['rcsb_entry_container_identifiers']['polymer_entity_ids']:
+                      obj,ev=download_json('https://data.rcsb.org/rest/v1/core/polymer_entity/'+pdb+'/'+eid,pdb+'_entity_'+eid+'.json'); evidence.append(ev)
+                      desc=obj.get('rcsb_polymer_entity',{}).get('pdbx_description','')
+                      seq=re.sub(r'\s+','',obj['entity_poly']['pdbx_seq_one_letter_code_can'])
+                      accepted=bool(re.search(r'VHH|nanobody|single.?domain',desc,re.I)) and 90<=len(seq)<=180 and set(seq)<=AA
+                      ident=pdb+'_entity_'+eid
+                      entities.append({'id':ident,'description':desc,'length':len(seq),'selected_as_published_VHH':accepted,'author_chains':obj.get('rcsb_polymer_entity_container_identifiers',{}).get('auth_asym_ids',[])})
+                      if accepted: refs[ident]=seq
+              save('reference_sources.json',evidence); save('entity_selection.json',entities)
+              if not refs: raise RuntimeError('No explicitly described public VHH found; no fallback to TNF or guessed chains')
+              fasta(SOURCE/'published_TNF_VHH_FULL_NOT_CANDIDATES.fasta',refs)
+              from anarcii import Anarcii
+              model=Anarcii(seq_type='antibody',cpu=True,ncpu=2,batch_size=8)
+              imgt=model.number(list(refs.items()))
+              save('public_reference_imgt_numbering.json',imgt)
+              cdrs={}; domains=[]
+              for name,seq in refs.items():
+                  meta=imgt[name]
+                  if meta.get('error') or meta.get('chain_type')!='H': raise RuntimeError('Reference numbering failed: '+name)
+                  numbered=meta['numbering']
+                  parts=[''.join(aa for pos,aa in numbered if lo<=int(pos[0])<=hi and aa!='-') for lo,hi in [(27,38),(56,65),(105,117)]]
+                  if any(not p or not set(p)<=AA for p in parts): raise RuntimeError('Invalid CDR extraction')
+                  cdrs[name]=''.join(parts)
+                  domains.append({'id':name,'numbering_scheme':'IMGT','CDR_ranges_numbered':[[27,38],[56,65],[105,117]],'CDR1':parts[0],'CDR2':parts[1],'CDR3':parts[2],'CDR_concat':cdrs[name],'CDR_length':len(cdrs[name]),'query_start':meta.get('query_start'),'query_end':meta.get('query_end'),'chain_type':meta.get('chain_type')})
+              save('public_reference_CDRs.json',domains)
+              fasta(SOURCE/'published_TNF_VHH_CDR_IMGT_NOT_CANDIDATES.fasta',cdrs)
+              # Positive controls must identify the already-published references as non-novel.
+              query={'SELF_'+k:v for k,v in cdrs.items()}
+              target=dict(cdrs)
+              rng=random.Random(20261106)
+              synthetic=''.join(rng.choice(sorted(AA)) for _ in range(100))
+              query['SYNTHETIC_100_TEST_ONLY']=synthetic
+              target['SYNTHETIC_100_EXACT_TEST_ONLY']=synthetic
+              target['SYNTHETIC_100_INTERNAL_INSERTION_TEST_ONLY']=synthetic[:50]+'W'+synthetic[50:]
+              q=SOURCE/'controls_query_NOT_CANDIDATES.fasta'; t=SOURCE/'controls_reference_NOT_CANDIDATES.fasta'
+              fasta(q,query); fasta(t,target)
+              fields=['query','target','qlen','tlen','alnlen','nident','qstart','qend','tstart','tend','qcov','tcov','qaln','taln','evalue','bits']
+              cmd=[str(MM),'easy-search',str(q),str(t),str(OUT/'alignments.tsv'),str(ROOT/'tmp'),
+                   '--threads','2','--alignment-mode','3','--seq-id-mode','0','--cov-mode','2','-c','0',
+                   '--min-seq-id','0','-a','--mask','0','--comp-bias-corr','0','-e','1000000',
+                   '-s','7.5','--max-seqs','10000','--format-output',','.join(fields)]
+              save('command.json',{'argv':cmd,'purpose':'Control calibration, not an official competition parameter reconstruction. No coverage or identity prefilter; strict rule applied to integer counts after alignment.'})
+              with (OUT/'mmseqs_stdout.log').open('w') as so,(OUT/'mmseqs_stderr.log').open('w') as se:
+                  proc=subprocess.run(cmd,stdout=so,stderr=se,timeout=180)
+              if proc.returncode: raise RuntimeError('MMseqs2 failed: '+str(proc.returncode))
+              results=[]
+              with (OUT/'alignments.tsv').open() as handle:
+                  for row in csv.DictReader(handle,fieldnames=fields,delimiter='\t'):
+                      qa,ta=row['qaln'],row['taln']
+                      if len(qa)!=len(ta) or any(a==b=='-' for a,b in zip(qa,ta)): raise ValueError('Malformed gapped alignment')
+                      n=sum(a==b and a!='-' for a,b in zip(qa,ta)); c=sum(a!='-' for a in qa)
+                      if n!=int(row['nident']) or len(qa)!=int(row['alnlen']): raise ValueError('MMseqs2 count reconstruction mismatch')
+                      if c!=int(row['qend'])-int(row['qstart'])+1: raise ValueError('Query span mismatch')
+                      evaluated=evaluate(int(row['qlen']),c,n,len(qa))
+                      if abs(evaluated['query_coverage']-float(row['qcov']))>0.0011: raise ValueError('Reported query coverage does not match reconstructed span')
+                      results.append({**row,**evaluated,'covered_query_residues':c,'identical_pairs_recounted':n,'alignment_columns_recounted':len(qa)})
+              save('alignment_audit.json',results)
+              missing=[k for k in cdrs if not any(r['query']=='SELF_'+k and r['target']==k and r['trigger'] and r['identity_including_gaps']==1 and r['query_coverage']==1 for r in results)]
+              if missing: raise RuntimeError('Positive reference controls missed: '+repr(missing))
+              gaprows=[r for r in results if r['query']=='SYNTHETIC_100_TEST_ONLY' and 'INTERNAL_INSERTION' in r['target'] and ('-' in r['qaln'] or '-' in r['taln'])]
+              receipt.update(public_reference_count=len(refs),public_reference_numbering_count=len(refs),
+                             numbered_CDR_lengths={k:len(v) for k,v in cdrs.items()},
+                             real_MMseqs2_runs=1,reported_alignments=len(results),
+                             exact_reference_controls_passed=len(refs),gapped_control_alignments=len(gaprows),
+                             completed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),status='PUBLIC_CONTROLS_COMPLETED')
+              save('receipt.json',receipt)
+              (ROOT/'README_zh.md').write_text('# 公开参考与新颖性工具校准\n\n本包不含参赛候选，不含新设计，不认证任何候选通过新颖性。仅使用RCSB公开5M2I、5M2J、5M2M中描述为VHH的实体作为已知阳性排除参考；不是完整数据库。\n\n实际运行ANARCII 2.0.8，IMGT CDR定义为27–38、56–65、105–117，串联作为一种本地代理方案；官方CDR定义和拼接方式尚未披露。MMseqs2实际运行版本、命令、完整比对和整数重算均保留。Query覆盖率≥80%且带缺口列的一致性>70%触发风险。严格比较采用分数而非四舍五入数值。\n\n8个纯软件边界测试与公开参考自命中检查通过，仅证明本检查器在这些控制上正确。未发表的8条研究候选没有上传、没有重新编号、没有执行此筛查。\n\n复现：安装同版本ANARCII与MMseqs2，在新目录复制calibrate.py并按原工作流执行。读取results/receipt.json和alignment_audit.json检查真实状态。不得把公开参考序列当作参赛设计。\n')
+              print(json.dumps(receipt,ensure_ascii=False,indent=2))
+              print('PUBLIC_REFERENCE_CDRS',json.dumps(domains,ensure_ascii=False))
+          if __name__=='__main__':
+              try: main()
+              except Exception as exc:
+                  save('failure.json',{'error':type(exc).__name__+': '+str(exc),'traceback':traceback.format_exc(),'candidate_runs':0})
+                  raise
+              finally:
+                  lines=[]
+                  for p in sorted(ROOT.rglob('*')):
+                      if p.is_file() and 'tmp' not in p.relative_to(ROOT).parts and p.name!='checksums.sha256':
+                          lines.append(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p.relative_to(ROOT)))
+                  (ROOT/'checksums.sha256').write_text('\n'.join(lines)+'\n')
+          PY
+          .venv/bin/python delivery/calibrate.py
+          rm -rf delivery/tmp
+      - name: Retain actual public outputs and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-public-novelty-calibration-20261106
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
