@@ -1,0 +1,137 @@
+name: Bounded public TL1A RFD3 attempt with encrypted recovery
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-tl1a-design-20261106-1403.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-tl1a-one-design-20261106-1403
+  cancel-in-progress: false
+jobs:
+  one-public-target-attempt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Install public encryption dependency
+        run: python3 -m pip install --disable-pip-version-check 'cryptography==46.0.3'
+      - name: One bounded public target request and encrypted recovery
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os,io,re,json,time,hashlib,base64,zipfile,pathlib,urllib.request,urllib.parse,urllib.error,http.cookiejar
+          from cryptography.hazmat.primitives import hashes,serialization
+          from cryptography.hazmat.primitives.asymmetric import padding
+          from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+          BASE='https://www.athanortools.com'
+          PUB='''-----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtu2t1/r6xl/eYFG17dw5
+          8mYU6Tr2kn4ejfBfzTtMfSuIK3xfasykElr9m332khsXu59tI3b9POhcpxVhUnoz
+          bK+bmahxSTWqSZPQgyKbz/0x7BqnDoO0tmf2fI9O/N4iHF0ajOXWI+o6cODKg0XJ
+          wKB29HRDIPa7a8jk+3Quh+Eq867F7aCwzjo2Bg+dtLgYGs4TIHVejSyXefFGOzbZ
+          zAh5uVQ/R2UZE3vYnKVStPP3c3D91rQTR6aCkOuXkoEH8sbVdjxU+wbvIkr6asVI
+          KW2FOEGC0ER4zSAH5vIxgdWdjNlSQ4Mi1KlMn+ZQYj0vPjoFoxuubmI+jyBbdJcz
+          YwIDAQAB
+          -----END PUBLIC KEY-----'''
+          EXPECTED='LKGQEFAPSHQQVYAPLRADGDKPRAHLTVVRQTPTQHFKNQFPALHWEHELGLAFTKNRMNYTNKFLLIPESGDYFIYSQVTFRGMTSECSEIRQAGRPNKPDSITVVITKVTDSYPEPTQLLMGTKSVCEVGSNWFQPIYLGAMFSLQEGDKLMVNVSDISLVDYTKEDKTFFGAFLL'
+          R=pathlib.Path('private_run');R.mkdir();O=pathlib.Path('sealed_result');O.mkdir()
+          S={'task':'one TL1A trimer-conditioned RFD3 attempt','private_candidate_inputs_uploaded':False,'num_requested_designs':1,'submit_attempts':0,'accepted':False,'status':'NOT_STARTED','actual_generated_sequences':0,'downloaded_files':0,'native_target':'O95150 72-251','observed_context':'88-251 in chains A B C','missing_target_residues':'72-87 each chain','exact_His_tag_unknown':True,'independent_cofold':False}
+          jar=http.cookiejar.MozillaCookieJar(str(R/'cookies.txt'))
+          op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+          def save(n,b):
+              p=R/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b if isinstance(b,bytes) else str(b).encode())
+          def req(u,data=None,limit=12000000,timeout=40):
+              p=urllib.parse.urlparse(u);allowed={'www.athanortools.com','athanortools.com','files.rcsb.org'}
+              if p.scheme!='https' or p.hostname not in allowed:raise ValueError('Unapproved host')
+              headers={'User-Agent':'CJ26-bounded-public-target-design/1.0'}
+              if data is not None:headers.update({'Content-Type':'application/json','Origin':BASE,'Referer':BASE+'/tools/rfd3/'})
+              try:
+                  with op.open(urllib.request.Request(u,data=data,headers=headers),timeout=timeout) as r:
+                      q=urllib.parse.urlparse(r.url)
+                      if q.scheme!='https' or q.hostname not in allowed:raise ValueError('Unapproved redirect')
+                      b=r.read(limit+1)
+                      if len(b)>limit:raise ValueError('Response too large')
+                      return r.status,dict(r.headers),b
+              except urllib.error.HTTPError as e:return e.code,dict(e.headers),e.read(min(limit,1000000))
+          def prep(text):
+              aa=dict(zip(['ALA','ARG','ASN','ASP','CYS','GLN','GLU','GLY','HIS','ILE','LEU','LYS','MET','PHE','PRO','SER','THR','TRP','TYR','VAL'],'ARNDCQEGHILKMFPSTWYV'))
+              rows=[];ids={c:{} for c in 'ABC'}
+              for l in text.splitlines():
+                  if l.startswith('ENDMDL'):break
+                  if not l.startswith('ATOM  ') or len(l)<54 or l[21] not in 'ABC' or l[16] not in ' A':continue
+                  n=int(l[22:26])+71
+                  if l[17:20] not in aa or l[26].strip() or not 88<=n<=251:raise ValueError('Unexpected public structure residue')
+                  ids[l[21]][n]=aa[l[17:20]]
+                  rows.append(l[:6]+f'{len(rows)+1:5d}'+l[11:16]+' '+l[17:22]+f'{n:4d}'+l[26:])
+              for c,d in ids.items():
+                  if sorted(d)!=list(range(88,252)) or ''.join(d[n] for n in sorted(d))!=EXPECTED[16:]:raise ValueError('Target identity mismatch')
+              for n,atoms in [(166,['CB','CG','CD','NE','CZ','NH1','NH2']),(167,['CB','CG','CD','OE1','NE2']),(161,['CB','CG','CD','OE1','OE2'])]:
+                  if not all(any(l[21]=='A' and int(l[22:26])==n and l[12:16].strip()==a for l in rows) for a in atoms):raise ValueError('Missing hotspot atoms')
+              return 'REMARK PUBLIC TARGET ONLY; NATIVE 72-251; OBSERVED 88-251; TAG NOT MODELED\n'+'\n'.join(rows)+'\nEND\n'
+          def collect(d):
+              urls=[]
+              def walk(x):
+                  if isinstance(x,dict):
+                      for k,v in x.items():
+                          if isinstance(v,str) and ('url' in k.lower() or 'download' in k.lower()) and (v.startswith('/') or v.startswith('https://')):urls.append(urllib.parse.urljoin(BASE,v))
+                          elif isinstance(v,(list,dict)):walk(v)
+                  elif isinstance(x,list):
+                      for v in x:walk(v)
+              walk(d);done=set()
+              while urls and len(done)<12:
+                  u=urls.pop(0);p=urllib.parse.urlparse(u)
+                  if p.hostname not in {'www.athanortools.com','athanortools.com'} or u in done or '/api/jobs/' in u or any(k in u for k in ['cancel','delete','logout']):continue
+                  done.add(u);code,h,b=req(u,limit=40000000)
+                  save(f'downloads/{len(done):02d}.bin',b);save(f'downloads/{len(done):02d}_meta.json',json.dumps({'url':u,'status':code,'headers':h,'sha256':hashlib.sha256(b).hexdigest()}))
+                  S['downloaded_files']+=int(code==200)
+                  if code==200 and 'text/html' in h.get('Content-Type',''):
+                      for href in re.findall(r'href=[\"\']([^\"\']+)[\"\']',b.decode(errors='replace')):
+                          if any(k in href.lower() for k in ['download','.zip','.cif','.pdb','.fasta','.json']):urls.append(urllib.parse.urljoin(u,href))
+          try:
+              code,h,raw=req('https://files.rcsb.org/download/2RE9.pdb');save('public/2RE9.pdb',raw)
+              if code!=200:raise RuntimeError('Public target retrieval failed')
+              pdb=prep(raw.decode());save('public/TL1A_ABC_88_251.pdb',pdb)
+              code,h,meta=req(BASE+'/api/rfd3/');save('api_metadata.json',meta);S['metadata_http_status']=code
+              if code!=200:raise RuntimeError('Schema endpoint unavailable; no submission')
+              md=json.loads(meta)
+              if md.get('available') is False or (isinstance(md.get('tool'),dict) and md['tool'].get('available') is False):raise RuntimeError('Server marks tool unavailable')
+              spec={'CJ26_T05_CLOUD_20261106':{'input':'uploaded','dialect':2,'contig':'70-70,/0,A88-251,/0,B88-251,/0,C88-251','select_fixed_atoms':True,'select_unfixed_sequence':False,'redesign_motif_sidechains':False,'cif_parser_args':{'add_missing_atoms':False,'remove_ccds':[]},'select_hotspots':{'A166':'CB,CG,CD,NE,CZ,NH1,NH2','A167':'CB,CG,CD,OE1,NE2','A161':'CB,CG,CD,OE1,OE2'},'infer_ori_strategy':'hotspots','is_non_loopy':True}}
+              payload={'input_mode':'text','inputs':json.dumps(spec),'spec_input_file':pdb,'job_name':'cj26-tl1a-public-trimer-single-design','n_batches':1,'diffusion_batch_size':1,'inference_sampler.num_timesteps':200,'prevalidate_inputs':True,'low_memory_mode':True,'output_full_json':True,'dump_prediction_metadata_json':True,'dump_trajectories':False}
+              save('request.json',json.dumps(payload));S['submit_attempts']=1
+              code,h,b=req(BASE+'/api/rfd3/',json.dumps(payload).encode(),timeout=90);save('submit_headers.json',json.dumps(h));save('submit_response.json',b);S['submit_http_status']=code
+              if code not in (200,202):S['status']='REJECTED_NO_SUCCESS_CLAIM'
+              else:
+                  d=json.loads(b);j=d.get('job',d);S['accepted']=bool(j.get('id') or j.get('status_url'));url=j.get('status_url');S['status']=str(j.get('status','UNKNOWN'));deadline=time.monotonic()+420;i=0
+                  while S['status'] not in {'succeeded','failed','cancelled'} and url and time.monotonic()<deadline:
+                      time.sleep(10);i+=1;code,h,b=req(urllib.parse.urljoin(BASE,url));save(f'polls/{i:03d}.json',b)
+                      if code!=200:S['last_poll_http_status']=code;break
+                      d=json.loads(b);j=d.get('job',d);S['status']=str(j.get('status','UNKNOWN'))
+                  if S['status']=='succeeded':collect(d)
+                  elif S['status'] not in {'failed','cancelled'}:S['collection_incomplete']=True
+              jar.save(ignore_discard=True,ignore_expires=True)
+          except Exception as e:
+              S['exception_class']=type(e).__name__;save('failure_details.txt',repr(e))
+              if S['submit_attempts']==0:S['status']='FAILED_BEFORE_SUBMISSION'
+              elif S['status']=='NOT_STARTED':S['status']='SUBMISSION_OUTCOME_UNKNOWN'
+          finally:
+              save('summary.json',json.dumps(S,indent=2));buf=io.BytesIO();manifest={}
+              with zipfile.ZipFile(buf,'w',zipfile.ZIP_DEFLATED) as z:
+                  for p in sorted(R.rglob('*')):
+                      if p.is_file():
+                          b=p.read_bytes();n=p.relative_to(R).as_posix();manifest[n]=hashlib.sha256(b).hexdigest();z.writestr(n,b)
+                  z.writestr('manifest.json',json.dumps(manifest,indent=2))
+              k=AESGCM.generate_key(bit_length=256);nonce=os.urandom(12);aad=b'CJ26-public-target-single-rfd3-run-v1';cipher=AESGCM(k).encrypt(nonce,buf.getvalue(),aad)
+              pub=serialization.load_pem_public_key(PUB.encode());wrapped=pub.encrypt(k,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
+              (O/'result.aesgcm').write_bytes(cipher)
+              (O/'encryption.json').write_text(json.dumps({'algorithm':'RSA-OAEP-SHA256+AES-256-GCM','wrapped_key':base64.b64encode(wrapped).decode(),'nonce':base64.b64encode(nonce).decode(),'aad':base64.b64encode(aad).decode(),'ciphertext_sha256':hashlib.sha256(cipher).hexdigest()},indent=2))
+              (O/'public_status.json').write_text(json.dumps(S,indent=2));print(json.dumps(S,indent=2))
+          PY
+      - name: Return encrypted outputs and non-sensitive state
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-tl1a-one-design-sealed-20261106-1403
+          path: sealed_result/
+          if-no-files-found: warn
+          retention-days: 3
+          compression-level: 0
