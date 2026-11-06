@@ -1,0 +1,60 @@
+name: Public competition rule audit assets
+
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-rule-assets-20261106.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cj26-public-rule-assets-20261106
+  cancel-in-progress: false
+
+jobs:
+  fetch-public-assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve checksum-pinned MMseqs2 and public UniProt records
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures, hashlib, json, pathlib, time, urllib.request
+          out = pathlib.Path('public_rule_assets'); out.mkdir()
+          specs = [{'name':'mmseqs-linux-avx2-18-8cc5c.tar.gz',
+                    'url':'https://github.com/soedinglab/MMseqs2/releases/download/18-8cc5c/mmseqs-linux-avx2.tar.gz',
+                    'limit':30_000_000,
+                    'sha256':'bd9b0234da5949ad528d5b5f9ea4cda9c1e23dce14b46c0791d4d919a76e61ce'}]
+          for accession in ['P43220','P02786','O95150','P19438','P16871']:
+              for fmt in ['fasta','json']:
+                  specs.append({'name':accession+'.'+fmt,
+                                'url':'https://rest.uniprot.org/uniprotkb/'+accession+'.'+fmt,
+                                'limit':4_000_000})
+          def retrieve(spec):
+              started=time.monotonic(); size=0; digest=hashlib.sha256()
+              req=urllib.request.Request(spec['url'],headers={'User-Agent':'CJ26-public-rule-audit/1.0'})
+              with urllib.request.urlopen(req,timeout=60) as response, (out/spec['name']).open('wb') as f:
+                  if response.status != 200 or not response.url.startswith('https://'): raise RuntimeError('Invalid HTTPS response')
+                  resolved=response.url
+                  for chunk in iter(lambda:response.read(1024*1024),b''):
+                      size+=len(chunk)
+                      if size>spec['limit'] or time.monotonic()-started>240: raise RuntimeError('Download bound exceeded')
+                      f.write(chunk); digest.update(chunk)
+              if size<100: raise RuntimeError('Unexpectedly small asset')
+              if spec.get('sha256') and digest.hexdigest()!=spec['sha256']: raise RuntimeError('Official release checksum mismatch')
+              return {'name':spec['name'],'source_url':spec['url'],'resolved_url':resolved,'bytes':size,'sha256':digest.hexdigest(),'published_digest_verified':bool(spec.get('sha256'))}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool: records=list(pool.map(retrieve,specs))
+          manifest={'purpose':'New target range and local novelty audit tooling','private_candidate_data_uploaded':False,'model_inference_executed':False,'mmseqs_release':'18-8cc5c','files':records}
+          (out/'PUBLIC_ASSETS_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps(manifest,indent=2))
+          PY
+      - name: Return public assets only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-public-rule-assets-20261106
+          path: public_rule_assets/
+          retention-days: 3
+          if-no-files-found: error
+          compression-level: 0
