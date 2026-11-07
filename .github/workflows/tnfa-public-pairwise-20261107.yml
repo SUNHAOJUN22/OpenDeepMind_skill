@@ -1,0 +1,37 @@
+name: TNFA public pairwise completeness check
+on:
+  push:
+    branches: [research/tnfa-public-pairwise-20261107]
+    paths: [public_pairwise_followup.py, .github/workflows/tnfa-public-pairwise-20261107.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: tnfa-public-pairwise-20261107
+  cancel-in-progress: false
+jobs:
+  public-pairwise:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Read exact public source for this commit
+        env:
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          curl --fail --location --max-time 60 "https://raw.githubusercontent.com/${REPO}/${SHA}/public_pairwise_followup.py" --output public_pairwise_followup.py
+      - name: Verify prior public evidence and execute all-pair native alignments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NVIDIA_HOSTED_CREDENTIAL: ${{ secrets.NVIDIA_API_KEY || secrets.NGC_API_KEY }}
+          OMP_NUM_THREADS: 2
+        run: python3 public_pairwise_followup.py
+      - name: Save complete public evidence including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: TNFA_PUBLIC_PAIRWISE_COMPLETENESS_20261107
+          path: pairwise_evidence/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
