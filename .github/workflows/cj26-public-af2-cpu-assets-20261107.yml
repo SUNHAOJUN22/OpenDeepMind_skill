@@ -1,0 +1,77 @@
+name: Public AF2 Multimer CPU assets
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-af2-cpu-assets-20261107.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-public-af2-assets-20261107
+  cancel-in-progress: false
+jobs:
+  retrieve-public-assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Retrieve one public trained checkpoint and pinned public source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,pathlib,tarfile,urllib.request,time
+          out=pathlib.Path('public_af2'); out.mkdir()
+          src=pathlib.Path('public_environment'); src.mkdir()
+          origin='https://storage.googleapis.com/alphafold/alphafold_params_colab_2022-12-06.tar'
+          wanted='params_model_1_multimer_v3.npz'
+          started=time.monotonic(); found=False
+          with urllib.request.urlopen(origin,timeout=120) as response:
+              if response.status!=200 or not response.url.startswith('https://'): raise RuntimeError('Bad public source response')
+              with tarfile.open(fileobj=response,mode='r|') as archive:
+                  for member in archive:
+                      if time.monotonic()-started>500: raise RuntimeError('Public retrieval time bound')
+                      if pathlib.PurePosixPath(member.name).name != wanted: continue
+                      if not member.isfile() or not 1000000<member.size<500000000: raise RuntimeError('Unexpected checkpoint size')
+                      h=hashlib.sha256(); size=0
+                      with archive.extractfile(member) as f,(out/wanted).open('wb') as dst:
+                          while True:
+                              b=f.read(1024*1024)
+                              if not b:break
+                              size+=len(b);h.update(b);dst.write(b)
+                      if size!=member.size:raise RuntimeError('Truncated trained checkpoint')
+                      meta={'source_url':origin,'tar_member':member.name,'bytes':size,'sha256':h.hexdigest(),'published_digest_not_available':True,'private_candidate_data_uploaded':False,'inference_executed':False}
+                      (out/'SOURCE_MANIFEST.json').write_text(json.dumps(meta,indent=2)+'\n');print(json.dumps(meta));found=True;break
+          if not found:raise RuntimeError('Requested public checkpoint absent')
+          commit='c77e5d2a8961d1a353632c462914ff0a32a950f6'
+          url='https://codeload.github.com/google-deepmind/alphafold/zip/'+commit
+          with urllib.request.urlopen(url,timeout=90) as r: payload=r.read(30000001)
+          if len(payload)>30000000:raise RuntimeError('Source size bound')
+          (src/'alphafold_source.zip').write_bytes(payload)
+          (src/'SOURCE_MANIFEST.json').write_text(json.dumps({'commit':commit,'source_url':url,'sha256':hashlib.sha256(payload).hexdigest(),'private_data':False},indent=2)+'\n')
+          PY
+      - name: Download bounded CPython313 CPU wheels only
+        shell: bash
+        run: |
+          mkdir -p public_environment/wheels
+          python3 -m pip download --dest public_environment/wheels --only-binary=:all: --no-deps --python-version 313 --implementation cp --abi cp313 --platform manylinux2014_x86_64 jax==0.4.38 jaxlib==0.4.38 dm-haiku==0.0.13 dm-tree==0.1.9 ml-collections==1.1.0 jmp==0.0.4
+          python3 - <<'PY'
+          import pathlib,hashlib,json
+          p=pathlib.Path('public_environment/wheels')
+          records=[{'name':f.name,'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()} for f in sorted(p.iterdir()) if f.is_file()]
+          if sum(r['bytes'] for r in records)>250000000:raise RuntimeError('Dependency size bound')
+          (p.parent/'WHEELS_MANIFEST.json').write_text(json.dumps(records,indent=2)+'\n')
+          PY
+      - name: Return public checkpoint
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-public-af2-multimer-model1
+          path: public_af2/
+          retention-days: 2
+          if-no-files-found: error
+          compression-level: 0
+      - name: Return public source and CPU dependencies
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-public-af2-cpu-environment
+          path: public_environment/
+          retention-days: 2
+          if-no-files-found: error
+          compression-level: 0
