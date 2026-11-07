@@ -1,0 +1,40 @@
+name: Public TNF reference and novelty-contract audit
+on:
+  push:
+    branches: [research/tnfa-public-novelty-audit-20261107]
+    paths: ['.github/workflows/tnfa-public-novelty-audit.yml', 'audit_public.py']
+permissions:
+  contents: read
+concurrency:
+  group: tnfa-public-novelty-audit-20261107
+  cancel-in-progress: false
+jobs:
+  public-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+    steps:
+      - name: Read this exact public audit source
+        run: |
+          mkdir -p evidence
+          curl --fail --location --max-time 90 "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/audit_public.py" --output audit_public.py
+          cp audit_public.py evidence/
+          python3 -m venv .venv
+      - name: Install pinned public CPU numbering packages
+        run: |
+          .venv/bin/python -m pip install 'torch==2.9.1' --index-url https://download.pytorch.org/whl/cpu
+          .venv/bin/python -m pip install 'anarcii==2.0.8'
+          .venv/bin/python -m pip freeze > evidence/pip_freeze.txt
+      - name: Number public controls and execute actual MMseqs2 checks
+        run: .venv/bin/python audit_public.py
+      - name: Retain public data and complete failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: TNFA_PUBLIC_REFERENCES_AND_MMSEQS_ACTUAL_AUDIT_20261107
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 7
