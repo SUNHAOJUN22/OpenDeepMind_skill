@@ -1,0 +1,63 @@
+name: Public IL7RA target MSA and scoring source
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-public-il7ra-msa-20261107.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-public-il7ra-msa-20261107
+  cancel-in-progress: false
+jobs:
+  public-target-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Get public scoring source and one public target MSA
+        shell: bash
+        run: |
+          mkdir -p public_target
+          python3 - <<'PY'
+          import urllib.request,urllib.parse,pathlib,json,time,hashlib,traceback
+          out=pathlib.Path('public_target')
+          sha='6174cf9e71cb1bd660cc805856a18c4871a6dec3'
+          for name in ['ipsae.py','LICENSE']:
+              u='https://raw.githubusercontent.com/DunbrackLab/IPSAE/'+sha+'/'+name
+              with urllib.request.urlopen(u,timeout=60) as r: b=r.read(2000000)
+              (out/name).write_bytes(b)
+          target='ESGYAQNGDLEDAELDDYSFSCYSQLEVNGSQHSLTCAFEDPDVNITNLEFEICGALVEVKCLNFRKLQEIYFIETKKFLLIGKSNICVKVGEKSLTCKKIDLTTIVKPEAPFDLSVVYREGANDFVVTFNTSHLQKKYVKVLMHDVAYRQEKDENKWTHVNLSSTKLTLLQRKLQPAAMYEIKVRSIPDHYFKGFWSEWSPSYYFRTPEINNSSGEMD'
+          assert len(target)==219
+          (out/'PUBLIC_TARGET_P16871_21_239.fasta').write_text('>101 public_IL7RA_P16871_21_239\n'+target+'\n')
+          manifest={'private_binder_uploaded':False,'target_accession':'P16871','target_range':[21,239],'target_length':219,'ipsae_commit':sha,'model_inference':False,'template_search':False,'post_attempts':0}
+          headers={'User-Agent':'CJ26-public-target-research/1.0 (SUNHAOJUN22; public IL7RA only)'}
+          try:
+              payload=urllib.parse.urlencode({'q':'>101\n'+target+'\n','mode':'env'}).encode()
+              req=urllib.request.Request('https://api.colabfold.com/ticket/msa',data=payload,headers=headers,method='POST')
+              manifest['post_attempts']=1
+              with urllib.request.urlopen(req,timeout=45) as r: raw=r.read(1000000)
+              (out/'submission_response.json').write_bytes(raw)
+              ticket=json.loads(raw); manifest['ticket']=ticket
+              job=ticket.get('id'); start=time.monotonic()
+              if not job: raise RuntimeError('No task id; do not resubmit')
+              while ticket.get('status') not in ['COMPLETE','ERROR','MAINTENANCE','RATELIMIT'] and time.monotonic()-start<420:
+                  time.sleep(8)
+                  with urllib.request.urlopen(urllib.request.Request('https://api.colabfold.com/ticket/'+str(job),headers=headers),timeout=30) as r: ticket=json.load(r)
+              manifest['last_status']=ticket
+              if ticket.get('status')=='COMPLETE':
+                  with urllib.request.urlopen(urllib.request.Request('https://api.colabfold.com/result/download/'+str(job),headers=headers),timeout=90) as r: b=r.read(60000001)
+                  if len(b)>60000000:raise RuntimeError('MSA artifact size bound')
+                  (out/'public_target_msa.tar.gz').write_bytes(b);manifest['msa_download_sha256']=hashlib.sha256(b).hexdigest()
+              else:manifest['result_not_downloaded']=True
+          except Exception as e:
+              manifest['error']=type(e).__name__+': '+str(e);traceback.print_exc()
+          (out/'PUBLIC_TARGET_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps(manifest,indent=2))
+          PY
+      - name: Return public reference assets and receipts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-public-il7ra-msa-and-ipsae
+          path: public_target/
+          if-no-files-found: error
+          retention-days: 2
+          compression-level: 0
