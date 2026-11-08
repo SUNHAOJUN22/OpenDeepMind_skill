@@ -14,6 +14,25 @@ OpenDeepMind is a portable Agent Skill comprising three isolated reasoning modul
 
 The project is independent and has no affiliation with or endorsement by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute or referenced repository maintainers. See [LICENSE.md](LICENSE.md), [NOTICE.md](NOTICE.md) and [VERSION](VERSION).
 
+## Reviewable reasoning route and opt-in boundary
+
+```mermaid
+flowchart LR
+  Q["Question + boundary"] --> PHI["Φ8: qualify foundations"]
+  PHI --> P["P9: models, alternatives, falsifiers"]
+  P --> V["Evidence ledger and validity"]
+  V --> D{"Decision or next test"}
+  D -->|"Reframe"| PHI
+  P -.->|"Explicit user opt-in only"| T["T10: TRIZ concept candidates"]
+  T --> V
+  classDef core fill:#4F46E5,color:#fff,stroke:#A5B4FC;
+  classDef optin fill:#9A3412,color:#fff,stroke:#FDBA74;
+  class PHI,P,V core;
+  class T optin;
+```
+
+This is a **text-editable reasoning schematic**, not an evaluation result. Φ and P remain independent canonical methods, TRIZ never auto-activates, and generated concepts return to evidence checks. Repository validators establish structural correctness; behavioral improvements need paired evaluation runs, isolated inputs, model/version records and retained raw grading artifacts.
+
 ## 1. Capabilities and concrete outputs
 
 | Component | What it does | Source and output |
