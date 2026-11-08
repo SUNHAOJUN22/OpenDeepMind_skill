@@ -1,0 +1,45 @@
+name: CJ26 TL1A numbering-corrected bounded attempt
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-tl1a-numbering-fixed-20261108.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-tl1a-rfd3-20261108
+  cancel-in-progress: false
+jobs:
+  one-design-attempt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - name: Verify pinned runner and correct public residue numbering
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request, hashlib, textwrap
+          url='https://raw.githubusercontent.com/SUNHAOJUN22/OpenDeepMind_skill/2a5c9d5a16a0047d2301d36f92d6dc1801724b9c/.github/workflows/cj26-tl1a-public-target-rfd3-20261108.yml'
+          with urllib.request.urlopen(url,timeout=45) as response: payload=response.read(20001)
+          if len(payload)>20000: raise ValueError('Runner size bound')
+          blob=hashlib.sha1(b'blob '+str(len(payload)).encode()+b'\0'+payload).hexdigest()
+          if blob!='f878fda52bad3b346d7c33ac7b883341ed69eb56': raise ValueError('Pinned public runner blob mismatch')
+          source=payload.decode().split("python3 - <<'PY'\n",1)[1].split('\n          PY',1)[0]
+          code=textwrap.dedent(source)
+          old="if line.startswith('ATOM  ') and line[21:22] in seen and 88<=int(line[22:26])<=251:\n            lines.append(line);seen[line[21]].add(int(line[22:26]))"
+          new="if line.startswith('ATOM  ') and line[21:22] in seen and 17<=int(line[22:26])<=180:\n            canonical=int(line[22:26])+71\n            line=line[:22]+f'{canonical:4d}'+line[26:]\n            lines.append(line);seen[line[21]].add(canonical)"
+          if code.count(old)!=1: raise ValueError('Expected numbering block not found exactly once')
+          code=code.replace(old,new)
+          code=code.replace("'observed_residues_per_chain':164,", "'observed_residues_per_chain':164,'PDB_author_to_UniProt_offset':71,'PDB_author_range':[17,180],")
+          compile(code,'pinned_public_target_runner','exec')
+          print('Verified public runner; mapping 2RE9 author17-180 to UniProt88-251. Earlier attempt stopped before POST.')
+          exec(compile(code,'pinned_public_target_runner','exec'),{'__name__':'__main__'})
+          PY
+      - name: Return ciphertext only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-tl1a-rfd3-numbering-fixed-encrypted-20261108
+          path: encrypted_return/
+          retention-days: 2
+          if-no-files-found: warn
+          compression-level: 0
