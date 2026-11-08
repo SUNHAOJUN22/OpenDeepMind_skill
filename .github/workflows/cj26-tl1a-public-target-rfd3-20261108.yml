@@ -1,0 +1,99 @@
+name: CJ26 public-target RFD3 bounded attempt
+on:
+  push:
+    branches: [cj26-public-model-assets-20261104]
+    paths: [.github/workflows/cj26-tl1a-public-target-rfd3-20261108.yml]
+permissions:
+  contents: read
+concurrency:
+  group: cj26-tl1a-rfd3-20261108
+  cancel-in-progress: false
+jobs:
+  bounded-public-design:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - name: Submit one public target design and encrypt all returned content
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os,json,time,hashlib,pathlib,urllib.request,urllib.parse,http.cookiejar,base64,traceback
+          from cryptography.hazmat.primitives import serialization,hashes
+          from cryptography.hazmat.primitives.asymmetric import padding
+          from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+          PUBLIC_KEY='''-----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApfketQ5GLKR8yhgr6G/8
+          ndWqTnPsx5o4TByJ6drzLlymOVea4vdyDyOZZksoWMV2i4iKZjNk5tDKrV/ZwQrB
+          iQeKY2nGrEpdBShDkhcw4gHVJva/jJh4jLXlhpWxvRKC+Y4Fw3QIz+GEZK8Zc2nW
+          LcBUcQaRsNJhp+EiLBBEy50Vywbx25SJTao9gtA0cyPjKimRVdIwj8099pGgnzvn
+          aCyYYFTFNb1xcVqpMJZ/6RG04u/8yrUlzALBV0YiRRMhk60vI3czdRhzBh9TsUy4
+          Q3x6o0SaM43lXntmv4CCYjqM1+a2K12WxWs6qZmnByoH6AoRWw2qNTwRDyHzyz1x
+          rQIDAQAB
+          -----END PUBLIC KEY-----'''
+          key=serialization.load_pem_public_key(PUBLIC_KEY.encode());out=pathlib.Path('encrypted_return');out.mkdir()
+          BASE='https://www.athanortools.com';records=[];files=[];started=time.monotonic();status_url=None;terminal=False;phase='BEFORE_SUBMISSION'
+          jar=http.cookiejar.CookieJar();opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+          def request(url,body=None,limit=3000000):
+              if not url.startswith('https://'):raise ValueError('HTTPS required')
+              req=urllib.request.Request(url,data=body,headers={'User-Agent':'CJ26-bounded-public-target/1.0',**({'Content-Type':'application/json'} if body is not None else {})})
+              try:
+                  with opener.open(req,timeout=45) as r:
+                      data=r.read(limit+1);code=r.status;ctype=r.headers.get('Content-Type','')
+              except urllib.error.HTTPError as e:data=e.read(limit+1);code=e.code;ctype=e.headers.get('Content-Type','')
+              if len(data)>limit:raise ValueError('Response size bound')
+              return code,ctype,data
+          try:
+              code,ctype,raw=request('https://files.rcsb.org/download/2RE9.pdb',limit=5000000)
+              if code!=200:raise ValueError('Public target download failed')
+              lines=[];seen={c:set() for c in 'ABC'}
+              for line in raw.decode().splitlines():
+                  if line.startswith('ATOM  ') and line[21:22] in seen and 88<=int(line[22:26])<=251:
+                      lines.append(line);seen[line[21]].add(int(line[22:26]))
+              if any(v!=set(range(88,252)) for v in seen.values()):raise ValueError('Public target residue coverage mismatch')
+              pdb='\n'.join(lines)+'\nEND\n'
+              spec={'T05_TL1A_PUBLIC_NEW':{'input':'uploaded','dialect':2,'contig':'70-70,/0,A88-251,/0,B88-251,/0,C88-251','cif_parser_args':{'add_missing_atoms':False,'remove_ccds':[]},'select_fixed_atoms':True,'select_unfixed_sequence':False,'redesign_motif_sidechains':False,'select_hotspots':{'A166':'CB,CG,CD,NE,CZ,NH1,NH2','A167':'CB,CG,CD,OE1,NE2','A161':'CB,CG,CD,OE1,OE2'},'infer_ori_strategy':'hotspots','is_non_loopy':True}}
+              payload={'input_mode':'text','inputs':json.dumps(spec),'spec_input_file':pdb,'job_name':'CJ26_T05_PUBLIC_20261108','n_batches':1,'diffusion_batch_size':1,'inference_sampler.num_timesteps':200,'prevalidate_inputs':True,'low_memory_mode':True,'output_full_json':True,'dump_prediction_metadata_json':True}
+              records.append({'stage':'INPUT','source':'https://files.rcsb.org/download/2RE9.pdb','target_sha256':hashlib.sha256(pdb.encode()).hexdigest(),'observed_residues_per_chain':164,'missing_official_Nterm':[72,87],'existing_candidate_data':False,'payload':payload})
+              phase='POST_ONCE';code,ctype,raw=request(BASE+'/api/rfd3/',json.dumps(payload).encode());records.append({'stage':'SUBMIT','code':code,'response':raw.decode(errors='replace')})
+              if code!=202:phase='NOT_ACCEPTED';terminal=True
+              else:
+                  j=json.loads(raw);job=j.get('job',{});path=job.get('status_url')
+                  if not isinstance(path,str):raise ValueError('Accepted without status URL; no repeated POST')
+                  status_url=urllib.parse.urljoin(BASE,path)
+                  if urllib.parse.urlsplit(status_url).netloc!='www.athanortools.com' or not urllib.parse.urlsplit(status_url).path.startswith('/api/jobs/'):raise ValueError('Unsafe status URL')
+                  while time.monotonic()-started<600:
+                      code,ctype,raw=request(status_url);j=json.loads(raw);job=j.get('job',{});records.append({'stage':'POLL','code':code,'elapsed_s':time.monotonic()-started,'response':j});phase=str(job.get('status','UNKNOWN'))
+                      if phase in ['succeeded','failed','cancelled']:
+                          terminal=True
+                          if phase=='succeeded':
+                              for suffix in ['primary-result/','raw-results/','structures/']:
+                                  c,t,b=request(status_url.rstrip('/')+'/'+suffix,limit=40000000)
+                                  files.append({'route':suffix,'status':c,'content_type':t,'sha256':hashlib.sha256(b).hexdigest(),'base64':base64.b64encode(b).decode()})
+                          break
+                      if code not in [200,202]:break
+                      time.sleep(10)
+          except Exception as e:
+              records.append({'stage':'EXCEPTION','type':type(e).__name__,'message':str(e)})
+              phase='ERROR_OR_UNKNOWN'
+          finally:
+              if status_url and not terminal:
+                  try:
+                      c,t,b=request(status_url.rstrip('/')+'/abort/',b'{}');records.append({'stage':'ABORT_ON_BUDGET','code':c,'response':b.decode(errors='replace')})
+                      c,t,b=request(status_url);records.append({'stage':'FINAL_STATUS','code':c,'response':b.decode(errors='replace')});phase=json.loads(b).get('job',{}).get('status','UNKNOWN')
+                  except Exception as e:records.append({'stage':'ABORT_OR_FINAL_READ_FAILED','type':type(e).__name__});phase='UNKNOWN_AFTER_ABORT_ATTEMPT'
+              doc=json.dumps({'records':records,'files':files,'cookies':[{'name':c.name,'value':c.value,'domain':c.domain,'path':c.path} for c in jar],'final_phase':phase,'elapsed_s':time.monotonic()-started},separators=(',',':')).encode()
+              sym=AESGCM.generate_key(bit_length=256);nonce=os.urandom(12);aad=b'CJ26_T05_PUBLIC_20261108';cipher=AESGCM(sym).encrypt(nonce,doc,aad)
+              wrapped=key.encrypt(sym,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
+              (out/'result.aesgcm').write_bytes(cipher);(out/'wrapped_key.bin').write_bytes(wrapped)
+              meta={'format':'RSA-OAEP-SHA256+AES256-GCM','nonce_base64':base64.b64encode(nonce).decode(),'aad':aad.decode(),'cipher_sha256':hashlib.sha256(cipher).hexdigest(),'plaintext_sha256':hashlib.sha256(doc).hexdigest(),'elapsed_s':time.monotonic()-started,'phase':phase,'existing_candidates_uploaded':False,'submit_attempts_maximum':1,'result_content_public':False}
+              (out/'ENCRYPTED_RETURN_MANIFEST.json').write_text(json.dumps(meta,indent=2)+'\n');print(json.dumps({k:v for k,v in meta.items() if k not in ['plaintext_sha256','nonce_base64']},indent=2))
+          PY
+      - name: Return ciphertext only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cj26-tl1a-rfd3-encrypted-20261108
+          path: encrypted_return/
+          retention-days: 2
+          if-no-files-found: warn
+          compression-level: 0
