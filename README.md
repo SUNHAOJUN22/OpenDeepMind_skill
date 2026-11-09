@@ -14,6 +14,12 @@ OpenDeepMind is a portable Agent Skill comprising three isolated reasoning modul
 
 The project is independent and has no affiliation with or endorsement by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute or referenced repository maintainers. See [LICENSE.md](LICENSE.md), [NOTICE.md](NOTICE.md) and [VERSION](VERSION).
 
+## 2026 architecture: four reviewable stages
+
+![Four-stage first-principles workflow](docs/assets/atlas-v2/architecture-en.svg)
+
+Editable vector concept only. Execution, evidence, and scientific qualification must be established from source-linked records, not from this artwork.
+
 ## Reviewable reasoning route and opt-in boundary
 
 ```mermaid

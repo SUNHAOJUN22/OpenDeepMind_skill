@@ -14,6 +14,12 @@ OpenDeepMind 是一个可移植的 Agent Skill，由三个隔离的推理模块�
 
 本项目独立开发，与 Google DeepMind、OpenAI、Anthropic、MATRIZ、Altshuller Institute 及所引用仓库的维护者不存在隶属或背书关系。许可与版本见 [LICENSE.md](LICENSE.md)、[NOTICE.md](NOTICE.md) 和 [VERSION](VERSION)。
 
+## 2026 年架构图：四阶段审查路径
+
+![四阶段第一性原理审查流程](docs/assets/atlas-v2/architecture-zh.svg)
+
+以上为可编辑矢量概念图；功能状态以源码、测试及来源证据为准，图形不表示模型已运行或科研结论已获认证。
+
 ## 一、功能如何落到可检查的产物
 
 | 组成 | 实际职责 | 源码或方法与输出 |
