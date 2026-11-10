@@ -126,7 +126,7 @@ $$
 \forall(u,v)\in E:\ u,v\in N,\qquad G\text{ is acyclic}.
 $$
 
-The iterative validator limits raw JSON to 8 MiB, nesting to 128 levels, records to 10,000 and references to 100,000. It rejects duplicate JSON keys, unpaired Unicode surrogates, nonfinite values and nonzero numbers that underflow to zero during float conversion. Exact zero such as `0e-999` and a representable subnormal such as `5e-324` remain subject to ordinary field validation.
+The iterative validator limits raw JSON to 8 MiB, nesting to 128 levels, records to 10,000 and references to 100,000. It rejects duplicate JSON keys, unpaired Unicode surrogates, nonfinite values and nonzero numbers that underflow to zero during float conversion. Exact zero such as `0e-999` and a representable subnormal such as `5e-324` remain subject to ordinary field validation. Ledger validation accepts only a stable regular file: symbolic links, directories, FIFOs and other special files are rejected before parsing; on POSIX, the file is opened nonblocking and no-follow, then checked against the observed device and inode identity.
 
 Optional confidence values follow:
 
