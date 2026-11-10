@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
+import stat
 import sys
 from pathlib import Path
 from typing import Any
@@ -249,10 +251,35 @@ def validate(data: dict[str, Any]) -> list[str]:
     return errors
 
 
+def read_bounded_regular_file(path: Path, limit: int) -> bytes:
+    """Read one stable regular file without following links or blocking on FIFOs."""
+    observed = path.lstat()
+    if stat.S_ISLNK(observed.st_mode) or not stat.S_ISREG(observed.st_mode):
+        raise ValueError("ledger input must be a regular file")
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    fd = os.open(path, flags)
+    try:
+        opened = os.fstat(fd)
+        if not stat.S_ISREG(opened.st_mode):
+            raise ValueError("ledger input must be a regular file")
+        if (opened.st_dev, opened.st_ino) != (observed.st_dev, observed.st_ino):
+            raise ValueError("ledger input changed while it was opened")
+        chunks: list[bytes] = []
+        remaining = limit + 1
+        while remaining:
+            chunk = os.read(fd, min(1024 * 1024, remaining))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        return b"".join(chunks)
+    finally:
+        os.close(fd)
+
+
 def load_ledger(path: Path) -> Any:
     """Read bounded, unambiguous UTF-8 JSON without nonfinite values."""
-    with path.open("rb") as stream:
-        raw = stream.read(MAX_LEDGER_BYTES + 1)
+    raw = read_bounded_regular_file(path, MAX_LEDGER_BYTES)
     if len(raw) > MAX_LEDGER_BYTES:
         raise ValueError("ledger exceeds the 8 MiB input budget")
 
