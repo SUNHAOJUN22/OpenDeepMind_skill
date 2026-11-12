@@ -1,0 +1,39 @@
+{
+  "schema": "opendeepmind.ai-image-prompts/v1",
+  "images": [
+    {
+      "id": "r3-open-architecture-v1",
+      "asset": "architecture",
+      "prompt": "Use case: scientific-educational. Create a complete original AI-generated 16:9 scientific concept illustration for OpenDeepMind_skill README. Clean ivory background, restrained cobalt, teal, amber, fine soft shadows; exquisite legible journal-style explanatory graphic, no photorealism. Title 'OpenDeepMind | Reasoning architecture'. Clearly show three isolated modules in upper zone: 'First Philosophy · Φ8' (foundation charter), 'First Principles · P9' (model, rival, falsifier), 'TRIZ · T10' (concept candidates). Φ charter arrow to P. Only P has dashed amber outgoing arrow to TRIZ labelled 'Explicit request only'; TRIZ has solid arrow BACK to First Principles labelled 'Validation required'. No Phi→TRIZ arrow. Lower zone visually separate 'Evaluation layer' observes recorded outputs one-way, never routes to methods. Show small labelled cards 'Typed claims: D O L C A E V U', 'Evidence + units + uncertainty', 'Red blockers first'. Small visual hints of energy landscape and particle ensembles as conceptual metaphors only, never measured data. Use only simple illustrative formulas 'y = H(x) + ε' and 'g(x) ≤ 0'. No score charts or performance claims. Footer 'AI-generated concept · methods and evidence contracts · no model result'. All artwork and labels must be generated as one coherent image; generous whitespace, readable at README width.",
+      "tool": "image_gen.imagegen",
+      "model_id": null,
+      "selected": true,
+      "transparent_background": false
+    },
+    {
+      "id": "r3-open-algorithm-v1",
+      "asset": "algorithm",
+      "prompt": "Use case: scientific-educational. Create a complete original AI-generated 16:9 conceptual science methodology infographic for OpenDeepMind_skill. Ivory journal aesthetic with cobalt/teal/amber, crisp generous typography. Title 'From physical hypotheses to falsifiable decisions'. A balanced 2x2 grid of conceptual panels connected subtly: '1 · Declare the ensemble' with NVT, T > 0 and formulas 'β = 1/(kB T)', 'Z = Σ exp(−βEi)'; '2 · Predict observables' with formula '⟨A⟩ = Σ pi Ai' and a symbolic particle ensemble (no data plot); '3 · Compare rivals' with 'y = H(x) + ε', labels 'units · closure · uncertainty'; '4 · Test and revise' labels 'falsifier · domain · next experiment'. Small middle ribbon 'Physical model templates — external solver required'. Distinguish thermodynamic entropy and evidence uncertainty with small footer 'S = −kB Σ pi ln pi applies to the stated ensemble; it is not a model confidence score'. No implementation claim that this skill computes partition functions. No decorative false equations or numeric results. All text and diagram must be AI-generated in one complete image. Footer 'AI-generated scientific concept · editable equations in the guide'.",
+      "tool": "image_gen.imagegen",
+      "model_id": null,
+      "selected": true,
+      "transparent_background": false
+    },
+    {
+      "id": "r3-open-roadmap-v1",
+      "asset": "roadmap",
+      "prompt": "Use case: scientific-educational. Generate a complete 16:9 concise technical roadmap as a refined AI science infographic, all diagram elements and text generated together. Ivory background, cobalt/teal modules, amber optional branch, readable typography, ample space. Title 'OpenDeepMind | Compact technical route'. Main route in FIVE short boxes: 'Frame + boundary' → 'Φ8 · Foundation Charter' → 'P9 · Model + rival' → 'Evidence + falsifier' → 'Decision / next test'. Under model box put 'y = H(x) + ε'; under evidence box 'units · domain · uncertainty'; under decision box 'g(x) ≤ 0'. Place optional TRIZ box below P9, connected FROM P9 by dashed amber arrow labelled 'Explicit request only', then solid arrow from TRIZ BACK TO P9 labelled 'Validate concepts'. Evaluation strip at bottom separately labelled 'Record → grade → check artifacts' with 'publication_ready = false' and 'Independent attestation required'. It observes outputs only. Tiny footer 'AI-generated concept · Φ8 / P9 / T10 are method stages · no measured performance'. No extra arrows from Phi to TRIZ, no automatic activation, no plot, no unqualified conservation claim.",
+      "tool": "image_gen.imagegen",
+      "model_id": null,
+      "selected": true,
+      "transparent_background": false
+    },
+    {
+      "id": "r2-seven-repo-roadmap-v1",
+      "asset": "seven-repo-roadmap",
+      "tool": "image_gen.imagegen",
+      "model_id": null,
+      "prompt_exact": "Use case: scientific-educational.\nCreate ONE complete, polished landscape 16:9 scientific roadmap illustration for the seven SUNHAOJUN22 repositories. This is an AI-generated explanatory schematic, not a data plot. It must look like a clear publication figure with an elegant light ivory background, fine dark typography, subtle physical 3D motifs, compact editorial composition, and color-coded panels. All areas, including the bottom, must contain meaningful organized content; no empty lower half. Avoid glowing sci-fi clutter, robot faces, fake numerical plots, fake logos, or collages.\nTitle, exact: \"PHYSICS-GUIDED SCIENTIFIC WORKFLOW\"\nSubtitle, exact: \"Seven independent repositories • proposed interfaces\"\nUse seven distinct readable cards, in two balanced rows (four above, three below), with thin DOTTED connecting lines identified by the small legend \"Dotted links: proposed handoffs\". Do not imply these integrations are already implemented.\nCards and exact body text:\n1 \"TsaoSciResearcher\" in burgundy/rose. \"Question → evidence → qualified claim\". Small motif: connected evidence records.\n2 \"TsaoSciComputation\" in teal/navy. \"Model → execution → verification\". Small motif: continuum mesh and molecule.\n3 \"TsaoDFT_skill\" in violet/blue. \"Electronic structure → reaction energetics\". Small motif: electron-density-inspired orbital.\n4 \"ResinDB-Pro-by-SunHJ\" in amber/petrol. \"Quantity + unit + condition → materials decision\". Small motif: polymer chain and database.\n5 \"AspenOps-Agent\" in cobalt/cyan. \"Validated process intent → licensed solver → engineering review\". Small motif: restrained reactor/column flowsheet.\n6 \"TSAO-PROCESSING-SKILL\" in emerald/copper. \"Kinetics → transport → processing reference\". Small motif: flow channel and polymer chains.\n7 \"OpenDeepMind_skill\" in indigo/gold. \"Foundations → first principles → validation\". Add small text \"TRIZ: explicit opt-in\". Small motif: clean branching hypothesis lattice.\nBelow the cards, a beautiful full-width slim mathematical ribbon headed \"Equilibrium context · fixed N, V, T\". Set these four short equations precisely and legibly:\n\"β = 1/(k_B T)\"\n\"Z = Σ_i exp(−β E_i)\"\n\"p_i = exp(−β E_i)/Z\"\n\"F = −k_B T ln Z\"\nA small line directly below defines \"T > 0; E_i: state energy; k_B: Boltzmann constant\".\nA second very compact footer text strip: \"Units • finite values • conservation • uncertainty • traceable evidence\".\nA final small clearly readable footer at bottom right: \"AI-generated schematic • illustrative, not measured data\".\nThe formulas are theoretical context; do not place fake benchmark claims or scores. Draw the entire figure as one coherent generated raster. Every card has a concise caption, no blank panels. English spelling must be exact; legible at README width. Hierarchy: title, seven cards, equation ribbon, footer. Keep the roadmap simple with ample breathing room inside this compact structure."
+    }
+  ]
+}

@@ -46,3 +46,16 @@ Validation: run every command in AGENTS.md and the README. The original 26 new m
 The bilingual README now defines a separate common-identity subset for each metric, matching the existing aggregator. A public-CLI fixture with two paired identities but only one pair of numeric judge scores yields `paired_runs=2` and a judge-score mean delta over that one available pair; a missing score does not contribute a zero or enlarge that metric's denominator. Empty metric subsets return JSON `null`. This is a documentation clarification of the existing implementation, with no scoring or benchmark-definition change.
 
 中文说明：README 的成对均差公式按“双方均有该指标的配对”确定分母。共有运行数与可用评分配对数可能不同；软件夹具用于核对公式与调用行为，不是模型评测成绩。
+
+
+## Conflicting input identity repair (unreleased)
+
+- **Problem:** the same literal input path could declare different valid SHA-256 digests and still be admitted as complete benchmark evidence.
+- **Failed invariant:** one declared path must have one consistent declared digest within a run.
+- **Evidence:** four new regression methods include adjacent/reversed/separated conflicts and public CLI scenarios with either or both arms invalid. On the baseline the identity file has six failing subtests in two methods; after the fix all 13 methods pass.
+- **Affected layer:** behavioral evaluation metadata admission only.
+- **Changed rule:** conflicting digests invalidate the run. Consistent duplicates, distinct paths with equal hashes, exact lexical identities and input ordering remain valid/meaningful.
+- **Expected improvement:** contradictory evidence cannot add complete runs, individual metrics or paired comparisons.
+- **New failure risk:** this checks declarations; it does not verify actual file bytes or provider execution.
+- **Compatibility:** report schemas, CLI exit semantics, canonical methods, benchmark cases/splits/rubric and the independent publication gate remain unchanged.
+- **Validation:** the original repository/module/evaluation validators, full unittest suite and compilation are required on the final tree. Synthetic fixtures are software tests and are not published model scores.

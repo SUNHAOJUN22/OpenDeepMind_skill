@@ -177,5 +177,68 @@ class PairedModelIdentityTests(unittest.TestCase):
             self.assertIsNone(paired["mean_assertion_pass_rate_delta_left_minus_right"])
 
 
+class InputArtifactIdentityTests(unittest.TestCase):
+    def test_conflicting_digests_for_one_literal_path_are_invalid(self):
+        first = {"path": "inputs/data.csv", "sha256": "a" * 64}
+        conflicting = {"path": first["path"], "sha256": "b" * 64}
+        distinct = {"path": "inputs/control.csv", "sha256": "c" * 64}
+        for inputs in ([first, conflicting], [conflicting, first], [first, distinct, conflicting]):
+            with self.subTest(inputs=inputs):
+                conditions = execution_conditions()
+                conditions["input_files"] = inputs
+                before = json.dumps(conditions, sort_keys=True)
+                errors = AGG.validate_execution_conditions(conditions)
+                self.assertTrue(any("conflicting" in error and first["path"] in error for error in errors))
+                self.assertEqual(json.dumps(conditions, sort_keys=True), before)
+
+    def test_identical_duplicates_and_distinct_literal_paths_remain_valid(self):
+        paths = ["data.csv", "data.csv", "DATA.csv", "./data.csv", " data.csv ", "é.csv", "e\u0301.csv"]
+        conditions = execution_conditions()
+        conditions["input_files"] = [{"path": path, "sha256": "a" * 64} for path in paths]
+        self.assertEqual(AGG.validate_execution_conditions(conditions), [])
+        left, right = row("opendeepmind_full"), row("no_skill")
+        left[1]["execution_conditions"]["input_files"] = conditions["input_files"]
+        right[1]["execution_conditions"]["input_files"] = list(reversed(conditions["input_files"]))
+        result = AGG.paired_comparison({("R01", 1): left}, {("R01", 1): right})
+        self.assertEqual(result["paired_runs"], 0)
+        self.assertEqual(result["excluded_pairs"][0]["reason_codes"], ["EXECUTION_CONDITIONS_MISMATCH"])
+
+    def test_invalid_paths_do_not_escape_as_type_errors(self):
+        for path in (None, [], {}, 1, True, "", " \t "):
+            with self.subTest(path=path):
+                conditions = execution_conditions()
+                conditions["input_files"] = [{"path": path, "sha256": "a" * 64}]
+                self.assertTrue(any("path" in error for error in AGG.validate_execution_conditions(conditions)))
+
+    def test_cli_excludes_inconsistent_artifacts_and_preserves_source_bytes(self):
+        for invalid_arms in ((0,), (1,), (0, 1)):
+            with self.subTest(invalid_arms=invalid_arms), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                rows = [row("opendeepmind_full"), row("no_skill")]
+                for index in invalid_arms:
+                    rows[index][1]["execution_conditions"]["input_files"] = [
+                        {"path": "data.csv", "sha256": "a" * 64},
+                        {"path": "data.csv", "sha256": "b" * 64},
+                    ]
+                slots = [{key: run[key] for key in ("case_id", "configuration", "repetition")} for _, run, _ in rows]
+                (root / "manifest.json").write_text(json.dumps({"benchmark_version": "1.0.0", "expected_run_slots": slots}), encoding="utf-8")
+                for _, run, grade in rows:
+                    directory = root / "eval-R01" / run["configuration"] / "run-1"
+                    directory.mkdir(parents=True)
+                    (directory / "run_record.json").write_text(json.dumps(run), encoding="utf-8")
+                    (directory / "grading.json").write_text(json.dumps(grade), encoding="utf-8")
+                before = {path: path.read_bytes() for path in root.rglob("*.json")}
+                process = subprocess.run([sys.executable, str(ROOT / "open-deep-mind/evals/scripts/aggregate_benchmark.py"), str(root)], text=True, capture_output=True)
+                self.assertEqual(process.returncode, 0, process.stderr)
+                report = json.loads((root / "benchmark.json").read_text(encoding="utf-8"))
+                self.assertEqual(report["complete_runs"], 2 - len(invalid_arms))
+                self.assertFalse(report["artifact_set_complete"])
+                self.assertFalse(report["publication_ready"])
+                self.assertEqual(report["comparisons"]["full_vs_no_skill"]["paired_runs"], 0)
+                self.assertEqual(len(report["metadata_errors"]), len(invalid_arms))
+                for path, content in before.items():
+                    self.assertEqual(path.read_bytes(), content)
+
+
 if __name__ == "__main__":
     unittest.main()

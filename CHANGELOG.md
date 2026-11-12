@@ -9,6 +9,9 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Reject conflicting SHA-256 declarations for the same literal benchmark input path before admitting run metrics or paired observations; preserve consistent duplicates, distinct paths, ordering and original evidence.
+- Rebuild bilingual entry READMEs and scientific guides with four complete AI PNG schematics, source-linked equations and separate software/model/attestation boundaries.
+
 - Reuse the expected-slot membership set in `publication_decision`, eliminating quadratic repeated set construction while preserving missing/duplicate/orphan diagnostics, completeness and publication authority. Add an independent multiset oracle, large-inventory checks and a deterministic hash-work regression.
 - Rebuild both READMEs around executable entrypoints, distinguish candidate from accepted benchmark pairs, document nearest-rank quantiles and source-bound mathematical contracts, and embed matching-language AI concept artwork with font-independent labels and provenance.
 

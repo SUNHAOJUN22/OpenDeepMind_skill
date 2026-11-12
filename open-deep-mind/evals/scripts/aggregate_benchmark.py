@@ -179,6 +179,7 @@ def validate_execution_conditions(conditions: Any) -> list[str]:
     if "input_files" in conditions and not isinstance(input_files, list):
         errors.append("execution_conditions.input_files must be an array")
     elif isinstance(input_files, list):
+        input_digests: dict[str, str] = {}
         for index, item in enumerate(input_files):
             prefix = f"execution_conditions.input_files[{index}]"
             if not isinstance(item, dict):
@@ -192,6 +193,11 @@ def validate_execution_conditions(conditions: Any) -> list[str]:
             digest = item.get("sha256")
             if not isinstance(digest, str) or len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
                 errors.append(f"{prefix}.sha256 must be a lowercase SHA-256 hex digest")
+            elif isinstance(path, str) and path.strip():
+                if path in input_digests and input_digests[path] != digest:
+                    errors.append(f"{prefix} has conflicting SHA-256 digests for path {path!r}")
+                else:
+                    input_digests[path] = digest
     return errors
 
 
