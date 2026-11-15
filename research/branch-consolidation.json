@@ -1,0 +1,1172 @@
+{
+  "schema_version": "1.0",
+  "review_date": "2026-11-15",
+  "main_before": "47a701c65a7609b7fb049958d0a853170ba94313",
+  "retained_branch": "main",
+  "integration_policy": "Preserve all source commits through merge ancestry; integrate distinct reusable materials; retain one-shot jobs and transport state in history only.",
+  "external_downloads_performed_in_this_review": false,
+  "model_or_cloud_jobs_run_in_this_review": false,
+  "checksum_status": "Source-recorded expected values only. No external model bytes were downloaded or independently hashed during consolidation.",
+  "source_branches": [
+    {
+      "name": "agent/public-model-assets-20261104",
+      "head": "712386117fa9fc5c67aab37172f99558fe9750e4",
+      "merge_base": "d4a97bb2e0390f17cb76ee0cbbeaa4e05e7c0d7f",
+      "commits_not_in_original_main": 2
+    },
+    {
+      "name": "cj26-public-model-assets-20261104",
+      "head": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b",
+      "merge_base": "d4a97bb2e0390f17cb76ee0cbbeaa4e05e7c0d7f",
+      "commits_not_in_original_main": 26
+    },
+    {
+      "name": "cj26-public-novelty-calibration-20261106",
+      "head": "4e9c6fbd3dbf67e9e8efb8b2dbca977cff00a8eb",
+      "merge_base": "d4a97bb2e0390f17cb76ee0cbbeaa4e05e7c0d7f",
+      "commits_not_in_original_main": 1
+    },
+    {
+      "name": "compute/public-immune-model-deps-20261104",
+      "head": "fceea66219a015b5ddd687ca77e1c2b73c98c3a4",
+      "merge_base": "d4a97bb2e0390f17cb76ee0cbbeaa4e05e7c0d7f",
+      "commits_not_in_original_main": 1
+    },
+    {
+      "name": "research/tnfa-public-novelty-audit-20261107",
+      "head": "7acc5a3076861151b8571d750e138aeac7a1b4d1",
+      "merge_base": "d4a97bb2e0390f17cb76ee0cbbeaa4e05e7c0d7f",
+      "commits_not_in_original_main": 23
+    },
+    {
+      "name": "research/tnfa-public-pairwise-20261107",
+      "head": "a83aec91aa953570b0a4370d2354075a683e4cbe",
+      "merge_base": "d4a97bb2e0390f17cb76ee0cbbeaa4e05e7c0d7f",
+      "commits_not_in_original_main": 24
+    },
+    {
+      "name": "tnfa-cloud-execution-20261108",
+      "head": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f",
+      "merge_base": "d4a97bb2e0390f17cb76ee0cbbeaa4e05e7c0d7f",
+      "commits_not_in_original_main": 27
+    }
+  ],
+  "distinct_source_commits_not_in_original_main": [
+    "01463a97b95ad0a7a34f0cda41313b971fe2be19",
+    "07b57f961ea0cd883057d099b70dedf33fcb0c29",
+    "09186025327dc67b292cbfd7d84fee6675bfee15",
+    "0e1373fa280182d7b9e468cd340822b0356099ab",
+    "0e1cff29cf5e8bae4dbba68d82e7460001306285",
+    "1c7deae427baf7e68b7c2e8908dc7bfd8c72c8bb",
+    "2a5c9d5a16a0047d2301d36f92d6dc1801724b9c",
+    "3dec2ee4bf788f9b18811748b426a004f6165d33",
+    "40c8448336afcd4be4ce4e654058af85ab81df01",
+    "4e9c6fbd3dbf67e9e8efb8b2dbca977cff00a8eb",
+    "53817b851d0cdfbc756a04b9157757238fb79906",
+    "611ea9505c1d73397116ddbbea833e5cb5d1edac",
+    "62e7808a6b9ba708e8af29e0f5ea7c2fca445b12",
+    "64b6181441ad9a79747c6de086a5ff3878a827ef",
+    "712386117fa9fc5c67aab37172f99558fe9750e4",
+    "74591cde6977fe5fdad0290bc1e31d8b9969df1e",
+    "7acc5a3076861151b8571d750e138aeac7a1b4d1",
+    "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f",
+    "7f143ad0151141d8a6a6dd0dc92e742bc4c98fd8",
+    "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b",
+    "841ae97fba69d29520ef199763f72c388ab7a05c",
+    "8e2369ea0770c69e129792d42596aef3ab263bde",
+    "9abebc1531a886f04ce1740d251c057c28582427",
+    "a4b5233085f31cf2c1e53318041faa532d134453",
+    "a83aec91aa953570b0a4370d2354075a683e4cbe",
+    "ad5db4f23697942688196853ccc2437a05d8af68",
+    "b0023881a90d1ecee51ba59ffcbe80084a0ffd54",
+    "b8cb258285163fcec675631cda7ddbc5a90fa3d3",
+    "dda622ad8e86ca463f0fccdeaa660ecb7dbf7c69",
+    "df0a4c2cfd65b8f60fc2e249a2ff9f1cf099a26f",
+    "e17d9ce7408efd754274fc448a2e9a2da8416d88",
+    "ef22c66d3ed7c3872fc0b67b5edf00592a3035fc",
+    "f16a400aa4a7dab90893a4ad437fe1545510e6fe",
+    "fa8414de767eb374ee884c865f3b37deaf8efb29",
+    "fceea66219a015b5ddd687ca77e1c2b73c98c3a4"
+  ],
+  "source_files": [
+    {
+      "path": ".github/workflows/public-model-assets-20261104.yml",
+      "blob": "9b872bf2817e135aabbb731d19df8a514dda0b6e",
+      "bytes": 4757,
+      "sha256": "37492a6dd0630e992a2af3ed181efd04f2cad8759f338a3970f7f474e68a90f4",
+      "heads": [
+        {
+          "branch": "agent/public-model-assets-20261104",
+          "commit": "712386117fa9fc5c67aab37172f99558fe9750e4"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/public-model-refine-deps-20261104.yml",
+      "blob": "bbc5454e37a15bec4384218294c0a0f3ccf40273",
+      "bytes": 2251,
+      "sha256": "edf094690575d5b171a87ea62bf3be73e51b827db111eb107cac1e0ffc1159c5",
+      "heads": [
+        {
+          "branch": "agent/public-model-assets-20261104",
+          "commit": "712386117fa9fc5c67aab37172f99558fe9750e4"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".cj26-transport/recovery-command-20261106.cms.b64",
+      "blob": "d51a7170f8d8059956b6d4c2d430e24245e1aa86",
+      "bytes": 1305,
+      "sha256": "fcdc18262a943d393b0c0d4f1ba4410bc9a5560ab7b6a0e8447ebaee2e8c517c",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "One-use encrypted transport state retained only in merge ancestry; not decrypted or copied into the current source tree."
+    },
+    {
+      "path": ".github/workflows/cj26-existing-job-secure-recovery-20261106.yml",
+      "blob": "f856ce7d9ca74ae55fd082f1a03efaf0f50367cf",
+      "bytes": 9830,
+      "sha256": "946e5aaf078f423e5d6b547d3eee00351e95ea0f8a1572c582dee851ed88f42b",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-final-readonly-recovery-20261106-1440.yml",
+      "blob": "9e66e541f0c070d1bbaec147615e97ba814eb280",
+      "bytes": 2645,
+      "sha256": "89e617c0cc462999f1ff182a79d1a1af971f8de0f5b4322ca07e50a9b90d8cb4",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-af2-cpu-assets-20261107.yml",
+      "blob": "7a152d61631ea877dd7439bba178daa03a238bd3",
+      "bytes": 4469,
+      "sha256": "6a5f8dcbb6444e94bcd3ccb28a7f8e6507fc1904458669a973132988f0b7aa1c",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-boltz2-assets-0845.yml",
+      "blob": "9ce698b281f69c943b14ce2f234c06d60ef063ff",
+      "bytes": 6389,
+      "sha256": "a12613586b9b50163936fcfba9f4726df583682c54173c2e075dffc8db5400d9",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-boltz2-cpu-assets.yml",
+      "blob": "5cf1def3177edfb66aeae649017d2eca1e9a8e1b",
+      "bytes": 8350,
+      "sha256": "36fb1ff5863f8dc30389d01c461e769875829d4670ffeacd2b6038325f8709a1",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-boltz2-recovery-0852.yml",
+      "blob": "0bb7648a36e2f04cf6a5438e60ce535cba9a1a83",
+      "bytes": 4112,
+      "sha256": "1c570c1a5ccb92214fc7e5db164c5f1272ccfc9de7b0b6381e39f7673bc3421e",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-chembl-parser-0856.yml",
+      "blob": "390ea20d2f227e4ba2539a237b169881b1a392ca",
+      "bytes": 1044,
+      "sha256": "f87c1b3b131dd6f6205aafd43d64f57f820fd18e8983ee6355867cb34b5f82cb",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-control-context-20261108.yml",
+      "blob": "1d0473e6f820c8da7b61ef2f924472b8add2a14f",
+      "bytes": 2312,
+      "sha256": "0ba6e2909a94890bf2bac3af1031bacfa179566ca9847225d0472041066307a6",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-ensemble-split-return.yml",
+      "blob": "9abdb763b79729aedd212e55e357d86685cc60e8",
+      "bytes": 2390,
+      "sha256": "8f8dc9dd6642bc17316918b89d50aba49eb182086f873702d6e067b68639f9eb",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-il7ra-msa-20261107.yml",
+      "blob": "ab5f51bcd758774d57e08463daba8c60bb12a1c3",
+      "bytes": 3751,
+      "sha256": "8f4ec061ac736357e9c243aaaa9163d974f2f82550eed3c9df0806fb62509f24",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-model-assets.yml",
+      "blob": "782cc4f8e5968a6a57e8e53442b49920b6cb16ae",
+      "bytes": 3793,
+      "sha256": "1f8275deac3e3879d289dea0fdf0284224a7a3fa5d9caa2d3a245f31978a13e5",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-nanobody-ensemble-assets.yml",
+      "blob": "f3aa42d200092ceaf931bbad019899479d219bcd",
+      "bytes": 3172,
+      "sha256": "87ec7f3c70bd02d5be902e8cf422af51facccb80f20349be1c1ca97390ffac8b",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-proteinmpnn-assets-20261106.yml",
+      "blob": "c463fdd1956196382348bcabd9abb02930a97b41",
+      "bytes": 2239,
+      "sha256": "496888acffff3228aa71b76749c4fc6f98a10945fed4748619262df3f00ce3f3",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-refinement-deps.yml",
+      "blob": "17529aa5439bc1342f3faf99e5e15a8beac5d64c",
+      "bytes": 2769,
+      "sha256": "0909a0220edbabe0bbff5b21c20a3699467e18a7d28f99dc0deee86cfa98a7f7",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-rule-assets-20261106.yml",
+      "blob": "587eccfc4488724c7d5ee3e46c8277242d448731",
+      "bytes": 3261,
+      "sha256": "1ba0affdd9e52f69ffe87bc54dcaf295c5bfa9e0cc5594dcd034dcb92e57709a",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-target-cloud-pilot-20261106.yml",
+      "blob": "88b24aeee9e2f8a13a1f07b989af4805297e40bb",
+      "bytes": 10963,
+      "sha256": "3cab1286c2378c2c2457f9bfee75fee2e649e4bf0033f5f2b8d02fff772fae09",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-target-cloud-pilot-mapped-20261106.yml",
+      "blob": "9b3e62e8102a416b613093c6757f50f6613a706a",
+      "bytes": 3535,
+      "sha256": "24d21575015428d22fd4830f684d4b278bb743e702460e0c7510dfe8affc6b99",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-target-msas.yml",
+      "blob": "b1db16c6c7572c84097835252b93e9a519d5c147",
+      "bytes": 3517,
+      "sha256": "f2e71de6d1376a2e19247b075d8fae0c0ce8e5853f4ce83148ab94c017ef9b03",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-public-tl1a-design-20261106-1403.yml",
+      "blob": "eba61598368136462b38e8c04114bbb61b3a2867",
+      "bytes": 11132,
+      "sha256": "94fa27352d3c36e01d3682f65494304c23bd12abf1921d42b17ca5e7d56eba97",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-readonly-sealed-recovery-20261106-1415.yml",
+      "blob": "e8dfd2957fe91c637c04ec04f74ca2377cbf23d7",
+      "bytes": 9429,
+      "sha256": "56eb26a24287b5962c73d60910fb174429b09276305a51ba3d8649d018915f08",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-tl1a-numbering-fixed-20261108.yml",
+      "blob": "b51613510e69f386698df426c6925bdb7c55d3b4",
+      "bytes": 2622,
+      "sha256": "cd89d0f297749b037c436fb25bb8f1951a871b2b6cbaf5c7554e4eb49109d819",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/cj26-tl1a-public-target-rfd3-20261108.yml",
+      "blob": "f878fda52bad3b346d7c33ac7b883341ed69eb56",
+      "bytes": 8134,
+      "sha256": "37de8b6dd16e75488abe3b9eba257ce356d1086dd524a4676d293221a854d98b",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": "cj26-transport/handoff-20261106-1415.json",
+      "blob": "430ff337d7df7a384a33a650421885b9e61d57bd",
+      "bytes": 1642,
+      "sha256": "5fecc4c8b10d158254acfcd4d0e1a45853a9eb7a184aa63d949086f40ed38a9c",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "One-use encrypted transport state retained only in merge ancestry; not decrypted or copied into the current source tree."
+    },
+    {
+      "path": "cj26-transport/handoff-20261106-1440.json",
+      "blob": "e748003ff0258f6935e6eee297c5fa7fb38984e5",
+      "bytes": 1642,
+      "sha256": "002a1f9ffe415626646985f5683523d8856fcbb57e8c4f86528fb7e94164c02f",
+      "heads": [
+        {
+          "branch": "cj26-public-model-assets-20261104",
+          "commit": "806e7f7a977f85287f2623fbe7fa4e4fefe9ad7b"
+        },
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "One-use encrypted transport state retained only in merge ancestry; not decrypted or copied into the current source tree."
+    },
+    {
+      "path": ".github/workflows/cj26-public-novelty-calibration-20261106.yml",
+      "blob": "03e8166fb5658895429bf904a32546c68b851d1d",
+      "bytes": 13574,
+      "sha256": "32064c080850d77d6d53f92a8bbfce87d866c857a13dd7a160b96d1704f449d9",
+      "heads": [
+        {
+          "branch": "cj26-public-novelty-calibration-20261106",
+          "commit": "4e9c6fbd3dbf67e9e8efb8b2dbca977cff00a8eb"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/public-immune-model-deps.yml",
+      "blob": "6d12a677069fb55f45c256bff55e0716611c9d15",
+      "bytes": 4435,
+      "sha256": "7b6a646bce54866af48dc0eabb8841db1ce478d549e7fecb5952dc883144dc11",
+      "heads": [
+        {
+          "branch": "compute/public-immune-model-deps-20261104",
+          "commit": "fceea66219a015b5ddd687ca77e1c2b73c98c3a4"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": ".github/workflows/tnfa-public-novelty-audit.yml",
+      "blob": "57f586c34cb94f15baebb0a46cf56e621fd53be7",
+      "bytes": 1585,
+      "sha256": "c762b442d10175b92c0d26468c4349bd311bfafd539447e545f9bb20f7de4757",
+      "heads": [
+        {
+          "branch": "research/tnfa-public-novelty-audit-20261107",
+          "commit": "7acc5a3076861151b8571d750e138aeac7a1b4d1"
+        },
+        {
+          "branch": "research/tnfa-public-pairwise-20261107",
+          "commit": "a83aec91aa953570b0a4370d2354075a683e4cbe"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": "PUBLIC_AUDIT_RESULT_zh.md",
+      "blob": "2f713123793202c5b809b5f79e2f2f471b44ee07",
+      "bytes": 3756,
+      "sha256": "dd953fd06fcb669c1dee2984dcaa262e87877e56031366bdfd91b732e429f4bc",
+      "heads": [
+        {
+          "branch": "research/tnfa-public-novelty-audit-20261107",
+          "commit": "7acc5a3076861151b8571d750e138aeac7a1b4d1"
+        }
+      ],
+      "disposition": "Integrated once, byte-identical to the source blob.",
+      "destination": "research/public-reference-audit/PUBLIC_AUDIT_RESULT_zh.md"
+    },
+    {
+      "path": "README.md",
+      "blob": "2ed6de859384c8bb2e493a12202eee88953c5138",
+      "bytes": 898,
+      "sha256": "af0056500096e80033dd5483a4f34e212bb470748b6e07f2bf53f5e8101bb800",
+      "heads": [
+        {
+          "branch": "research/tnfa-public-novelty-audit-20261107",
+          "commit": "7acc5a3076861151b8571d750e138aeac7a1b4d1"
+        },
+        {
+          "branch": "research/tnfa-public-pairwise-20261107",
+          "commit": "a83aec91aa953570b0a4370d2354075a683e4cbe"
+        }
+      ],
+      "disposition": "Temporary branch overview superseded by research/README.md; original retained in merge ancestry."
+    },
+    {
+      "path": "audit_public.py",
+      "blob": "b7f17d4d18c2fe269a513a3c414250d641e8292f",
+      "bytes": 12993,
+      "sha256": "935959165f89a00b86a62cf33920de2dd8e7cac007bd2072df67cb8ba673364f",
+      "heads": [
+        {
+          "branch": "research/tnfa-public-novelty-audit-20261107",
+          "commit": "7acc5a3076861151b8571d750e138aeac7a1b4d1"
+        },
+        {
+          "branch": "research/tnfa-public-pairwise-20261107",
+          "commit": "a83aec91aa953570b0a4370d2354075a683e4cbe"
+        }
+      ],
+      "disposition": "Integrated once, byte-identical to the source blob.",
+      "destination": "research/public-reference-audit/audit_public.py"
+    },
+    {
+      "path": ".github/workflows/tnfa-public-pairwise-20261107.yml",
+      "blob": "6b1cf1298aa2187fcc4a14f173a6f035826acd24",
+      "bytes": 1405,
+      "sha256": "33f999b82b8b6d83e36b2429993bfb664f97da5dfffadc76b3d79d23acca3b33",
+      "heads": [
+        {
+          "branch": "research/tnfa-public-pairwise-20261107",
+          "commit": "a83aec91aa953570b0a4370d2354075a683e4cbe"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    },
+    {
+      "path": "PUBLIC_PAIRWISE_ACTUAL_RESULT_20261107_zh.md",
+      "blob": "9e48f7e3e3643e4e0614decb2fe3bf4ff7f110a3",
+      "bytes": 4501,
+      "sha256": "38e0729b1a96ab77d57c649bb8bcda2c65765fcd9d7b2cf30588f646ca810244",
+      "heads": [
+        {
+          "branch": "research/tnfa-public-pairwise-20261107",
+          "commit": "a83aec91aa953570b0a4370d2354075a683e4cbe"
+        }
+      ],
+      "disposition": "Integrated once, byte-identical to the source blob.",
+      "destination": "research/public-reference-audit/PUBLIC_PAIRWISE_ACTUAL_RESULT_20261107_zh.md"
+    },
+    {
+      "path": "public_pairwise_followup.py",
+      "blob": "86eba89d60b5ffe6f743c86391adba568914187c",
+      "bytes": 12327,
+      "sha256": "e5bfafe1177f88aae15b8790097e4f7728949da9101988760cd209801036bec0",
+      "heads": [
+        {
+          "branch": "research/tnfa-public-pairwise-20261107",
+          "commit": "a83aec91aa953570b0a4370d2354075a683e4cbe"
+        }
+      ],
+      "disposition": "Integrated once, byte-identical to the source blob.",
+      "destination": "research/public-reference-audit/public_pairwise_followup.py"
+    },
+    {
+      "path": ".github/workflows/tnfa-cloud-capability-20261108.yml",
+      "blob": "e168373b7c96edc9b3daa13430a746ec7456dca3",
+      "bytes": 4513,
+      "sha256": "540a6556ce46c2f9dcb78f58cc426217012e34cbda8d1f0cc0808b728f7a57a4",
+      "heads": [
+        {
+          "branch": "tnfa-cloud-execution-20261108",
+          "commit": "7f03165a6a116ba3f10dedb9fbe7f3400ab51b2f"
+        }
+      ],
+      "disposition": "Branch-specific one-shot workflow retained only in merge ancestry; reusable pinned assets are consolidated in public_assets when applicable. Not installed as an active workflow."
+    }
+  ],
+  "public_assets": [
+    {
+      "id": "nanobody-model-1",
+      "url": "https://zenodo.org/records/7258553/files/nanobody_model_1?download=1",
+      "source_paths": [
+        ".github/workflows/public-model-assets-20261104.yml",
+        ".github/workflows/cj26-public-model-assets.yml",
+        ".github/workflows/public-immune-model-deps.yml"
+      ],
+      "source_recorded_checksums": {
+        "md5": "4591075f467ca9f76a37a5d1d3cfe591"
+      }
+    },
+    {
+      "id": "nanobody-model-2",
+      "url": "https://zenodo.org/records/7258553/files/nanobody_model_2?download=1",
+      "source_paths": [
+        ".github/workflows/cj26-public-nanobody-ensemble-assets.yml"
+      ],
+      "source_recorded_checksums": {
+        "md5": "620fc916720bc7068cd18c7afa1aea8d"
+      }
+    },
+    {
+      "id": "nanobody-model-3",
+      "url": "https://zenodo.org/records/7258553/files/nanobody_model_3?download=1",
+      "source_paths": [
+        ".github/workflows/cj26-public-nanobody-ensemble-assets.yml"
+      ],
+      "source_recorded_checksums": {
+        "md5": "f1ef0a66a54efb9d14ddbb97fdc30785"
+      }
+    },
+    {
+      "id": "nanobody-model-4",
+      "url": "https://zenodo.org/records/7258553/files/nanobody_model_4?download=1",
+      "source_paths": [
+        ".github/workflows/cj26-public-nanobody-ensemble-assets.yml"
+      ],
+      "source_recorded_checksums": {
+        "md5": "a7e14a33f4c00e96df896120e9cf8522"
+      }
+    },
+    {
+      "id": "proteinmpnn-v48-020",
+      "url": "https://raw.githubusercontent.com/dauparas/ProteinMPNN/8907e6671bfbfc92303b5f79c4b5e6ce47cdef57/vanilla_model_weights/v_48_020.pt",
+      "source_paths": [
+        ".github/workflows/public-model-assets-20261104.yml",
+        ".github/workflows/cj26-public-proteinmpnn-assets-20261106.yml",
+        ".github/workflows/public-immune-model-deps.yml"
+      ],
+      "revision": "8907e6671bfbfc92303b5f79c4b5e6ce47cdef57",
+      "source_recorded_checksums": {
+        "sha256": "c9cb4a671d79604111231f8dbfc7c590e06f1197453b7a6854ac6661a642f5bd",
+        "git_blob_sha1": "66f81553eea491dfc1307582c679ef029511937b"
+      }
+    },
+    {
+      "id": "immunebuilder-source",
+      "url": "https://codeload.github.com/oxpig/ImmuneBuilder/zip/0df4e2ad82a1aa60f37ea9dae335d1198159ef78",
+      "source_paths": [
+        ".github/workflows/cj26-public-model-assets.yml"
+      ],
+      "revision": "0df4e2ad82a1aa60f37ea9dae335d1198159ef78"
+    },
+    {
+      "id": "openmm-8.4.0-metadata",
+      "url": "https://pypi.org/pypi/OpenMM/8.4.0/json",
+      "source_paths": [
+        ".github/workflows/public-model-refine-deps-20261104.yml",
+        ".github/workflows/cj26-public-refinement-deps.yml"
+      ],
+      "version": "8.4.0",
+      "checksum_note": "The workflows select a wheel from this version metadata and check its reported SHA256; no fixed wheel digest is embedded here."
+    },
+    {
+      "id": "pdbfixer-94cfa4c-source",
+      "url": "https://codeload.github.com/openmm/pdbfixer/zip/94cfa4c0ca551cdc5f13320f9a658efd59f2b881",
+      "source_paths": [
+        ".github/workflows/public-model-refine-deps-20261104.yml"
+      ],
+      "revision": "94cfa4c0ca551cdc5f13320f9a658efd59f2b881"
+    },
+    {
+      "id": "pdbfixer-5e658a4-source",
+      "url": "https://codeload.github.com/openmm/pdbfixer/zip/5e658a4fb8d2b90d65ca8408c845cbf104ce7099",
+      "source_paths": [
+        ".github/workflows/cj26-public-refinement-deps.yml"
+      ],
+      "revision": "5e658a4fb8d2b90d65ca8408c845cbf104ce7099"
+    },
+    {
+      "id": "boltz2-structure-checkpoint",
+      "url": "https://huggingface.co/boltz-community/boltz-2/resolve/6fdef46d763fee7fbb83ca5501ccceff43b85607/boltz2_conf.ckpt?download=true",
+      "source_paths": [
+        ".github/workflows/cj26-public-boltz2-recovery-0852.yml"
+      ],
+      "revision": "6fdef46d763fee7fbb83ca5501ccceff43b85607",
+      "source_recorded_checksums": {
+        "sha256": "090e82ac8c92f5e943fa1b39e7410a44027bea7243c0bbb3caa67a77fc1428e1"
+      },
+      "source_recorded_bytes": 2286561469
+    },
+    {
+      "id": "alphafold-model-1-multimer-v3",
+      "url": "https://storage.googleapis.com/alphafold/alphafold_params_colab_2022-12-06.tar",
+      "source_paths": [
+        ".github/workflows/cj26-public-af2-cpu-assets-20261107.yml"
+      ],
+      "archive_member_basename": "params_model_1_multimer_v3.npz",
+      "checksum_note": "The source workflow records a computed digest after retrieval; it contains no expected published digest."
+    },
+    {
+      "id": "alphafold-source",
+      "url": "https://codeload.github.com/google-deepmind/alphafold/zip/c77e5d2a8961d1a353632c462914ff0a32a950f6",
+      "source_paths": [
+        ".github/workflows/cj26-public-af2-cpu-assets-20261107.yml"
+      ],
+      "revision": "c77e5d2a8961d1a353632c462914ff0a32a950f6"
+    },
+    {
+      "id": "mmseqs2-linux-avx2",
+      "url": "https://github.com/soedinglab/MMseqs2/releases/download/18-8cc5c/mmseqs-linux-avx2.tar.gz",
+      "source_paths": [
+        ".github/workflows/cj26-public-rule-assets-20261106.yml"
+      ],
+      "version": "18-8cc5c",
+      "source_recorded_checksums": {
+        "sha256": "bd9b0234da5949ad528d5b5f9ea4cda9c1e23dce14b46c0791d4d919a76e61ce"
+      }
+    }
+  ],
+  "rejected_tree_deletions": [
+    {
+      "branch": "research/tnfa-public-novelty-audit-20261107",
+      "paths": [
+        ".agents/skills/open-deep-mind/SKILL.md",
+        ".agents/skills/open-deep-mind/agents/openai.yaml",
+        ".agents/skills/open-deep-mind/references/definition-of-done.md",
+        ".agents/skills/open-deep-mind/references/interoperability-v1.json",
+        ".github/V15_FINAL_QUALIFICATION.md",
+        ".github/V17_FINAL_QUALIFICATION_2026-08-19.md",
+        ".github/workflows/validate.yml",
+        ".gitignore",
+        "AGENTS.md",
+        "BENCHMARK.md",
+        "CHANGELOG.md",
+        "CITATION.cff",
+        "CONTRIBUTING.md",
+        "LICENSE.md",
+        "NOTICE.md",
+        "README.zh-CN.md",
+        "SECURITY.md",
+        "V15_RELEASE_NOTES.md",
+        "VERSION",
+        "docs/acceptance-repair.md",
+        "docs/assets/README.md",
+        "docs/assets/readme-vnext/artwork-provenance.json",
+        "docs/assets/readme-vnext/hero.en.svg",
+        "docs/assets/readme-vnext/hero.zh-CN.svg",
+        "docs/assets/vision-en.png",
+        "docs/assets/vision-zh.png",
+        "open-deep-mind/ARCHITECTURE.md",
+        "open-deep-mind/COMPLETENESS_AUDIT.md",
+        "open-deep-mind/FIRST_PHILOSOPHY.md",
+        "open-deep-mind/FIRST_PRINCIPLES.md",
+        "open-deep-mind/MODULES.json",
+        "open-deep-mind/SKILL.md",
+        "open-deep-mind/TRIZ_ENGINEERING.md",
+        "open-deep-mind/assets/claim-ledger-template.md",
+        "open-deep-mind/assets/claim-ledger.schema.json",
+        "open-deep-mind/assets/diagrams/ai-concept-map.svg",
+        "open-deep-mind/assets/diagrams/domain-map.svg",
+        "open-deep-mind/assets/diagrams/dual-engine.svg",
+        "open-deep-mind/assets/diagrams/en/concept-map.svg",
+        "open-deep-mind/assets/diagrams/en/dual-engine.svg",
+        "open-deep-mind/assets/diagrams/en/hero.svg",
+        "open-deep-mind/assets/diagrams/en/philosophy-lenses.svg",
+        "open-deep-mind/assets/diagrams/en/principles-loop.svg",
+        "open-deep-mind/assets/diagrams/en/proposition-ledger.svg",
+        "open-deep-mind/assets/diagrams/en/quality-gates.svg",
+        "open-deep-mind/assets/diagrams/en/scale-ladder.svg",
+        "open-deep-mind/assets/diagrams/failure-modes.svg",
+        "open-deep-mind/assets/diagrams/hero.svg",
+        "open-deep-mind/assets/diagrams/homepage-bilingual.svg",
+        "open-deep-mind/assets/diagrams/output-architecture.svg",
+        "open-deep-mind/assets/diagrams/philosophy-lenses.svg",
+        "open-deep-mind/assets/diagrams/principles-loop.svg",
+        "open-deep-mind/assets/diagrams/proposition-ledger.svg",
+        "open-deep-mind/assets/diagrams/quality-gates.svg",
+        "open-deep-mind/assets/diagrams/scale-ladder.svg",
+        "open-deep-mind/assets/diagrams/zh/concept-map.svg",
+        "open-deep-mind/assets/diagrams/zh/dual-engine.svg",
+        "open-deep-mind/assets/diagrams/zh/hero.svg",
+        "open-deep-mind/assets/diagrams/zh/philosophy-lenses.svg",
+        "open-deep-mind/assets/diagrams/zh/principles-loop.svg",
+        "open-deep-mind/assets/diagrams/zh/proposition-ledger.svg",
+        "open-deep-mind/assets/diagrams/zh/quality-gates.svg",
+        "open-deep-mind/assets/diagrams/zh/scale-ladder.svg",
+        "open-deep-mind/assets/example-ledger.json",
+        "open-deep-mind/assets/output-templates.md",
+        "open-deep-mind/evals/MODEL_EVAL_STATUS.json",
+        "open-deep-mind/evals/README.md",
+        "open-deep-mind/evals/benchmark-config.json",
+        "open-deep-mind/evals/benchmark.schema.json",
+        "open-deep-mind/evals/evals.json",
+        "open-deep-mind/evals/evals.schema.json",
+        "open-deep-mind/evals/grading.schema.json",
+        "open-deep-mind/evals/rubric.md",
+        "open-deep-mind/evals/run-record.schema.json",
+        "open-deep-mind/evals/scripts/aggregate_benchmark.py",
+        "open-deep-mind/evals/scripts/create_workspace.py",
+        "open-deep-mind/evals/scripts/validate_evals.py",
+        "open-deep-mind/first-philosophy/METHOD.md",
+        "open-deep-mind/first-philosophy/README.md",
+        "open-deep-mind/first-philosophy/example-foundation-charter.json",
+        "open-deep-mind/first-philosophy/foundation-charter.schema.json",
+        "open-deep-mind/first-philosophy/module.json",
+        "open-deep-mind/first-philosophy/scripts/validate_module.py",
+        "open-deep-mind/first-principles/METHOD.md",
+        "open-deep-mind/first-principles/README.md",
+        "open-deep-mind/first-principles/decision-record.schema.json",
+        "open-deep-mind/first-principles/example-decision-record.json",
+        "open-deep-mind/first-principles/example-model-contract.json",
+        "open-deep-mind/first-principles/model-contract.schema.json",
+        "open-deep-mind/first-principles/module.json",
+        "open-deep-mind/first-principles/scripts/validate_module.py",
+        "open-deep-mind/references/domain-routing.md",
+        "open-deep-mind/references/failure-modes.md",
+        "open-deep-mind/references/glossary.md",
+        "open-deep-mind/references/intellectual-lineage.md",
+        "open-deep-mind/references/method-atlas.md",
+        "open-deep-mind/references/quality-gates.md",
+        "open-deep-mind/references/worked-examples.md",
+        "open-deep-mind/scripts/contracts_v17.py",
+        "open-deep-mind/scripts/prepare_context.py",
+        "open-deep-mind/scripts/scientific_contracts_v16.py",
+        "open-deep-mind/scripts/validate_ledger.py",
+        "open-deep-mind/scripts/validate_repository.py",
+        "open-deep-mind/tests/test_acceptance_integrity.py",
+        "open-deep-mind/tests/test_aggregate_output_preservation.py",
+        "open-deep-mind/tests/test_benchmark_identity.py",
+        "open-deep-mind/tests/test_benchmark_workspace.py",
+        "open-deep-mind/tests/test_configuration_integrity.py",
+        "open-deep-mind/tests/test_context_preparation.py",
+        "open-deep-mind/tests/test_context_registry_integrity.py",
+        "open-deep-mind/tests/test_contracts_v17.py",
+        "open-deep-mind/tests/test_cost_and_latency.py",
+        "open-deep-mind/tests/test_json_numeric_underflow.py",
+        "open-deep-mind/tests/test_ledger_json_boundary.py",
+        "open-deep-mind/tests/test_ledger_optional_confidence.py",
+        "open-deep-mind/tests/test_ledger_optional_fields.py",
+        "open-deep-mind/tests/test_ledger_raw_budgets.py",
+        "open-deep-mind/tests/test_ledger_regressions.py",
+        "open-deep-mind/tests/test_pair_model_identity.py",
+        "open-deep-mind/tests/test_scientific_contracts_v16.py",
+        "open-deep-mind/tests/test_skill_interoperability_v19.py",
+        "open-deep-mind/tests/test_validators.py",
+        "open-deep-mind/triz/README.md",
+        "open-deep-mind/triz/ROUTER.md",
+        "open-deep-mind/triz/VENDORED_LICENSE.md",
+        "open-deep-mind/triz/examples/anti_example_misframed.md",
+        "open-deep-mind/triz/examples/battery_pack.md",
+        "open-deep-mind/triz/examples/brake_disc.md",
+        "open-deep-mind/triz/examples/heat_exchanger_fouling.md",
+        "open-deep-mind/triz/module.json",
+        "open-deep-mind/triz/resources/39_parameters.md",
+        "open-deep-mind/triz/resources/40_principles.md",
+        "open-deep-mind/triz/resources/76_standard_solutions.md",
+        "open-deep-mind/triz/resources/ariz_85c.md",
+        "open-deep-mind/triz/resources/cause_effect_chain.md",
+        "open-deep-mind/triz/resources/clone_problems.md",
+        "open-deep-mind/triz/resources/concept_substantiation.md",
+        "open-deep-mind/triz/resources/contradiction_matrix.json",
+        "open-deep-mind/triz/resources/contradictions.md",
+        "open-deep-mind/triz/resources/effects_and_fos.md",
+        "open-deep-mind/triz/resources/evolution_trends.md",
+        "open-deep-mind/triz/resources/feature_transfer.md",
+        "open-deep-mind/triz/resources/flow_analysis.md",
+        "open-deep-mind/triz/resources/function_analysis.md",
+        "open-deep-mind/triz/resources/glossary.md",
+        "open-deep-mind/triz/resources/ideality_ifr_resources.md",
+        "open-deep-mind/triz/resources/innovative_benchmarking.md",
+        "open-deep-mind/triz/resources/matrix_anomalies.json",
+        "open-deep-mind/triz/resources/modern_problem_identification.md",
+        "open-deep-mind/triz/resources/multiscreen_operator.md",
+        "open-deep-mind/triz/resources/output_template.md",
+        "open-deep-mind/triz/resources/psychological_inertia_tools.md",
+        "open-deep-mind/triz/resources/s_curve_and_tese.md",
+        "open-deep-mind/triz/resources/separation_principles.md",
+        "open-deep-mind/triz/resources/sources.md",
+        "open-deep-mind/triz/resources/substance_field_modeling.md",
+        "open-deep-mind/triz/resources/trimming.md",
+        "open-deep-mind/triz/scripts/lookup_matrix.py",
+        "open-deep-mind/triz/scripts/lookup_standard_solution.py",
+        "open-deep-mind/triz/scripts/validate_triz_module.py"
+      ],
+      "reason": "Research-only branch replaced the repository root. Preserve the current main project and integrate research materials under research/."
+    },
+    {
+      "branch": "research/tnfa-public-pairwise-20261107",
+      "paths": [
+        ".agents/skills/open-deep-mind/SKILL.md",
+        ".agents/skills/open-deep-mind/agents/openai.yaml",
+        ".agents/skills/open-deep-mind/references/definition-of-done.md",
+        ".agents/skills/open-deep-mind/references/interoperability-v1.json",
+        ".github/V15_FINAL_QUALIFICATION.md",
+        ".github/V17_FINAL_QUALIFICATION_2026-08-19.md",
+        ".github/workflows/validate.yml",
+        ".gitignore",
+        "AGENTS.md",
+        "BENCHMARK.md",
+        "CHANGELOG.md",
+        "CITATION.cff",
+        "CONTRIBUTING.md",
+        "LICENSE.md",
+        "NOTICE.md",
+        "README.zh-CN.md",
+        "SECURITY.md",
+        "V15_RELEASE_NOTES.md",
+        "VERSION",
+        "docs/acceptance-repair.md",
+        "docs/assets/README.md",
+        "docs/assets/readme-vnext/artwork-provenance.json",
+        "docs/assets/readme-vnext/hero.en.svg",
+        "docs/assets/readme-vnext/hero.zh-CN.svg",
+        "docs/assets/vision-en.png",
+        "docs/assets/vision-zh.png",
+        "open-deep-mind/ARCHITECTURE.md",
+        "open-deep-mind/COMPLETENESS_AUDIT.md",
+        "open-deep-mind/FIRST_PHILOSOPHY.md",
+        "open-deep-mind/FIRST_PRINCIPLES.md",
+        "open-deep-mind/MODULES.json",
+        "open-deep-mind/SKILL.md",
+        "open-deep-mind/TRIZ_ENGINEERING.md",
+        "open-deep-mind/assets/claim-ledger-template.md",
+        "open-deep-mind/assets/claim-ledger.schema.json",
+        "open-deep-mind/assets/diagrams/ai-concept-map.svg",
+        "open-deep-mind/assets/diagrams/domain-map.svg",
+        "open-deep-mind/assets/diagrams/dual-engine.svg",
+        "open-deep-mind/assets/diagrams/en/concept-map.svg",
+        "open-deep-mind/assets/diagrams/en/dual-engine.svg",
+        "open-deep-mind/assets/diagrams/en/hero.svg",
+        "open-deep-mind/assets/diagrams/en/philosophy-lenses.svg",
+        "open-deep-mind/assets/diagrams/en/principles-loop.svg",
+        "open-deep-mind/assets/diagrams/en/proposition-ledger.svg",
+        "open-deep-mind/assets/diagrams/en/quality-gates.svg",
+        "open-deep-mind/assets/diagrams/en/scale-ladder.svg",
+        "open-deep-mind/assets/diagrams/failure-modes.svg",
+        "open-deep-mind/assets/diagrams/hero.svg",
+        "open-deep-mind/assets/diagrams/homepage-bilingual.svg",
+        "open-deep-mind/assets/diagrams/output-architecture.svg",
+        "open-deep-mind/assets/diagrams/philosophy-lenses.svg",
+        "open-deep-mind/assets/diagrams/principles-loop.svg",
+        "open-deep-mind/assets/diagrams/proposition-ledger.svg",
+        "open-deep-mind/assets/diagrams/quality-gates.svg",
+        "open-deep-mind/assets/diagrams/scale-ladder.svg",
+        "open-deep-mind/assets/diagrams/zh/concept-map.svg",
+        "open-deep-mind/assets/diagrams/zh/dual-engine.svg",
+        "open-deep-mind/assets/diagrams/zh/hero.svg",
+        "open-deep-mind/assets/diagrams/zh/philosophy-lenses.svg",
+        "open-deep-mind/assets/diagrams/zh/principles-loop.svg",
+        "open-deep-mind/assets/diagrams/zh/proposition-ledger.svg",
+        "open-deep-mind/assets/diagrams/zh/quality-gates.svg",
+        "open-deep-mind/assets/diagrams/zh/scale-ladder.svg",
+        "open-deep-mind/assets/example-ledger.json",
+        "open-deep-mind/assets/output-templates.md",
+        "open-deep-mind/evals/MODEL_EVAL_STATUS.json",
+        "open-deep-mind/evals/README.md",
+        "open-deep-mind/evals/benchmark-config.json",
+        "open-deep-mind/evals/benchmark.schema.json",
+        "open-deep-mind/evals/evals.json",
+        "open-deep-mind/evals/evals.schema.json",
+        "open-deep-mind/evals/grading.schema.json",
+        "open-deep-mind/evals/rubric.md",
+        "open-deep-mind/evals/run-record.schema.json",
+        "open-deep-mind/evals/scripts/aggregate_benchmark.py",
+        "open-deep-mind/evals/scripts/create_workspace.py",
+        "open-deep-mind/evals/scripts/validate_evals.py",
+        "open-deep-mind/first-philosophy/METHOD.md",
+        "open-deep-mind/first-philosophy/README.md",
+        "open-deep-mind/first-philosophy/example-foundation-charter.json",
+        "open-deep-mind/first-philosophy/foundation-charter.schema.json",
+        "open-deep-mind/first-philosophy/module.json",
+        "open-deep-mind/first-philosophy/scripts/validate_module.py",
+        "open-deep-mind/first-principles/METHOD.md",
+        "open-deep-mind/first-principles/README.md",
+        "open-deep-mind/first-principles/decision-record.schema.json",
+        "open-deep-mind/first-principles/example-decision-record.json",
+        "open-deep-mind/first-principles/example-model-contract.json",
+        "open-deep-mind/first-principles/model-contract.schema.json",
+        "open-deep-mind/first-principles/module.json",
+        "open-deep-mind/first-principles/scripts/validate_module.py",
+        "open-deep-mind/references/domain-routing.md",
+        "open-deep-mind/references/failure-modes.md",
+        "open-deep-mind/references/glossary.md",
+        "open-deep-mind/references/intellectual-lineage.md",
+        "open-deep-mind/references/method-atlas.md",
+        "open-deep-mind/references/quality-gates.md",
+        "open-deep-mind/references/worked-examples.md",
+        "open-deep-mind/scripts/contracts_v17.py",
+        "open-deep-mind/scripts/prepare_context.py",
+        "open-deep-mind/scripts/scientific_contracts_v16.py",
+        "open-deep-mind/scripts/validate_ledger.py",
+        "open-deep-mind/scripts/validate_repository.py",
+        "open-deep-mind/tests/test_acceptance_integrity.py",
+        "open-deep-mind/tests/test_aggregate_output_preservation.py",
+        "open-deep-mind/tests/test_benchmark_identity.py",
+        "open-deep-mind/tests/test_benchmark_workspace.py",
+        "open-deep-mind/tests/test_configuration_integrity.py",
+        "open-deep-mind/tests/test_context_preparation.py",
+        "open-deep-mind/tests/test_context_registry_integrity.py",
+        "open-deep-mind/tests/test_contracts_v17.py",
+        "open-deep-mind/tests/test_cost_and_latency.py",
+        "open-deep-mind/tests/test_json_numeric_underflow.py",
+        "open-deep-mind/tests/test_ledger_json_boundary.py",
+        "open-deep-mind/tests/test_ledger_optional_confidence.py",
+        "open-deep-mind/tests/test_ledger_optional_fields.py",
+        "open-deep-mind/tests/test_ledger_raw_budgets.py",
+        "open-deep-mind/tests/test_ledger_regressions.py",
+        "open-deep-mind/tests/test_pair_model_identity.py",
+        "open-deep-mind/tests/test_scientific_contracts_v16.py",
+        "open-deep-mind/tests/test_skill_interoperability_v19.py",
+        "open-deep-mind/tests/test_validators.py",
+        "open-deep-mind/triz/README.md",
+        "open-deep-mind/triz/ROUTER.md",
+        "open-deep-mind/triz/VENDORED_LICENSE.md",
+        "open-deep-mind/triz/examples/anti_example_misframed.md",
+        "open-deep-mind/triz/examples/battery_pack.md",
+        "open-deep-mind/triz/examples/brake_disc.md",
+        "open-deep-mind/triz/examples/heat_exchanger_fouling.md",
+        "open-deep-mind/triz/module.json",
+        "open-deep-mind/triz/resources/39_parameters.md",
+        "open-deep-mind/triz/resources/40_principles.md",
+        "open-deep-mind/triz/resources/76_standard_solutions.md",
+        "open-deep-mind/triz/resources/ariz_85c.md",
+        "open-deep-mind/triz/resources/cause_effect_chain.md",
+        "open-deep-mind/triz/resources/clone_problems.md",
+        "open-deep-mind/triz/resources/concept_substantiation.md",
+        "open-deep-mind/triz/resources/contradiction_matrix.json",
+        "open-deep-mind/triz/resources/contradictions.md",
+        "open-deep-mind/triz/resources/effects_and_fos.md",
+        "open-deep-mind/triz/resources/evolution_trends.md",
+        "open-deep-mind/triz/resources/feature_transfer.md",
+        "open-deep-mind/triz/resources/flow_analysis.md",
+        "open-deep-mind/triz/resources/function_analysis.md",
+        "open-deep-mind/triz/resources/glossary.md",
+        "open-deep-mind/triz/resources/ideality_ifr_resources.md",
+        "open-deep-mind/triz/resources/innovative_benchmarking.md",
+        "open-deep-mind/triz/resources/matrix_anomalies.json",
+        "open-deep-mind/triz/resources/modern_problem_identification.md",
+        "open-deep-mind/triz/resources/multiscreen_operator.md",
+        "open-deep-mind/triz/resources/output_template.md",
+        "open-deep-mind/triz/resources/psychological_inertia_tools.md",
+        "open-deep-mind/triz/resources/s_curve_and_tese.md",
+        "open-deep-mind/triz/resources/separation_principles.md",
+        "open-deep-mind/triz/resources/sources.md",
+        "open-deep-mind/triz/resources/substance_field_modeling.md",
+        "open-deep-mind/triz/resources/trimming.md",
+        "open-deep-mind/triz/scripts/lookup_matrix.py",
+        "open-deep-mind/triz/scripts/lookup_standard_solution.py",
+        "open-deep-mind/triz/scripts/validate_triz_module.py"
+      ],
+      "reason": "Research-only branch replaced the repository root. Preserve the current main project and integrate research materials under research/."
+    }
+  ],
+  "historical_artifact_observation": {
+    "checked_date": "2026-11-15",
+    "runs": [
+      {
+        "id": 42327052038,
+        "recorded_artifact_id": 13556011887,
+        "artifacts_returned": 0
+      },
+      {
+        "id": 42352634152,
+        "recorded_artifact_id": 13566121788,
+        "artifacts_returned": 0
+      }
+    ],
+    "scope": "GitHub connector listed no artifacts for either run. This does not establish why they are unavailable."
+  }
+}

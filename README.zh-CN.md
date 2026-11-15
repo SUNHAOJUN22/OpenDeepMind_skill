@@ -117,3 +117,7 @@ git diff --check
 虚线表示拟议交接，需要显式数据合同、单位、来源与验收；它不代表已经实现的整合平台。以上每张现用科学示意图都是完整 imagegen 原图；[AI 图像记录](docs/assets/ai-generated/README.md) 保留精确提示词、字节哈希与检查说明，历史矢量图以[归档链接](docs/assets/README.md) 保留。
 
 本独立项目与 Google DeepMind、OpenAI、Anthropic、MATRIZ、Altshuller Institute 或引用仓库维护者不存在隶属或背书关系。[许可证](LICENSE.md) · [第三方声明](NOTICE.md) · [更新记录](CHANGELOG.md)。
+
+## 已整合的研究记录
+
+[研究源码与历史报告](research/README.md)集中保存已收敛研究分支中的独有材料，并记录来源身份和复现条件。

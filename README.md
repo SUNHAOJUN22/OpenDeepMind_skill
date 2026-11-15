@@ -117,3 +117,7 @@ git diff --check
 Dotted cross-repository links are proposed handoffs requiring explicit data contracts, units, provenance and acceptance checks. They do not assert an implemented integrated platform. Every current scientific illustration above is a complete imagegen output; exact prompts, byte hashes and review notes are in the [AI image record](docs/assets/ai-generated/README.md). Historical vector assets are [linked in the archive](docs/assets/README.md).
 
 This independent project has no affiliation with or endorsement by Google DeepMind, OpenAI, Anthropic, MATRIZ, the Altshuller Institute or referenced maintainers. [License](LICENSE.md) · [Third-party notices](NOTICE.md) · [Changelog](CHANGELOG.md).
+
+## Consolidated research records
+
+[Research sources and dated reports](research/README.md) preserve the useful material from the retired research branches, with source identities and reproduction status.
