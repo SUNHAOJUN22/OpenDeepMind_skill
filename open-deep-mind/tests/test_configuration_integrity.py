@@ -28,6 +28,7 @@ class ConfigurationIntegrityTests(unittest.TestCase):
                    "phi-p": ["first-philosophy", "first-principles"],
                    "triz": ["triz", "first-principles"]}
         self.ablation_records: dict[Path, dict] = {}
+        self.no_skill_records: dict[Path, dict] = {}
         self.production_non_triz: list[Path] = []
         self.production_triz: list[Path] = []
         for slot in manifest["expected_run_slots"]:
@@ -63,6 +64,8 @@ class ConfigurationIntegrityTests(unittest.TestCase):
             (directory / "grading.json").write_text(json.dumps(grade), encoding="utf-8")
             if cfg == ABLATION:
                 self.ablation_records[path] = run
+            if cfg == "no_skill":
+                self.no_skill_records[path] = run
             if cfg == "opendeepmind_full" and case["triz_allowed"] is not True:
                 self.production_non_triz.append(path)
             elif cfg == "opendeepmind_full" and case["triz_allowed"] is True:
@@ -203,6 +206,63 @@ class ConfigurationIntegrityTests(unittest.TestCase):
         self.assertEqual(metrics["runs"], 36)
         self.assertAlmostEqual(metrics["triz_false_activation_rate"], 1 / 36)
         self.assertAlmostEqual(metrics["routing_accuracy"], 35 / 36)
+
+    def test_loaded_skill_cannot_create_a_no_skill_baseline_win(self) -> None:
+        path, original = next(iter(self.no_skill_records.items()))
+        grade_path = path.parent / "grading.json"
+        grade = json.loads(grade_path.read_text(encoding="utf-8"))
+        for assertion in grade["assertion_results"]:
+            assertion["passed"] = True
+        total = len(grade["assertion_results"])
+        grade["summary"].update(passed=total, failed=0, pass_rate=1.0, case_passed=True)
+        grade_path.write_text(json.dumps(grade), encoding="utf-8")
+
+        for modules in (["first-philosophy"], ["first-principles"], ["triz"],
+                        ["first-philosophy", "first-principles", "triz"]):
+            with self.subTest(modules=modules):
+                path.write_text(json.dumps({**original, "loaded_modules": modules}), encoding="utf-8")
+                report = self.aggregate()
+                self.assertEqual(report["complete_runs"], 113)
+                self.assertFalse(report["artifact_set_complete"])
+                self.assertFalse(report["publication_ready"])
+                self.assertEqual(report["configurations"]["no_skill"]["runs"], 35)
+                self.assertEqual(report["configurations"]["no_skill"]["case_pass_rate"], 0.0)
+                comparison = report["comparisons"]["full_vs_no_skill"]
+                self.assertEqual(comparison["candidate_paired_runs"], 35)
+                self.assertEqual(comparison["paired_runs"], 35)
+                self.assertEqual(comparison["right_case_pass_wins"], 0)
+                self.assertTrue(any(str(path.parent) in error and "no-skill baseline" in error
+                                    for error in report["metadata_errors"]), report["metadata_errors"])
+                self.assertEqual(report["comparisons"]["full_vs_first_principles_baseline"]["paired_runs"], 36)
+
+    def test_fully_contaminated_no_skill_arm_is_excluded_without_relabeling(self) -> None:
+        for path, original in self.no_skill_records.items():
+            path.write_text(json.dumps({**original, "loaded_modules": ["first-principles"]}),
+                            encoding="utf-8")
+        report = self.aggregate()
+        self.assertEqual(report["complete_runs"], 78)
+        self.assertFalse(report["artifact_set_complete"])
+        self.assertNotIn("no_skill", report["configurations"])
+        self.assertEqual(report["comparisons"]["full_vs_no_skill"]["paired_runs"], 0)
+        self.assertIsNone(report["comparisons"]["full_vs_no_skill"]["mean_assertion_pass_rate_delta_left_minus_right"])
+        for path in self.no_skill_records:
+            self.assertTrue(any(str(path.parent) in error and "no-skill baseline" in error
+                                for error in report["metadata_errors"]), report["metadata_errors"])
+        self.assertEqual(report["comparisons"]["full_vs_first_principles_baseline"]["paired_runs"], 36)
+        self.assertEqual(report["comparisons"]["triz_module_ablation"]["paired_runs"], 6)
+
+    def test_unassisted_behavior_routes_do_not_imply_a_loaded_skill(self) -> None:
+        path, original = next(iter(self.no_skill_records.items()))
+        for route in ("none", "unknown", "phi", "p", "phi-p", "triz"):
+            with self.subTest(route=route):
+                path.write_text(json.dumps({**original, "route": route}), encoding="utf-8")
+                report = self.aggregate()
+                self.assertEqual(report["complete_runs"], 114)
+                self.assertTrue(report["artifact_set_complete"])
+                self.assertFalse(report["publication_ready"])
+                self.assertEqual(report["metadata_errors"], [])
+                self.assertEqual(report["configurations"]["no_skill"]["runs"], 36)
+                self.assertEqual(report["comparisons"]["full_vs_no_skill"]["paired_runs"], 36)
 
 
 if __name__ == "__main__":

@@ -108,6 +108,11 @@ constraints. Contradictory records are reported as metadata errors and excluded
 from completed-run counts, individual metrics and paired comparisons. Valid
 no-TRIZ ablations still omit production routing accuracy.
 
+The `no_skill` control must report an empty `loaded_modules` list. A run that
+declares a loaded reasoning module is excluded from that control's metrics and
+paired comparisons, with its original records preserved. A route label alone
+may describe unassisted behavior; it does not establish that a skill was loaded.
+
 Paired deltas and win/tie counts require the same declared model/version and
 matching `execution_conditions` (effective sampling/reasoning settings, tool
 access, and input-file paths/digests). Missing or mismatched conditions are

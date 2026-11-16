@@ -148,6 +148,16 @@ unchanged. Pair candidate counts include only admitted records. Production
 routing errors remain measured observations, and no-skill/external baselines
 are not required to load OpenDeepMind modules.
 
+The `no-skill-baseline` configuration requires an empty `loaded_modules` list.
+A recorded module load contradicts this experimental control even if the route
+is `none` and the grader reports passing assertions. Such a run is a metadata
+error and is excluded from completeness counts, individual metrics, and paired
+comparisons. Its source records remain unchanged. A behavioral route label with
+an empty load list remains an observed baseline response, including a routing
+failure; the aggregator does not infer a module load from the route label alone.
+This checks declared control identity, not provider execution or absence of
+undisclosed instruction exposure.
+
 聚合前须核验运行记录与实验配置一致：禁用模块既不能出现在加载列表中，也不能由
 选定路由调用；强制 P 路由的消融记录必须报告 `route="p"`。不计生产路由准确率
 不等于免除配置校验。违例记录保留原始文件和路径诊断，但不进入完整运行数、
@@ -172,6 +182,26 @@ are not required to load OpenDeepMind modules.
   loads, alternative forced routes, partial contamination, production failures,
   source preservation, and valid full workspaces. Self-reported metadata remains
   insufficient for model-execution attestation or causal performance claims.
+
+### No-skill control integrity change record
+
+- **Problem / failed invariant:** a run could declare `no_skill` while recording
+  a loaded reasoning module, then count as a valid control and create paired wins.
+- **Evidence / affected layer:** public CLI tests populate all 114 validation
+  slots with synthetic artifacts. One contaminated control slot, each canonical
+  module and their union, and contamination of all 36 control slots were admitted
+  before the repair. These are software regressions, not model experiments.
+- **Changed rule / expected improvement:** configuration validation rejects
+  reported module loads in a no-skill control before aggregation, preserving
+  uncontaminated observations and comparisons between the other configurations.
+- **Compatibility / new risk:** valid controls and unassisted behavioral routes
+  remain admitted. Previously accepted contradictory records require investigation;
+  deleting their load declarations would misrepresent the run. Undisclosed loads
+  cannot be detected from these self-reported records.
+- **Validation:** partial/full contamination tests, positive route controls,
+  source-preservation checks, all original configuration cases, repository and
+  evaluation validators, and the complete deterministic suite. Cases, splits,
+  repetitions, rubric, module methods, and publication authorization are unchanged.
 
 ## 6. Grading layers
 

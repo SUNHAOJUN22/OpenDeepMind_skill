@@ -289,6 +289,8 @@ def summarize_cost_groups(groups: dict[tuple[str, str, str], list[int]]) -> list
 def validate_configuration_run(run: dict[str, Any], configuration: dict[str, Any]) -> list[str]:
     """Check experiment-arm constraints after schema and slot identity validation."""
     errors: list[str] = []
+    if configuration.get("kind") == "no-skill-baseline" and run["loaded_modules"]:
+        errors.append("no-skill baseline must not report loaded reasoning modules")
     forced_route = configuration.get("forced_route")
     if forced_route is not None and run["route"] != forced_route:
         errors.append(f"route {run['route']!r} contradicts forced_route={forced_route!r}")
