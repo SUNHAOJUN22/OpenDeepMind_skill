@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import subprocess
 import sys
@@ -155,8 +156,64 @@ def local_targets(text: str) -> set[str]:
     return set(MD_LINK_RE.findall(text)) | set(HTML_LINK_RE.findall(text))
 
 
+def strict_json_loads(text: str) -> object:
+    """Reject ambiguous keys and numbers before interpreting repository contracts."""
+    def unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate JSON key: {key!r}")
+            result[key] = value
+        return result
+
+    def reject_constant(token: str) -> object:
+        raise ValueError(f"nonfinite JSON constant: {token}")
+
+    def finite_float(token: str) -> float:
+        value = float(token)
+        if not math.isfinite(value):
+            raise ValueError("JSON number exceeds the finite range")
+        significand = token.lower().split("e", 1)[0]
+        if value == 0 and any(digit in "123456789" for digit in significand):
+            raise ValueError("nonzero JSON number underflows to zero")
+        return value
+
+    return json.loads(
+        text, object_pairs_hook=unique_object, parse_constant=reject_constant,
+        parse_float=finite_float,
+    )
+
+
+def read_metadata_object(root: Path, relative: str, errors: list[str]) -> dict[str, object]:
+    """Return a typed contract or path-specific diagnostics, never a shape crash."""
+    path = root / relative
+    if not path.is_file():
+        return {}
+    try:
+        value = strict_json_loads(path.read_text(encoding="utf-8"))
+        if not isinstance(value, dict):
+            raise ValueError("top-level JSON must be an object")
+    except (OSError, UnicodeError, ValueError, RecursionError) as exc:
+        errors.append(f"invalid {relative}: {exc}")
+        return {}
+    return value
+
+
+def read_contract_text(path: Path, root: Path, errors: list[str]) -> str:
+    """Keep malformed required text within the validator's diagnostic contract."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        errors.append(f"invalid {path.relative_to(root)}: {exc}")
+        return ""
+
+
 def validate_local_target(path: Path, root: Path, target: str, errors: list[str]) -> None:
-    target = target.strip().split()[0].strip("<>")
+    parts = target.strip().split()
+    if not parts:
+        errors.append(f"empty link target in {path.relative_to(root)}")
+        return
+    target = parts[0].strip("<>")
     if not target or target.startswith(("http://", "https://", "mailto:", "#", "data:", "javascript:")):
         return
     target_path = unquote(target.split("#", 1)[0].split("?", 1)[0])
@@ -196,13 +253,13 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             errors.append(f"missing required file: {rel}")
 
     version_path = root / "VERSION"
-    version = version_path.read_text(encoding="utf-8").strip() if version_path.is_file() else ""
+    version = read_contract_text(version_path, root, errors).strip() if version_path.is_file() else ""
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         errors.append(f"VERSION must be semantic x.y.z; got {version!r}")
 
     skill_path = root / "open-deep-mind" / "SKILL.md"
     if skill_path.is_file():
-        text = skill_path.read_text(encoding="utf-8")
+        text = read_contract_text(skill_path, root, errors)
         try:
             fm = parse_top_level_frontmatter(text)
             skill_version = extract_skill_version(text)
@@ -230,34 +287,34 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             if marker not in text:
                 errors.append(f"SKILL.md missing canonical routing marker: {marker}")
 
-    registry_path = root / "open-deep-mind" / "MODULES.json"
-    try:
-        registry = json.loads(registry_path.read_text(encoding="utf-8")) if registry_path.is_file() else {}
-    except json.JSONDecodeError as exc:
-        errors.append(f"invalid MODULES.json: {exc}")
-        registry = {}
+    registry = read_metadata_object(root, "open-deep-mind/MODULES.json", errors)
     if registry.get("repository_version") != version:
         errors.append("MODULES.json repository_version != VERSION")
-    registry_ids = [m.get("id") for m in registry.get("modules", []) if isinstance(m, dict)]
+    modules = registry.get("modules", [])
+    if not isinstance(modules, list) or any(not isinstance(module, dict) for module in modules):
+        errors.append("MODULES.json modules must be an array of objects")
+        modules = []
+    registry_ids = [module.get("id") for module in modules]
     if registry_ids != ["first-philosophy", "first-principles", "triz"]:
         errors.append(f"MODULES.json module order/IDs invalid: {registry_ids}")
     if "eval" in " ".join(str(x).lower() for x in registry_ids):
         errors.append("eval layer must not be registered as a reasoning module")
-    if registry.get("context_preparation") != {
-        "entry": "scripts/prepare_context.py",
-        "routes": ["phi", "p", "phi-p", "triz"],
-        "triz_requires_explicit_request": True,
-        "model_execution": False,
-    }:
+    preparation = registry.get("context_preparation")
+    if (
+        not isinstance(preparation, dict)
+        or preparation != {
+            "entry": "scripts/prepare_context.py",
+            "routes": ["phi", "p", "phi-p", "triz"],
+            "triz_requires_explicit_request": True,
+            "model_execution": False,
+        }
+        or preparation.get("triz_requires_explicit_request") is not True
+        or preparation.get("model_execution") is not False
+    ):
         errors.append("MODULES.json context preparation contract is invalid")
 
     for module_id, rel in MODULE_MANIFESTS.items():
-        path = root / rel
-        try:
-            manifest = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
-        except json.JSONDecodeError as exc:
-            errors.append(f"invalid {rel}: {exc}")
-            manifest = {}
+        manifest = read_metadata_object(root, rel, errors)
         if manifest.get("id") != module_id:
             errors.append(f"{rel} id mismatch")
         if manifest.get("version") != version:
@@ -267,7 +324,7 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         path = root / rel
         if not path.is_file():
             continue
-        text = path.read_text(encoding="utf-8")
+        text = read_contract_text(path, root, errors)
         if target not in text:
             errors.append(f"compatibility alias {rel} does not point to {target}")
         if len(text.splitlines()) > 45:
@@ -275,14 +332,14 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
 
     citation_path = root / "CITATION.cff"
     if citation_path.is_file():
-        match = CFF_VERSION_RE.search(citation_path.read_text(encoding="utf-8"))
+        match = CFF_VERSION_RE.search(read_contract_text(citation_path, root, errors))
         cff_version = match.group(1) if match else None
         if cff_version != version:
             errors.append(f"CITATION.cff version {cff_version!r} != VERSION {version!r}")
 
     readme_path = root / "README.md"
     if readme_path.is_file():
-        readme = readme_path.read_text(encoding="utf-8")
+        readme = read_contract_text(readme_path, root, errors)
         versions = README_VERSION_RE.findall(readme)
         if version not in versions:
             errors.append(f"README version badge(s) {versions} do not include VERSION {version}")
@@ -292,19 +349,19 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
 
     benchmark_path = root / "open-deep-mind/evals/benchmark-config.json"
     if benchmark_path.is_file():
-        try:
-            benchmark = json.loads(benchmark_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            errors.append(f"invalid benchmark-config.json: {exc}")
-            benchmark = {}
+        benchmark = read_metadata_object(root, "open-deep-mind/evals/benchmark-config.json", errors)
         if benchmark.get("skill_version_target") != version:
             errors.append("benchmark-config skill_version_target != VERSION")
-        if benchmark.get("publication", {}).get("publish_scores_before_real_runs") is not False:
+        publication = benchmark.get("publication", {})
+        if not isinstance(publication, dict):
+            errors.append("benchmark-config publication must be an object")
+            publication = {}
+        if publication.get("publish_scores_before_real_runs") is not False:
             errors.append("benchmark publication policy must forbid scores before real runs")
 
     domain_path = root / "open-deep-mind/references/domain-routing.md"
     if domain_path.is_file():
-        text = domain_path.read_text(encoding="utf-8")
+        text = read_contract_text(domain_path, root, errors)
         if "TRIZ isolation rule" not in text:
             errors.append("domain-routing.md missing TRIZ isolation rule")
         if "- TRIZ contradiction" in text or "Default methods\n\n- TRIZ" in text:
@@ -332,8 +389,8 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
                 validate_local_target(path, root, target, errors)
         elif suffix == ".json":
             try:
-                json.loads(text)
-            except json.JSONDecodeError as exc:
+                strict_json_loads(text)
+            except (ValueError, RecursionError) as exc:
                 errors.append(f"invalid JSON in {rel}: {exc}")
         elif suffix == ".svg":
             try:
