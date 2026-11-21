@@ -138,7 +138,11 @@ path-specific metadata error, excludes the run from metrics, and blocks
 替换或增添评分项。模块标识必须使用上述规范名称，不能用大写或路径别名绕过检查。
 
 The aggregator also checks each run against its configuration before admitting it
-to individual metrics or paired comparisons. `forced_route` specifies the selected
+to individual metrics or paired comparisons. The official case category must
+match the configuration's `case_categories` (or its `all` wildcard). Adding an
+out-of-scope slot to the workspace manifest cannot expand an experiment arm;
+in particular, non-TRIZ cases cannot contribute no-TRIZ ablation metrics or pairs.
+`forced_route` specifies the selected
 method: a no-TRIZ ablation must record `route="p"`, including when production
 routing accuracy is intentionally not scored. A module in `disabled_modules`
 must appear in neither `loaded_modules` nor the selected route. Contradictory
@@ -202,6 +206,24 @@ undisclosed instruction exposure.
   source-preservation checks, all original configuration cases, repository and
   evaluation validators, and the complete deterministic suite. Cases, splits,
   repetitions, rubric, module methods, and publication authorization are unchanged.
+
+### Case-category acceptance change record
+
+- **Problem / failed invariant:** a manifest could assign a non-TRIZ case to the
+  TRIZ-only ablation and count it in a comparison labelled `triz-positive`.
+- **Evidence / affected layer:** a public CLI regression adds one schema-valid,
+  passing out-of-category record to a complete synthetic validation workspace;
+  the former aggregator admitted 115 runs and seven ablation pairs.
+- **Changed rule / expected improvement:** configuration acceptance uses each
+  official case's category and the existing `case_categories` declaration before
+  counting individual or paired metrics.
+- **Compatibility / new risk:** legitimate categories and `all` configurations
+  retain their observations. Previously admitted out-of-scope artifacts require
+  investigation; their files are preserved. No case, split, protocol, schema or
+  publication-authority change is made.
+- **Validation / remaining limit:** the regression checks exclusion of only the
+  extra record, preservation of all 114 valid runs and six ablation pairs, and
+  the existing closed publication gate. Records remain self-reported evidence.
 
 ## 6. Grading layers
 

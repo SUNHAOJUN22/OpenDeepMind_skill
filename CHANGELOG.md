@@ -9,6 +9,7 @@
 
 ## Unreleased — artifact integrity and bilingual delivery
 
+- Reject benchmark runs outside their configuration's declared case categories before counting completeness, individual metrics or paired comparisons; preserve valid categories, source artifacts and the independent publication gate.
 - Reject conflicting SHA-256 declarations for the same literal benchmark input path before admitting run metrics or paired observations; preserve consistent duplicates, distinct paths, ordering and original evidence.
 - Rebuild bilingual entry READMEs and scientific guides with four complete AI PNG schematics, source-linked equations and separate software/model/attestation boundaries.
 

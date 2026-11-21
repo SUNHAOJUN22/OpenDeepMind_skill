@@ -289,6 +289,13 @@ def summarize_cost_groups(groups: dict[tuple[str, str, str], list[int]]) -> list
 def validate_configuration_run(run: dict[str, Any], configuration: dict[str, Any]) -> list[str]:
     """Check experiment-arm constraints after schema and slot identity validation."""
     errors: list[str] = []
+    category = CASE_MAP[run["case_id"]]["category"]
+    categories = configuration.get("case_categories", ["all"])
+    if "all" not in categories and category not in categories:
+        errors.append(
+            f"case {run['case_id']!r} category {category!r} is outside "
+            f"configuration {run['configuration']!r} case_categories={categories!r}"
+        )
     if configuration.get("kind") == "no-skill-baseline" and run["loaded_modules"]:
         errors.append("no-skill baseline must not report loaded reasoning modules")
     forced_route = configuration.get("forced_route")

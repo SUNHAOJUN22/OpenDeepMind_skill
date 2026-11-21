@@ -126,6 +126,44 @@ class ConfigurationIntegrityTests(unittest.TestCase):
         self.assertEqual(comparison["right_case_pass_wins"], 6)
         self.assertEqual(comparison["mean_assertion_pass_rate_delta_left_minus_right"], -1.0)
 
+    def test_out_of_category_ablation_cannot_enter_the_triz_comparison(self) -> None:
+        source = self.production_non_triz[0]
+        run = json.loads(source.read_text(encoding="utf-8"))
+        run.update(configuration=ABLATION, route="p", loaded_modules=["first-principles"])
+        grade = json.loads((source.parent / "grading.json").read_text(encoding="utf-8"))
+        grade["configuration"] = ABLATION
+        for assertion in grade["assertion_results"]:
+            assertion["passed"] = True
+        grade["summary"].update(passed=len(grade["assertion_results"]), failed=0,
+                                pass_rate=1.0, case_passed=True)
+        directory = source.parent.parent.parent / ABLATION / source.parent.name
+        directory.mkdir(parents=True)
+        (directory / "run_record.json").write_text(json.dumps(run), encoding="utf-8")
+        (directory / "grading.json").write_text(json.dumps(grade), encoding="utf-8")
+        manifest_path = self.workspace / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["expected_run_slots"].append({
+            field: run[field] for field in ("case_id", "configuration", "repetition")
+        })
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+        report = self.aggregate()
+
+        self.assertEqual(report["expected_runs"], 115)
+        self.assertEqual(report["complete_runs"], 114)
+        self.assertFalse(report["artifact_set_complete"])
+        self.assertFalse(report["publication_ready"])
+        self.assertEqual(report["configurations"][ABLATION]["runs"], 6)
+        comparison = report["comparisons"]["triz_module_ablation"]
+        self.assertEqual(comparison["paired_runs"], 6)
+        self.assertEqual(comparison["right_case_pass_wins"], 6)
+        self.assertTrue(any(
+            "case_categories" in error and run["case_id"] in error and ABLATION in error
+            for error in report["metadata_errors"]
+        ), report["metadata_errors"])
+        for comparison_id in ("full_vs_no_skill", "full_vs_first_principles_baseline"):
+            self.assertEqual(report["comparisons"][comparison_id]["paired_runs"], 36)
+
     def test_disabled_module_in_route_or_loads_cannot_enter_any_metrics(self) -> None:
         for route, modules in (("triz", []), ("p", ["first-principles", "triz"]),
                                ("triz", ["triz", "first-principles"])):
